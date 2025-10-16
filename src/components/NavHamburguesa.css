@@ -1,0 +1,224 @@
+
+
+/* El botón hamburguesa se alinea con el nav y nunca queda fuera */
+.nav-hamburguesa-btn {
+  display: none;
+  background: #145a6a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.3s;
+  position: relative;
+  top: 0;
+  right: 0;
+  z-index: 1200;
+}
+
+@media (max-width: 900px) {
+  .nav-hamburguesa-btn {
+    display: block;
+  }
+}
+
+@media (min-width: 901px) {
+  .nav-hamburguesa-btn {
+    display: none !important;
+  }
+}
+
+/* El menú hamburguesa se integra visualmente con el nav */
+@media (max-width: 900px) {
+  .nav-hamburguesa-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    max-width: 320px;
+    height: 100vh;
+    background: #145a6a;
+    color: #fff;
+    box-shadow: 4px 0 16px rgba(44,62,80,0.18);
+    z-index: 1300;
+    transform: translateY(-40px) scaleY(0.8);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(.4,1.4,.6,1), opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0 16px 16px 0;
+    overflow-y: auto;
+    margin-top: 0;
+  }
+  .nav-hamburguesa-menu.open {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-hamburguesa-btn {
+    transition: transform 0.3s;
+  }
+  .nav-hamburguesa-btn.active {
+    transform: rotate(90deg) scale(1.1);
+  }
+}
+@media (min-width: 901px) {
+  .nav-hamburguesa-menu {
+    display: none !important;
+  }
+}
+.nav-hamburguesa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem 0.7rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 1px solid #1bffff44;
+}
+/* El botón hamburguesa se alinea con el nav */
+/* Eliminada duplicidad de la clase nav-hamburguesa-btn */
+/* Lista del menú hamburguesa */
+.nav-hamburguesa-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.nav-hamburguesa-link {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-size: 1.15rem;
+  color: #fff;
+  text-decoration: none;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #1bffff44;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.nav-hamburguesa-link:hover {
+  background: #145a6a49;
+  color: #145a6a;
+}
+.nav-hamburguesa-icon {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+.nav-hamburguesa-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44,62,80,0.18);
+  z-index: 1250;
+}
+
+
+/* Links del menú hamburguesa */
+.nav-hamburguesa-list li a,
+.nav-hamburguesa-list li button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* espacio entre icono y texto */
+  text-decoration: none;
+  color: #fff; /* color de texto */
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s;
+  text-align: left;
+}
+
+/* Hover / activo */
+.nav-hamburguesa-list li a:hover,
+.nav-hamburguesa-list li button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Focus para accesibilidad */
+.nav-hamburguesa-list li a:focus,
+.nav-hamburguesa-list li button:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* NavHamburguesa.css */
+
+/* ... (mantener los estilos existentes) ... */
+
+/* --- ESTILOS PARA EL SEGUIMIENTO DESTACADO (FIX: Visibilidad) --- */
+
+/* Contenedor del elemento dentro del UL */
+.nav-hamburguesa-tracking-item {
+    padding: 10px 0;
+    margin: 15px 0; /* Más margen para separarlo del resto */
+    /* Quitamos el border-bottom para usar la sombra como separador visual */
+}
+
+.nav-hamburguesa-tracking-cta {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px; /* Padding interno ligeramente aumentado */
+    margin: 0 10px; /* Separación de los bordes del menú */
+    text-decoration: none;
+    
+    /* Colores y diseño llamativo y contrastante */
+    /* 1. Usamos un color de acento más fuerte (por ejemplo, un azul secundario o naranja) */
+    background-color: #4CAF50; /* ¡VERDE LLAMATIVO! (Asegura que contraste con tu app de hamburguesas) */
+    border: 1px solid #388E3C; /* Borde oscuro para definición */
+    border-radius: 8px;
+    
+    /* 2. Sombra para que "salte" del menú */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    
+    color: white; /* Cambiamos el color de texto a blanco para el contraste */
+    transition: all 0.2s ease;
+    
+}
+
+.nav-hamburguesa-tracking-cta:hover {
+    background-color: #388E3C; /* Se oscurece al pasar el mouse */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px); 
+}
+
+/* Icono (FaTools) */
+.nav-hamburguesa-tracking-cta .tracking-icon {
+    margin-right: 10px;
+    color: #FFEB3B; /* Amarillo brillante para el icono (¡Alto contraste!) */
+}
+
+/* Contenedor del Título y Subtítulo */
+.nav-hamburguesa-tracking-cta .tracking-text-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+}
+
+.nav-hamburguesa-tracking-cta .tracking-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    color: white; /* Aseguramos que el título sea blanco */
+}
+
+.nav-hamburguesa-tracking-cta .tracking-subtitle {
+    font-size: 0.75rem;
+    color: #E0E0E0; /* Gris claro para el subtítulo */
+    line-height: 1.2;
+}
+/* dsd */
+

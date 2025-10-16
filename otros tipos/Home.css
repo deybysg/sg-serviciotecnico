@@ -1,0 +1,250 @@
+/* General */
+body, html, #root {
+  overflow-x: hidden !important;
+}
+
+.home-container {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #e0e7ff 60%, #f7fafd 100%);
+  box-sizing: border-box;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.home-layout {
+  display: flex;
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  min-height: 80vh;
+  box-sizing: border-box;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Filtro Desktop */
+.filtro-desktop {
+  margin-top: 1.5rem;
+  min-width: 260px;
+  max-width: 260px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(44, 62, 80, 0.1);
+  padding: 2rem 1.2rem;
+  border: 2px solid #e0e7ff;
+  z-index: 100;
+  overflow-y: auto;
+  display: block;
+}
+
+.filtro-desktop h3,
+.filtro-movil h3 {
+  color: #2e3192;
+  margin-bottom: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+/* Estilos para móviles (pantallas <= 900px) */
+@media (max-width: 900px) {
+  .filtro-desktop h3,
+  .filtro-movil h3 {
+    margin-top: 50px; /* para que no quede pegado al top */
+    color: #2e3192;
+    margin-bottom: 1rem; /* podés ajustar para móvil */
+    font-size: 1.1rem;   /* más pequeño para pantallas chicas */
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+}
+
+
+.filtro-desktop button,
+.filtro-movil button {
+  margin-bottom: 0.7rem;
+  width: 100%;
+  font-weight: 400;
+  background: #fff;
+  color: #000;
+  border-radius: 8px;
+  border: 1px solid #e0e7ff;
+  padding: 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filtro-desktop button.btn-activo,
+.filtro-movil button.btn-activo {
+  font-weight: 700;
+  background: #2e3192;
+  color: #fff;
+}
+
+/* Productos */
+.contenedor-productos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  margin-left: 330px;
+}
+
+.productos-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  box-sizing: border-box;
+}
+
+.titulo-productos-movil {
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #2e3192;
+  letter-spacing: 1px;
+}
+
+.productos-lista-movil {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Botón hamburguesa */
+.filtro-movil-hamburguesa {
+  position: fixed;
+  left: 16px;
+  bottom: 24px;
+  z-index: 200;
+  background: #145a6a;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(44, 62, 80, 0.18);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+}
+
+.filtro-movil-hamburguesa:hover {
+  background: #0f5a6bff;
+  transform: scale(1.08);
+}
+
+.filtro-movil-hamburguesa span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+/* Filtro móvil */
+.filtro-movil {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 80vw;
+  max-width: 320px;
+  height: 100vh;
+  background: #fff;
+  border-radius: 0 18px 18px 0;
+  box-shadow: 0 4px 32px rgba(44, 62, 80, 0.18);
+  z-index: 300;
+  padding: 2rem 1.2rem;
+  border: 2px solid #e0e7ff;
+  overflow-y: auto;
+  display: block;
+  animation: slideInLeft 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+  animation-fill-mode: forwards;
+}
+
+/* Botón cerrar */
+.btn-cerrar-filtro {
+  margin-top: 20rem;
+  margin-left: 8.5rem;
+  position: fixed;
+  background: #145a6a;
+  color: #fff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(44, 62, 80, 0.28);
+  font-size: 2.8rem;
+  font-weight: 900;
+  z-index: 1000;
+  transition: background 0.18s, transform 0.18s;
+  animation: slideInLeft 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+  animation-fill-mode: forwards;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .filtro-desktop {
+    display: none !important;
+  }
+
+  .filtro-movil-hamburguesa {
+    display: flex !important;
+  }
+
+  .contenedor-productos {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .productos-lista-movil {
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    padding-left: 67px !important;
+  }
+
+  .titulo-productos-movil {
+    margin-top: 3rem !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .filtro-desktop {
+    display: block !important;
+  }
+
+  .filtro-movil-hamburguesa {
+    display: none !important;
+  }
+}
+
+/* Animaciones */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.2;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

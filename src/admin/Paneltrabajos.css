@@ -1,0 +1,516 @@
+/* ============================== */
+/* PANEL DE TRABAJO - NUEVO ESTILO COMPLETO */
+/* ============================== */
+
+:root {
+  --color-primario: #2563eb;
+  --color-secundario: #1e293b;
+  --color-acento: #38bdf8;
+  --color-exito: #16a34a;
+  --color-peligro: #dc2626;
+  --color-advertencia: #f59e0b;
+  --color-fondo: #f9fafb;
+  --radius: 10px;
+}
+
+/* --- Contenedor Principal --- */
+.panel-trabajo-container {
+  margin-top: 4rem;
+  width: 100vw;
+  min-height: 100vh;
+  background: rgb(22, 50, 82);
+  padding: 2rem 1rem 4rem 1rem;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--color-secundario);
+}
+
+.panel-trabajo-container h1 {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 0.3rem;
+  color: white;
+}
+
+.panel-subtitulo {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+/* ============================== */
+/* FILTROS SUPERIORES */
+/* ============================== */
+.panel-filtros {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-filtro {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: var(--color-secundario);
+  padding: 0.5rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-filtro:hover {
+  background: #e2e8f0;
+}
+
+.btn-filtro.activo {
+  background: var(--color-primario);
+  color: white;
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* --- Buscador --- */
+.panel-buscador {
+  max-width: 600px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.panel-buscador input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.panel-buscador input:focus {
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* --- Lista de servicios --- */
+.servicios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* --- Tarjetas --- */
+.tarjeta-servicio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-left: 5px solid var(--color-primario);
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.tarjeta-servicio:hover {
+  transform: scale(1.01);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.prioridad-entrega {
+  border-left-color: var(--color-advertencia);
+  background: #fff8e1;
+}
+
+.info-resumen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.id-servicio {
+  font-weight: bold;
+  color: var(--color-secundario);
+}
+
+/* --- Estado badge --- */
+.estado-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  margin-left: 6px;
+}
+
+.estado-pendiente {
+  background-color: var(--color-peligro);
+}
+.estado-enRevision {
+  background-color: var(--color-advertencia);
+}
+.estado-revisionTerminada,
+.estado-terminado {
+  background-color: #ea580c;
+}
+.estado-entregado {
+  background-color: var(--color-exito);
+}
+
+/* --- Botones de acción --- */
+.acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-detalles,
+.btn-entregar {
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-detalles {
+  background: #e2e8f0;
+  color: var(--color-secundario);
+}
+.btn-detalles:hover {
+  background: #cbd5e1;
+}
+
+.btn-entregar {
+  background: var(--color-exito);
+  color: white;
+}
+.btn-entregar:hover {
+  background: #15803d;
+}
+
+/* --- Mensaje vacío --- */
+.mensaje-vacio {
+  text-align: center;
+  color: #475569;
+  background: white;
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Loading --- */
+.panel-loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: var(--color-secundario);
+}
+
+/* ===================== */
+/* MODAL */
+/* ===================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--color-fondo);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  border: 1px solid #e2e8f0;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-content h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--color-primario);
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+/* Formularios */
+.modal-form label {
+  display: block;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-secundario);
+  margin-bottom: 0.3rem;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--color-secundario);
+  background-color: white;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  border-color: var(--color-acento);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.45), inset 0 0 0 1px var(--color-acento);
+}
+
+/* Fieldset y resumen */
+fieldset {
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+}
+
+legend {
+  padding: 0 10px;
+  font-size: 1rem;
+  color: var(--color-primario);
+  font-weight: 700;
+}
+
+/* -------------------------------------- */
+/* Presupuesto dentro del Modal */
+/* -------------------------------------- */
+.presupuesto-item {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.presupuesto-item input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+}
+
+/* Botón eliminar ítem (X) - ROJO */
+.modal-content .presupuesto-item .btn-remove-item {
+  border: none;
+  background: var(--color-peligro) !important;
+  color: white !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.modal-content .presupuesto-item .btn-remove-item:hover {
+  background: #b91c1c !important;
+}
+
+/* Botón Añadir Ítem */
+.presupuesto-section button[type="button"] {
+  margin-top: 0.8rem;
+  background: var(--color-acento);
+  color: var(--color-secundario);
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.presupuesto-section button[type="button"]:hover {
+  background: #0ea5e9;
+  color: white;
+}
+
+/* Resumen del Presupuesto */
+.presupuesto-resumen {
+  font-size: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #94a3b8;
+  color: var(--color-secundario);
+  font-weight: 700;
+  text-align: right;
+}
+
+.presupuesto-resumen p:last-child {
+  font-size: 1.15rem;
+  color: var(--color-primario);
+  font-weight: 800;
+  margin-top: 0.3rem;
+}
+
+/* Botones del Modal */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-guardar {
+  background-color: var(--color-exito);
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-guardar:hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.4);
+}
+
+.btn-cancelar {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancelar:hover {
+  background-color: #4b5563;
+}
+
+/* ===================== */
+/* RESPONSIVE DESIGN */
+/* ===================== */
+@media (max-width: 768px) {
+  .tarjeta-servicio {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .acciones {
+    align-self: flex-end;
+  }
+
+  .panel-trabajo-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .modal-content {
+    max-width: 95%;
+    padding: 1rem;
+  }
+}
+
+/* ============================== */
+/* FILTROS DE ESTADO - MODERNOS */
+/* ============================== */
+.filtros-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.filtro-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: var(--color-secundario);
+  padding: 0.55rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.filtro-btn:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.filtro-btn.activo {
+  background: var(--color-primario);
+  color: white;
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  transform: scale(1.03);
+}
+
+.filtro-btn:active {
+  transform: scale(0.97);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .filtro-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}

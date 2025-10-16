@@ -1,0 +1,653 @@
+{
+  "Usuarios": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "1234",
+      "role": "admin"
+    },
+    {
+      "id": "2",
+      "username": "juan",
+      "password": "11",
+      "role": "user"
+    },
+    {
+      "id": "96d9",
+      "username": "gaston",
+      "password": "1234",
+      "role": "user"
+    },
+    {
+      "id": "1bd3",
+      "username": "deyby",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "bd1a",
+      "username": "bettina",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "4669",
+      "username": "paolo",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "0cd6",
+      "username": "gabi",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "dfb5",
+      "username": "gas",
+      "password": "sdsd@sdsd",
+      "role": "user"
+    },
+    {
+      "id": "e918",
+      "username": "gg",
+      "password": "mm@mm",
+      "role": "user"
+    },
+    {
+      "id": "96c4",
+      "username": "ggg",
+      "password": "12",
+      "role": "user"
+    },
+    {
+      "id": "d754",
+      "username": "gggg",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "8c65",
+      "username": "julian",
+      "password": "1",
+      "role": "user"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "1",
+      "nombreCompleto": "Juan Pérez",
+      "celular": "3512345678",
+      "correo": "juanperez@gmail.com",
+      "direccion": "Av. Siempreviva 7422",
+      "serviciosRealizados": [
+        "9314",
+        "2733",
+        "e557"
+      ]
+    },
+    {
+      "id": "b1ad",
+      "nombreCompleto": "Ituarte Gaston Abelardo",
+      "celular": "3816472708",
+      "correo": "sj@gmail",
+      "direccion": "lola mora 455",
+      "serviciosRealizados": [
+        "2e15",
+        "56e7",
+        "8b5c"
+      ]
+    },
+    {
+      "id": "002a",
+      "nombreCompleto": "Bobba Julian",
+      "celular": "646464",
+      "correo": "bhjvhj@hjhj",
+      "direccion": "hjhjh",
+      "serviciosRealizados": [
+        "5ac8"
+      ]
+    },
+    {
+      "id": "b486",
+      "nombreCompleto": "Zenteno Deyby ",
+      "celular": "381225787",
+      "correo": "deyby@g.com",
+      "direccion": "lola mora 455",
+      "serviciosRealizados": [
+        "245b"
+      ]
+    },
+    {
+      "id": "eedb",
+      "nombreCompleto": "Caro Gabriel",
+      "celular": "56466",
+      "correo": "sdsds@dsdd",
+      "direccion": "Ex ruta 9",
+      "serviciosRealizados": [
+        "0241",
+        "34e4",
+        "c301",
+        "77b8",
+        "848b"
+      ]
+    }
+  ],
+  "servicios": [
+    {
+      "id": "9314",
+      "clienteId": "1",
+      "marcaProducto": "xiaomi",
+      "tipoServicio": "celulares",
+      "detalles": "jjbj",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "pantalla",
+            "costo": 10000
+          },
+          {
+            "descripcion": "ads",
+            "costo": 5000
+          },
+          {
+            "descripcion": "bateria ",
+            "costo": 4400
+          },
+          {
+            "descripcion": "pin de carga",
+            "costo": 1243
+          }
+        ],
+        "subtotal": 20643,
+        "iva": 0,
+        "total": 20643
+      },
+      "estado": "pendiente",
+      "fechaEntrada": "2025-10-04",
+      "fechaSalida": null
+    },
+    {
+      "id": "2e15",
+      "clienteId": "b1ad",
+      "marcaProducto": "jhjh",
+      "tipoServicio": "celulares",
+      "detalles": "jhj",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "pantalla",
+            "costo": 151510
+          }
+        ],
+        "subtotal": 151510,
+        "iva": 0,
+        "total": 151510
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-04",
+      "fechaSalida": "2025-10-07T00:00:00.000Z"
+    },
+    {
+      "id": "56e7",
+      "clienteId": "b1ad",
+      "marcaProducto": "ppp",
+      "tipoServicio": "celulares",
+      "detalles": "kjkj",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-05",
+      "fechaSalida": "2025-09-29T00:00:00.000Z"
+    },
+    {
+      "id": "2733",
+      "clienteId": "1",
+      "marcaProducto": "infinix",
+      "tipoServicio": "computadora",
+      "detalles": "dsdad",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-05",
+      "fechaSalida": "2025-10-06T22:30:55.556Z"
+    },
+    {
+      "id": "e557",
+      "clienteId": "1",
+      "marcaProducto": "dsds",
+      "tipoServicio": "celulares",
+      "detalles": "dsdsd",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-05",
+      "fechaSalida": "2025-10-06T22:31:11.894Z"
+    },
+    {
+      "id": "5ac8",
+      "clienteId": "002a",
+      "marcaProducto": "samjun",
+      "tipoServicio": "parlantes",
+      "detalles": "fhhfhfh",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-05",
+      "fechaSalida": "2025-10-06T18:50:58.200Z"
+    },
+    {
+      "id": "245b",
+      "clienteId": "b486",
+      "marcaProducto": "HP",
+      "tipoServicio": "computadora",
+      "detalles": "pantalla en azul",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "CD ",
+            "costo": 4555
+          }
+        ],
+        "subtotal": 4555,
+        "iva": 0,
+        "total": 4555
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07",
+      "fechaSalida": "2025-10-07T08:01:08.216Z"
+    },
+    {
+      "id": "0241",
+      "clienteId": "eedb",
+      "marcaProducto": "xiaomi",
+      "tipoServicio": "celulares",
+      "detalles": "jkjk",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07",
+      "fechaSalida": "2025-10-07T08:09:29.199Z"
+    },
+    {
+      "id": "34e4",
+      "clienteId": "eedb",
+      "marcaProducto": "sdsd",
+      "tipoServicio": "parlantes",
+      "detalles": "dsdsdsdsdsd",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07T08:19:07.332Z",
+      "fechaSalida": "2025-10-07T08:20:25.201Z"
+    },
+    {
+      "id": "c301",
+      "clienteId": "eedb",
+      "marcaProducto": ",m,m,",
+      "tipoServicio": "celulares",
+      "detalles": "lkllk",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07T08:24:06.575Z",
+      "fechaSalida": "2025-10-07T08:24:23.885Z"
+    },
+    {
+      "id": "77b8",
+      "clienteId": "eedb",
+      "marcaProducto": "ssd",
+      "tipoServicio": "celulares",
+      "detalles": "sds",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "dsds",
+            "costo": 4545
+          },
+          {
+            "descripcion": "sds",
+            "costo": 44221
+          },
+          {
+            "descripcion": "s",
+            "costo": 323
+          },
+          {
+            "descripcion": "aaa",
+            "costo": 2323
+          }
+        ],
+        "subtotal": 51412,
+        "iva": 0,
+        "total": 51412
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07T08:28:04.742Z",
+      "fechaSalida": "2025-10-07T08:28:36.986Z"
+    },
+    {
+      "id": "8b5c",
+      "clienteId": "b1ad",
+      "marcaProducto": "ghhgh",
+      "tipoServicio": "otros",
+      "detalles": "ghghgh",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "entregado",
+      "fechaEntrada": "2025-10-07T17:13:00.852Z",
+      "fechaSalida": "2025-10-07T17:13:16.480Z"
+    },
+    {
+      "id": "848b",
+      "clienteId": "eedb",
+      "marcaProducto": "kjk",
+      "tipoServicio": "celulares",
+      "detalles": "jkj",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "",
+            "costo": 0
+          }
+        ],
+        "subtotal": 0,
+        "iva": 0,
+        "total": 0
+      },
+      "estado": "pendiente",
+      "fechaEntrada": "2025-10-14T21:37:59.548Z",
+      "fechaSalida": null
+    }
+  ],
+  "panelTrabajos": [],
+  "estadisticas": [],
+  "historialServicio": [],
+  "historialEquiposNoretirados": [],
+  "carts": [
+    {
+      "id": "gaston",
+      "username": "gaston",
+      "items": [
+        {
+          "id": "3",
+          "nombre": "Auriculares",
+          "precio": 45000,
+          "cantidad": 2
+        }
+      ],
+      "updatedAt": "2025-10-14T22:12:00.000Z"
+    },
+    {
+      "id": "julian",
+      "username": "julian",
+      "items": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "categoria": "computadoras",
+          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
+          "precio": 650000,
+          "stock": 45,
+          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
+          "cantidad": 1
+        }
+      ],
+      "updatedAt": "2025-10-16T21:03:50.012Z"
+    },
+    {
+      "id": "gabi",
+      "username": "gabi",
+      "items": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "categoria": "computadoras",
+          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
+          "precio": 650000,
+          "stock": 45,
+          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
+          "cantidad": 1
+        }
+      ],
+      "updatedAt": "2025-10-16T22:10:29.944Z"
+    },
+    {
+      "id": "ggg",
+      "username": "ggg",
+      "items": [
+        {
+          "id": "4",
+          "nombre": "noot",
+          "categoria": "computadoras",
+          "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+          "precio": 45000,
+          "stock": 12,
+          "imagen": "https://yuhmak.vtexassets.com/arquivos/ids/192783-800-auto?v=638894997514700000&width=800&height=auto&aspect=true",
+          "cantidad": 1
+        }
+      ],
+      "updatedAt": "2025-10-16T21:18:03.228Z"
+    },
+    {
+      "id": "gggg",
+      "username": "gggg",
+      "items": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "categoria": "computadoras",
+          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
+          "precio": 650000,
+          "stock": 45,
+          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
+          "cantidad": 1
+        },
+        {
+          "id": "6",
+          "nombre": "Iphone 17",
+          "categoria": "accesorios",
+          "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+          "precio": 45000,
+          "stock": 12,
+          "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg",
+          "cantidad": 1
+        },
+        {
+          "id": "7",
+          "nombre": "S24 Ultra",
+          "categoria": "celulares",
+          "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
+          "precio": 1200000,
+          "stock": 8,
+          "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp",
+          "cantidad": 1
+        }
+      ],
+      "updatedAt": "2025-10-16T22:09:13.522Z"
+    },
+    {
+      "id": "admin",
+      "username": "admin",
+      "items": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "categoria": "computadoras",
+          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
+          "precio": 650000,
+          "stock": 45,
+          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
+          "cantidad": 1
+        },
+        {
+          "id": "6",
+          "nombre": "Iphone 17",
+          "categoria": "accesorios",
+          "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+          "precio": 45000,
+          "stock": 12,
+          "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg",
+          "cantidad": 1
+        },
+        {
+          "id": "7",
+          "nombre": "S24 Ultra",
+          "categoria": "celulares",
+          "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
+          "precio": 1200000,
+          "stock": 8,
+          "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp",
+          "cantidad": 1
+        }
+      ],
+      "updatedAt": "2025-10-16T21:43:01.489Z"
+    }
+  ],
+  "productos": [
+    {
+      "id": "1",
+      "nombre": "Samsung Galaxy A54",
+      "categoria": "celulares",
+      "descripcion": "Celular gama media, pantalla AMOLED 6.4 pulgadas, 128GB, 5G.",
+      "precio": 350000,
+      "stock": 10,
+      "imagen": "https://http2.mlstatic.com/D_NQ_NP_732057-MLA70868353813_082023-O.webp"
+    },
+    {
+      "id": "2",
+      "nombre": "Notebook Lenovo V15",
+      "categoria": "computadoras",
+      "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
+      "precio": 650000,
+      "stock": 45,
+      "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg"
+    },
+    {
+      "id": "3",
+      "nombre": "Auriculares JBL Tune 510BT",
+      "categoria": "accesorios",
+      "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+      "precio": 45000,
+      "stock": 9,
+      "imagen": "https://www.jbl.com.ar/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw04061255/JBL_TUNE_510BT_Product%20Image_Hero_Black.png"
+    },
+    {
+      "id": "4",
+      "nombre": "noot",
+      "categoria": "computadoras",
+      "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+      "precio": 45000,
+      "stock": 12,
+      "imagen": "https://yuhmak.vtexassets.com/arquivos/ids/192783-800-auto?v=638894997514700000&width=800&height=auto&aspect=true"
+    },
+    {
+      "id": "5",
+      "nombre": "Auriculares JBL Tune 510BT",
+      "categoria": "accesorios",
+      "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+      "precio": 45000,
+      "stock": 12,
+      "imagen": "https://www.jbl.com.ar/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw04061255/JBL_TUNE_510BT_Product%20Image_Hero_Black.png"
+    },
+    {
+      "id": "6",
+      "nombre": "Iphone 17",
+      "categoria": "accesorios",
+      "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
+      "precio": 45000,
+      "stock": 12,
+      "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg"
+    },
+    {
+      "id": "7",
+      "nombre": "S24 Ultra",
+      "categoria": "celulares",
+      "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
+      "precio": 1200000,
+      "stock": 8,
+      "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp"
+    },
+    {
+      "id": "aeeb",
+      "nombre": "Infinix hot 50 pro",
+      "categoria": "celulares",
+      "descripcion": "ASKAJSKjsk jaskaskjaska",
+      "precio": 150000,
+      "stock": 10,
+      "imagen": "/img/logo1.png"
+    }
+  ]
+}

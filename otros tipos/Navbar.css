@@ -1,0 +1,135 @@
+/* NAVBAR ELEGANTE Y FIJA */
+.navbar-sg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 0.8rem 2rem;
+  min-height: 64px;
+  z-index: 1000;
+
+  /* Fondo sólido fijo */
+  background: #1e293b; /* azul navy elegante */
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo moderno */
+.navbar-sg h1 {
+  color: #fff;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin: 0 0 0 0.7rem;
+  text-align: left;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(255,255,255,0.15);
+}
+
+/* Links */
+.navbar-sg ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-sg a {
+  position: relative;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  transition: color 0.25s ease;
+}
+
+/* Subrayado moderno */
+.navbar-sg a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: #38bdf8; /* celeste lindo */
+  transition: width 0.3s ease;
+}
+
+.navbar-sg a:hover {
+  color: #38bdf8;
+}
+
+.navbar-sg a:hover::after {
+  width: 100%;
+}
+
+/* Contenedor del botón hamburguesa */
+.navbar-hamburguesa-container {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-links-right {
+  margin-left: auto;
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .navbar-links-right {
+    display: none !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .navbar-sg {
+    padding: 0.8rem 1rem;
+  }
+
+  .navbar-sg h1 {
+    font-size: 1.3rem;
+    margin: 0 0 0 0.5rem;
+    max-width: 70vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Link activo estilo botón moderno */
+.navbar-sg a.active {
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #4a90e2, #38bdf8);
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(58, 123, 255, 0.3);
+  transition: all 0.25s ease;
+}
+
+.navbar-sg a.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(58, 123, 255, 0.35);
+}

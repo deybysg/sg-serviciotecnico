@@ -1,0 +1,579 @@
+/*
+ * =================================================================
+ * ESTILO PREMIUM DASHBOARD (REACT) - VERSIÓN FINAL
+ * AJUSTES: 100vw, Padding Lateral Mínimo, Compactación de Elementos, y Responsividad Móvil.
+ * =================================================================
+ */
+
+/* --- VARIABLES CSS PERSONALIZADAS --- */
+:root {
+    /* Fondos */
+    --bg-color: #0b1a2e;        /* Fondo principal (Azul muy oscuro/Petróleo) */
+    --card-bg: #1c2b46;         /* Fondo de tarjetas/módulos (Azul Grisáceo) */
+    --hover-bg: #273859;        /* Fondo al pasar el mouse */
+    /* Colores primarios y de acento */
+    --primary-color: #00bcd4;   /* Cian Brillante (Para títulos/iconos/barras) */
+    --secondary-color: #4CAF50; /* Verde Esmeralda (Para Ingresos/Éxito) */
+    --text-color: #e0e7ff;      /* Texto principal (Blanco Azulado) */
+    --text-muted: #94a3b8;      /* Texto secundario/etiquetas */
+    /* Sombras y Bordes */
+    --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.4); /* Sombra elegante y profunda */
+    --border-color: rgba(255, 255, 255, 0.08); /* Líneas de separación sutiles */
+    --border-radius: 12px;
+}
+
+/* --- ESTILO PRINCIPAL DEL COMPONENTE Y VIEWPORT FIX --- */
+.estadisticas-admin-page-custom {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    /* Compactación: Reducimos el padding lateral a 10px */
+    padding: 30px 10px; 
+    
+    /* Corrección NAV: Se mantiene el margen superior */
+    padding-top: 100px; 
+    margin-top: -40px; 
+    
+    width: 100vw; /* Mantenido a petición */
+    min-height: 100vh;
+    
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Compactación vertical */
+    transition: background-color 0.3s;
+    /* Esencial con 100vw para evitar el scroll lateral */
+    overflow-x: hidden; 
+}
+
+.admin-header {
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.admin-header h1 {
+    margin-top: 15px;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    font-size: 2.8em;
+    font-weight: 800; 
+    letter-spacing: -0.5px;
+}
+
+.admin-header p {
+    color: var(--text-muted);
+    font-size: 1.2em;
+}
+
+.loading-message, 
+.error-message-full,
+.no-data-message,
+.no-chart-data {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.5em;
+    color: var(--text-muted);
+}
+.error-message-full {
+    color: #ef5350; 
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: var(--shadow-dark);
+}
+
+/* --- FILTROS --- */
+.filters-container {
+    justify-content: center; 
+    display: flex;
+    gap: 15px; 
+    /* Ajuste para que se pegue al borde (10px del padding principal) */
+    margin-left: 0; 
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1.05em;
+}
+
+.filter-group select {
+    background-color: #1c2b46; 
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    appearance: none; 
+    /* Flecha SVG para mantener el estilo */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.filter-group select:hover {
+    border-color: var(--primary-color);
+}
+
+
+/* --- GRID DE TARJETAS (KEY METRICS) --- */
+.stats-cards-grid {
+    display: grid;
+    /* Ajuste de tamaño de tarjeta para compactar */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+    gap: 15px; 
+}
+
+.stat-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 18px; /* Compactado */
+    box-shadow: var(--shadow-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100px; 
+    position: relative;
+    border-top: 3px solid; 
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 188, 212, 0.2); 
+}
+
+.stat-value {
+    font-size: 2.5em; /* Reducido */
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 3px;
+}
+
+.stat-label {
+    font-size: 0.9em; /* Reducido */
+    color: var(--text-muted);
+}
+
+.stat-icon {
+    position: absolute;
+    bottom: 15px; 
+    right: 15px;
+    top: auto; 
+    font-size: 3.5em; 
+    opacity: 0.15; 
+    color: var(--primary-color);
+}
+
+/* Colores específicos para las tarjetas (Icono y Borde Superior) */
+.revenue-card { border-top-color: var(--secondary-color); } 
+.revenue-card .stat-icon { 
+    color: var(--secondary-color);
+    opacity: 0.25; 
+}
+
+.active-services-card { border-top-color: #ffc107; } 
+.active-services-card .stat-icon { color: #ffc107; }
+
+.delivered-card { border-top-color: var(--primary-color); } 
+.delivered-card .stat-icon { color: var(--primary-color); }
+
+.avg-days-card { border-top-color: #e91e63; } 
+.avg-days-card .stat-icon { color: #e91e63; }
+
+
+/* --- FILA DE GRÁFICOS --- */
+.stats-charts-row {
+    display: grid;
+    /* Ajuste de tamaño de gráfico para compactar */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+    gap: 15px; 
+}
+
+.chart-block {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px; /* Compactado */
+    box-shadow: var(--shadow-dark);
+}
+
+.chart-block h2 {
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-size: 1.6em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.chart-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+
+/* --- GRÁFICO DE BARRAS (INGRESOS MENSUALES) --- */
+.bar-chart-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 300px;
+    border-left: 1px solid var(--border-color); 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 30px; 
+    position: relative;
+    padding-left: 10px;
+}
+
+.chart-bar {
+    flex: 1; 
+    max-width: 50px; /* Barras más delgadas para compactar */
+    background-color: var(--primary-color);
+    margin: 0 5px;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.2s ease, transform 0.2s; 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.5); 
+}
+
+.chart-bar:hover {
+    background-color: var(--secondary-color);
+    transform: scaleY(1.02);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.8); 
+}
+
+.bar-label {
+    position: absolute;
+    bottom: -25px;
+    width: 100%;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.bar-value {
+    font-size: 0.8em;
+    color: var(--text-color);
+    padding: 2px 5px;
+    white-space: nowrap;
+    position: absolute;
+    top: -25px; 
+    font-weight: 600;
+    background-color: var(--card-bg); 
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.chart-bar:hover .bar-value {
+    opacity: 1; 
+}
+
+
+/* --- GRÁFICO DE TORTA (DISTRIBUCIÓN DE SERVICIOS) --- */
+.pie-chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 30px;
+    min-height: 280px;
+}
+
+.pie-chart {
+    width: 180px; /* Reducido para compactar */
+    height: 180px; /* Reducido para compactar */
+    border-radius: 50%;
+    background-color: var(--bg-color); 
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); 
+    border: 5px solid var(--card-bg); 
+    transition: transform 0.3s ease;
+}
+
+.pie-chart:hover {
+    transform: scale(1.05);
+}
+
+.conic-pie-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.pie-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1em;
+    color: var(--text-color);
+    cursor: default;
+    transition: opacity 0.2s;
+}
+
+.legend-item:hover {
+    opacity: 0.8;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.no-chart-data {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 30px;
+}
+
+/* ================================================================= */
+/* --- ESTILOS DEL MODAL DE DETALLE DE SERVICIOS (Clases Únicas) --- */
+/* ================================================================= */
+
+.monthly-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.monthly-service-detail-modal {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: var(--shadow-dark);
+    transform: scale(0.95);
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.monthly-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.monthly-modal-header h2 {
+    color: var(--primary-color);
+    font-size: 1.8em;
+}
+
+.monthly-close-button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 2em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.monthly-close-button:hover {
+    color: #ef5350; 
+}
+
+.monthly-modal-summary {
+    background-color: var(--hover-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    color: var(--text-color);
+    display: flex;
+    justify-content: space-around;
+}
+
+.monthly-modal-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-color: var(--primary-color) var(--hover-bg); 
+    scrollbar-width: thin;
+}
+
+.monthly-service-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.monthly-service-detail-table th, .monthly-service-detail-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.monthly-service-detail-table th {
+    background-color: var(--hover-bg);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+}
+
+.monthly-service-detail-table tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.monthly-text-right {
+    text-align: right;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.monthly-service-type-tag {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: var(--bg-color);
+}
+.tag-celulares { background-color: #4CAF50; }
+.tag-computadora { background-color: #2196F3; color: var(--text-color); }
+.tag-parlantes { background-color: #FF9800; }
+.tag-otros { background-color: #9C27B0; color: var(--text-color); }
+
+.monthly-service-id, .monthly-service-date {
+    display: block;
+    line-height: 1.2;
+}
+.monthly-service-id { font-weight: 600; color: var(--text-color); }
+.monthly-service-date { font-size: 0.8em; color: var(--text-muted); }
+
+.monthly-no-data-message-modal {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+
+/* ================================================================= */
+/* --- RESPONSIVE DESIGN (FINAL OPTIMIZADO) --- */
+/* ================================================================= */
+
+@media (max-width: 992px) {
+    .filters-container {
+        justify-content: center;
+        margin: 0;
+    }
+    .stats-cards-grid {
+        /* Tamaño de tarjetas más compacto en tablet */
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+        gap: 10px; 
+    }
+    .chart-block {
+        padding: 15px; 
+    }
+}
+
+@media (max-width: 768px) {
+    .estadisticas-admin-page-custom {
+        gap: 20px;
+        /* Padding mínimo para que se pegue al borde en móvil */
+        padding: 10px 5px; 
+        padding-top: 80px; 
+        margin-top: -30px;
+    }
+    .stats-charts-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .pie-chart-container {
+        flex-direction: column;
+    }
+    .filters-container {
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+    }
+    
+    /* Compactar aún más tarjetas y fuentes en móvil */
+    .stat-card {
+        padding: 10px;
+        min-height: 80px;
+    }
+    .stat-value {
+        font-size: 2em;
+    }
+    
+    /* Adaptar tabla en móvil */
+    .monthly-service-detail-table th, .monthly-service-detail-table td {
+        padding: 8px 10px;
+    }
+    /* Ocultar la columna de Marca en tablet */
+    .monthly-service-detail-table th:nth-child(3), .monthly-service-detail-table td:nth-child(3) {
+        display: none; 
+    }
+    .monthly-service-detail-modal {
+        max-width: 98%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header h1 {
+        font-size: 1.8em;
+        margin-top: 30px;
+    }
+    .stat-value {
+        font-size: 1.8em;
+    }
+    .stat-card {
+        padding: 10px;
+    }
+    .chart-bar {
+        max-width: 30px;
+    }
+    /* Ocultar la fecha en la lista de servicios para ahorrar espacio */
+    .monthly-service-detail-table td .monthly-service-date {
+        display: none;
+    }
+}

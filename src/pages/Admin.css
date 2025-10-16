@@ -1,0 +1,133 @@
+/* General */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Layout principal */
+.admin-layout {
+  display: flex;
+  min-height: calc(100vh - 60px); /* resta la altura del header */
+  background: #0f172a; /* fondo oscuro */
+  color: #f1f5f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  margin-top: 60px; /* espacio debajo del header */
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 250px;
+  min-width: 250px;   /* mantiene ancho fijo */
+  background: #1e293b; /* gris azulado oscuro */
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #334155;
+}
+
+.admin-sidebar h2 {
+  margin-top: 42px;
+  font-size: 1.4rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #38bdf8; /* celeste */
+}
+
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-sidebar li {
+  margin: 0.8rem 0;
+}
+
+.admin-sidebar a {
+  display: block;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  color: #f1f5f9;
+  text-decoration: none;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.admin-sidebar a:hover {
+  background: #334155;
+  color: #38bdf8;
+}
+
+.admin-sidebar a.active {
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+/* Contenido */
+.admin-content {
+  flex: 1; /* ocupa TODO el espacio disponible */
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 2rem;
+  background: #0f172a; /* asegura fondo oscuro */
+  min-height: calc(100vh - 60px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Estilos del contenido (títulos, párrafos) */
+.admin-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #facc15; /* amarillo destacado */
+}
+
+.admin-content p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+/* Cards para secciones internas */
+.admin-card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    min-width: unset;
+    flex-direction: row;
+    justify-content: space-around;
+    border-right: none;
+    border-bottom: 1px solid #334155;
+    padding: 1rem;
+  }
+
+  .admin-sidebar ul {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .admin-sidebar li {
+    margin: 0;
+  }
+
+  .admin-content {
+    width: 100%; /* ocupa todo el ancho */
+    padding: 1.5rem;
+  }
+}

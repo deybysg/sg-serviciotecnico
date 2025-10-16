@@ -1,0 +1,201 @@
+/* src/components/Carrito.css */
+
+/* Se usa el ID para asegurar la unicidad y especificidad */
+#shopping-cart-modal-unique.carrito-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6); 
+    display: flex;
+    justify-content: flex-end; 
+    z-index: 1000; 
+}
+
+#shopping-cart-modal-unique .carrito-modal-content {
+    background: #f8f9fa; 
+    width: 100%;
+    max-width: 450px; 
+    height: 100%;
+    padding: 20px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn 0.3s ease-out; 
+}
+
+/* Animación de entrada (opcional) */
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+#shopping-cart-modal-unique .carrito-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #dc3545;
+}
+
+#shopping-cart-modal-unique .carrito-title {
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: #007bff; 
+}
+
+#shopping-cart-modal-unique .carrito-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 60vh; 
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+#shopping-cart-modal-unique .carrito-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#shopping-cart-modal-unique .item-info {
+    flex-grow: 1;
+}
+
+#shopping-cart-modal-unique .item-name {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+#shopping-cart-modal-unique .item-price {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+#shopping-cart-modal-unique .item-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#shopping-cart-modal-unique .item-quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+#shopping-cart-modal-unique .qty-btn {
+    background: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: #007bff;
+}
+
+#shopping-cart-modal-unique .qty-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#shopping-cart-modal-unique .item-quantity {
+    padding: 0 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+#shopping-cart-modal-unique .item-subtotal {
+    font-weight: bold;
+    color: #28a745;
+    min-width: 70px; 
+    text-align: right;
+}
+
+#shopping-cart-modal-unique .delete-item-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 5px;
+}
+
+#shopping-cart-modal-unique .carrito-summary {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding-top: 20px;
+    border-top: 2px solid #ccc;
+    margin-top: 20px;
+}
+
+#shopping-cart-modal-unique .summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+#shopping-cart-modal-unique .summary-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Estilos de botones generales */
+#shopping-cart-modal-unique .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.2s;
+}
+
+#shopping-cart-modal-unique .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+#shopping-cart-modal-unique .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.2s;
+}
+
+#shopping-cart-modal-unique .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+#shopping-cart-modal-unique .btn-secondary:disabled, #shopping-cart-modal-unique .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#shopping-cart-modal-unique .carrito-empty-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 50px 0;
+}
+
+/* Media Query para móviles: ocupa toda la pantalla */
+@media (max-width: 600px) {
+    #shopping-cart-modal-unique .carrito-modal-content {
+        max-width: 100%;
+    }
+}

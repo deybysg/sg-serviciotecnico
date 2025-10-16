@@ -1,0 +1,18 @@
+/* General para que nunca se rompa */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenedor para páginas centradas */
+.page-container {
+  width: 100%;
+  max-width: 1200px; /* no se estira demasiado */
+  margin: 0 auto; /* centra */
+  padding: 0 16px; /* espacio a los lados */
+  box-sizing: border-box;
+}

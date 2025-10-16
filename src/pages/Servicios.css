@@ -1,0 +1,128 @@
+/* Contenedor principal */
+.servicios-ayuda-container {
+  background: #0f172a; /* azul marino bien oscuro */
+  color: #e2e8f0; /* gris claro para texto */
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Títulos principales */
+.servicios-ayuda-container h1 {
+    margin-top: 50px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #38bdf8; /* celeste moderno */
+  text-shadow: 0 0 8px rgba(56,189,248,0.3);
+}
+
+/* Subtítulos (h2) */
+.servicios-ayuda-container h2 {
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #f8fafc;
+  border-left: 4px solid #38bdf8;
+  padding-left: 0.6rem;
+}
+
+/* Preguntas (h3) */
+.servicios-ayuda-container h3 {
+  font-size: 1.2rem;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #38bdf8;
+}
+
+/* Descripciones */
+.servicios-ayuda-container p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #cbd5e1; /* gris suave */
+}
+
+/* Links */
+.servicios-ayuda-container a {
+  color: #38bdf8;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px dashed #38bdf8;
+  transition: all 0.3s ease;
+}
+
+.servicios-ayuda-container a:hover {
+  color: #0ea5e9;
+  border-bottom-color: #0ea5e9;
+}
+
+/* Secciones con caja */
+.servicios-ayuda-container section {
+  background: #1e293b; /* gris-azul oscuro */
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Info de contacto */
+.contacto-info-corta {
+  margin-top: 2rem;
+  background: #1e293b;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #f1f5f9;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.contacto-info-corta {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #1e293b; /* azul navy oscuro */
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  color: #fff;
+  text-align: center;
+}
+
+.contacto-info-corta p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.horarios-container {
+  margin-top: 1rem;
+}
+
+.horarios-container h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #38bdf8; /* celeste llamativo */
+  text-shadow: 0 0 8px rgba(56,189,248,0.5);
+}
+
+.horarios-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.horarios-container li {
+  background: rgba(255,255,255,0.05);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+}
+
+.horarios-container li span {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
