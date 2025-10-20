@@ -1,10 +1,60 @@
+// src/components/Carrito.jsx
+
 import React from 'react';
 import { useCart } from '../context/CartContext';
-// 💡 Se añade la importación de useAuth
 import { useAuth } from '../context/AuthContext'; 
 import { FaPlus, FaMinus, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import '../pages/Carrito.css'; 
+
+// 💡 NECESITAS ESTO: Importa una función de tu Contexto de Compras/Ventas 
+//    para registrar la compra y la actualización de stock.
+//    (Asegúrate de que esta función exista en tu CartContext o crea un SalesContext)
+const simulatePurchaseAndSave = async (userId, username, items, total, updateStock) => {
+    // 🚨 Esta es la función clave a implementar en tu CartContext o SalesContext.
+    // Simula:
+    // 1. await updateStock(); 
+    // 2. Registra la compra en tu DB (por ejemplo, en un endpoint POST /ventas).
+    // 3. Vacía el carrito local.
+    
+    // Por ahora, solo usaremos la función updateStockOnPurchase que ya tenías
+    // y la combinaremos con un registro simple en el backend/json-server.
+    
+    // 1. Simular registro de la compra en el historial (backend/json-server)
+    const nuevaVenta = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2), // ID simple
+        usuarioId: userId,
+        username: username,
+        fechaCompra: new Date().toISOString(),
+        totalVenta: total,
+        metodoPago: 'Simulado (Offline)',
+        estado: 'Completado',
+        productosComprados: items.map(item => ({
+            id: item.id,
+            nombre: item.nombre,
+            precioUnitario: item.precio,
+            cantidad: item.cantidad,
+            subtotal: item.precio * item.cantidad,
+        }))
+    };
+    
+    // 🚨 Llama a tu endpoint de backend para registrar la venta (Mis Compras / Historial de Ventas)
+    // Asumiendo que tienes un endpoint para registrar ventas:
+    const salesResponse = await fetch('http://localhost:3001/ventas', { // 🚨 Ajusta esta URL si usas otro puerto/ruta
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaVenta)
+    });
+    
+    if (!salesResponse.ok) {
+        throw new Error('Error al guardar la venta en el historial.');
+    }
+
+    // 2. Actualizar el stock
+    await updateStock();
+
+    return salesResponse.json();
+};
 
 /**
  * Componente Modal del Carrito
@@ -16,6 +66,7 @@ function Carrito({ isOpen, onClose }) {
         cartItems, 
         totalAmount, 
         totalItems, 
+        // 👇 Usamos clearCart y updateStockOnPurchase, que son necesarios para la simulación
         addToCart, 
         removeFromCart, 
         removeItemTotally, 
@@ -30,40 +81,68 @@ function Carrito({ isOpen, onClose }) {
         return null;
     }
 
+    // 🚨 FUNCIÓN handleCheckout MODIFICADA PARA SIMULAR COMPRA 🚨
     const handleCheckout = async () => {
-        if (cartItems.length === 0) {
-             Swal.fire('Carrito Vacío', 'No puedes comprar sin productos.', 'warning');
+        // 1. Verificación de sesión
+        if (!user || user.role === 'Invitado') {
+             Swal.fire('Atención', 'Debes iniciar sesión para realizar una compra.', 'info');
              return;
         }
 
+        if (cartItems.length === 0) {
+            Swal.fire('Carrito Vacío', 'No puedes comprar sin productos.', 'warning');
+            return;
+        }
+
+        // 2. Confirmación de compra (Simulación)
         Swal.fire({
-             title: 'Confirmar Compra',
-             text: `El total a pagar es $${totalAmount.toFixed(2)}. ¿Deseas continuar?`,
-             icon: 'question',
-             showCancelButton: true,
-             confirmButtonColor: '#28a745',
-             cancelButtonColor: '#dc3545',
-             confirmButtonText: 'Sí, Comprar',
-             cancelButtonText: 'Cancelar'
+            title: 'Confirmar Compra (Simulada)',
+            text: `El total a pagar es $${totalAmount.toFixed(2)}. ¿Deseas SIMULAR la compra?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745', // Verde para confirmar
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Sí, Comprar',
+            cancelButtonText: 'Cancelar'
         }).then(async (result) => {
-             if (result.isConfirmed) {
-                 try {
-                     await updateStockOnPurchase(); 
-                     
-                     Swal.fire(
-                         '¡Compra Exitosa!',
-                         'Hemos procesado tu pedido y el stock ha sido actualizado.',
-                         'success'
-                     );
-                     onClose(); 
-                 } catch (error) {
-                     Swal.fire(
-                         'Error',
-                         error.message || 'Hubo un error al procesar tu compra. Inténtalo de nuevo.',
-                         'error'
-                     );
-                 }
-             }
+            if (result.isConfirmed) {
+                try {
+                    Swal.fire({
+                        title: 'Simulando Pago...',
+                        text: 'Procesando tu pedido y actualizando el historial...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // 3. 🚨 LLAMADA A LA FUNCIÓN DE SIMULACIÓN Y REGISTRO 🚨
+                    await simulatePurchaseAndSave(
+                        user.id, 
+                        user.username, 
+                        cartItems, 
+                        totalAmount, 
+                        updateStockOnPurchase
+                    );
+                    
+                    // 4. Vaciar el carrito después de la simulación y registro exitoso
+                    clearCart();
+                    
+                    Swal.fire(
+                        '¡Compra Exitosa (Simulada)!',
+                        'Tu pedido fue registrado en "Mis Compras" y el stock fue actualizado.',
+                        'success'
+                    );
+                    onClose(); 
+                    
+                } catch (error) {
+                    Swal.fire(
+                        'Error de Simulación',
+                        error.message || 'Hubo un error al simular la compra/guardar historial.',
+                        'error'
+                    );
+                }
+            }
         });
     };
 

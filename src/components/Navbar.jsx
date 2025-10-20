@@ -86,7 +86,7 @@ function Navbar() {
             <>
               <li><NavLink to="/" end>Inicio</NavLink></li>
               <li><NavLink to="/productos">Productos</NavLink></li>
-              <li><NavLink to="/servicios">Ayuda</NavLink></li>
+              <li><NavLink to="/servicios">Mis compras</NavLink></li>
 
               {/* === CARRITO EN PC === */}
               <li>

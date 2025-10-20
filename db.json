@@ -477,12 +477,12 @@
           "categoria": "computadoras",
           "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
           "precio": 650000,
-          "stock": 45,
+          "stock": 44,
           "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
           "cantidad": 1
         }
       ],
-      "updatedAt": "2025-10-16T22:10:29.944Z"
+      "updatedAt": "2025-10-20T18:25:02.132Z"
     },
     {
       "id": "ggg",
@@ -573,7 +573,7 @@
           "cantidad": 1
         }
       ],
-      "updatedAt": "2025-10-16T21:43:01.489Z"
+      "updatedAt": "2025-10-20T18:18:20.897Z"
     }
   ],
   "productos": [
@@ -583,7 +583,7 @@
       "categoria": "celulares",
       "descripcion": "Celular gama media, pantalla AMOLED 6.4 pulgadas, 128GB, 5G.",
       "precio": 350000,
-      "stock": 10,
+      "stock": 0,
       "imagen": "https://http2.mlstatic.com/D_NQ_NP_732057-MLA70868353813_082023-O.webp"
     },
     {
@@ -592,7 +592,7 @@
       "categoria": "computadoras",
       "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
       "precio": 650000,
-      "stock": 45,
+      "stock": 44,
       "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg"
     },
     {
@@ -648,6 +648,66 @@
       "precio": 150000,
       "stock": 10,
       "imagen": "/img/logo1.png"
+    }
+  ],
+  "ventas": [
+    {
+      "id": "mgui0q45svlazrfl63n",
+      "username": "gabi",
+      "fechaCompra": "2025-10-17T06:59:39.701Z",
+      "totalVenta": 1000000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "cantidad": 1,
+          "subtotal": 650000
+        },
+        {
+          "id": "1",
+          "nombre": "Samsung Galaxy A54",
+          "precioUnitario": 350000,
+          "cantidad": 1,
+          "subtotal": 350000
+        }
+      ]
+    },
+    {
+      "id": "mguimut09jnx9aosybk",
+      "username": "gabi",
+      "fechaCompra": "2025-10-17T07:16:52.212Z",
+      "totalVenta": 700000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "1",
+          "nombre": "Samsung Galaxy A54",
+          "precioUnitario": 350000,
+          "cantidad": 2,
+          "subtotal": 700000
+        }
+      ]
+    },
+    {
+      "id": "mguinic5cqjs9jj13t",
+      "username": "gabi",
+      "fechaCompra": "2025-10-17T07:17:22.709Z",
+      "totalVenta": 2450000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "1",
+          "nombre": "Samsung Galaxy A54",
+          "precioUnitario": 350000,
+          "cantidad": 7,
+          "subtotal": 2450000
+        }
+      ]
     }
   ]
 }

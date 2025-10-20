@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import Productos from "./pages/Productos";
 import Servicios from "./pages/Servicios";
 import Login from "./pages/Login";
-// 🗑️ ELIMINAMOS EL COMPONENTE PÁGINA: import Carrito from "./pages/Carrito"; 
+
 import NotFound from "./pages/NotFound";
 import ConsultaServicio from "./pages/ConsultaServicio"; 
 
@@ -18,7 +18,7 @@ import EstadisticasAdmin from "./admin/EstadisticasAdmin";
 import HistorialAdmin from "./admin/HistorialAdmin";
 
 import { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext"; // ⬅️ NUEVO IMPORT
+import { CartProvider } from "./context/CartContext"; 
 import PrivateRoute from "./components/PrivateRoute";
 import Paneltrabajos from "./admin/Paneltrabajos";
 

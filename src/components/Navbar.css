@@ -100,7 +100,7 @@
     margin: 0;
     flex-basis: 40%; /* Reserva espacio para el menú de la derecha */
     justify-content: flex-end; /* Alinea los ítems a la derecha de su sección */
-    gap: 1.5rem; /* Separación de los links */
+    gap: 0.8rem; /* Separación de los links */
 }
 
 .navbar-sg a {
@@ -357,3 +357,4 @@
     padding: 2px 6px;
   }
 }
+
