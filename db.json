@@ -470,19 +470,8 @@
     {
       "id": "gabi",
       "username": "gabi",
-      "items": [
-        {
-          "id": "2",
-          "nombre": "Notebook Lenovo V15",
-          "categoria": "computadoras",
-          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
-          "precio": 650000,
-          "stock": 44,
-          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
-          "cantidad": 1
-        }
-      ],
-      "updatedAt": "2025-10-20T18:25:02.132Z"
+      "items": [],
+      "updatedAt": "2025-10-21T08:08:24.711Z"
     },
     {
       "id": "ggg",
@@ -573,7 +562,7 @@
           "cantidad": 1
         }
       ],
-      "updatedAt": "2025-10-20T18:18:20.897Z"
+      "updatedAt": "2025-10-21T08:06:49.113Z"
     }
   ],
   "productos": [
@@ -592,7 +581,7 @@
       "categoria": "computadoras",
       "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
       "precio": 650000,
-      "stock": 44,
+      "stock": 43,
       "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg"
     },
     {
@@ -706,6 +695,23 @@
           "precioUnitario": 350000,
           "cantidad": 7,
           "subtotal": 2450000
+        }
+      ]
+    },
+    {
+      "id": "mh0a33bqa00azayv9np",
+      "username": "gabi",
+      "fechaCompra": "2025-10-21T08:04:10.262Z",
+      "totalVenta": 650000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "cantidad": 1,
+          "subtotal": 650000
         }
       ]
     }

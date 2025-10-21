@@ -16,11 +16,13 @@ import ProductosAdmin from "./admin/ProductosAdmin";
 import ServiciosAdmin from "./admin/ServiciosAdmin";
 import EstadisticasAdmin from "./admin/EstadisticasAdmin";
 import HistorialAdmin from "./admin/HistorialAdmin";
+import Paneltrabajos from "./admin/Paneltrabajos";
 
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext"; 
 import PrivateRoute from "./components/PrivateRoute";
-import Paneltrabajos from "./admin/Paneltrabajos";
+import MisComprasModal from "./pages/MisComprasModal";
+
 
 function App() {
   return (
@@ -40,15 +42,15 @@ function App() {
             <Route path="/seguimiento/:id" element={<ConsultaServicio />} />
 
           {/* Rutas privadas para usuarios normales: SE ELIMINÓ LA RUTA /carrito */}
-          {/*           <Route
-            path="/carrito"
+                     <Route
+            path="/miscomprasmodal"
             element={
               <PrivateRoute role="user">
-                <Carrito />
+                <MisComprasModal />
               </PrivateRoute>
             }
           /> 
-            */}
+            *
 
           {/* Rutas privadas para ADMIN (MANTENIDAS) */}
             <Route
