@@ -22,6 +22,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext"; 
 import PrivateRoute from "./components/PrivateRoute";
 import MisComprasModal from "./pages/MisComprasModal";
+import ComprobanteVenta from "./pages/ComprobanteVenta";
 
 
 function App() {
@@ -102,8 +103,18 @@ function App() {
             }
           />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
+                    {/* Ruta para ver comprobante de venta (abre en nueva pestaña desde MisCompras) */}
+                    <Route
+                        path="/comprobante/:id"
+                        element={
+                            <PrivateRoute>
+                                <ComprobanteVenta />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    {/* 404 */}
+                    <Route path="*" element={<NotFound />} />
         </Routes>
         </Router>
       </CartProvider>

@@ -115,7 +115,8 @@
       "correo": "deyby@g.com",
       "direccion": "lola mora 455",
       "serviciosRealizados": [
-        "245b"
+        "245b",
+        "a603"
       ]
     },
     {
@@ -430,6 +431,27 @@
       "estado": "pendiente",
       "fechaEntrada": "2025-10-14T21:37:59.548Z",
       "fechaSalida": null
+    },
+    {
+      "id": "a603",
+      "clienteId": "b486",
+      "marcaProducto": "xiaomi",
+      "tipoServicio": "parlantes",
+      "detalles": "sdsdsdsd",
+      "presupuesto": {
+        "items": [
+          {
+            "descripcion": "sdsd",
+            "costo": 4665
+          }
+        ],
+        "subtotal": 4665,
+        "iva": 0,
+        "total": 4665
+      },
+      "estado": "pendiente",
+      "fechaEntrada": "2025-10-21T08:42:13.491Z",
+      "fechaSalida": null
     }
   ],
   "panelTrabajos": [],
@@ -471,7 +493,7 @@
       "id": "gabi",
       "username": "gabi",
       "items": [],
-      "updatedAt": "2025-10-21T08:08:24.711Z"
+      "updatedAt": "2025-10-21T09:32:55.000Z"
     },
     {
       "id": "ggg",
@@ -562,7 +584,7 @@
           "cantidad": 1
         }
       ],
-      "updatedAt": "2025-10-21T08:06:49.113Z"
+      "updatedAt": "2025-10-21T08:47:06.597Z"
     }
   ],
   "productos": [
@@ -581,7 +603,7 @@
       "categoria": "computadoras",
       "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
       "precio": 650000,
-      "stock": 43,
+      "stock": 40,
       "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg"
     },
     {
@@ -590,7 +612,7 @@
       "categoria": "accesorios",
       "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
       "precio": 45000,
-      "stock": 9,
+      "stock": 8,
       "imagen": "https://www.jbl.com.ar/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw04061255/JBL_TUNE_510BT_Product%20Image_Hero_Black.png"
     },
     {
@@ -712,6 +734,47 @@
           "precioUnitario": 650000,
           "cantidad": 1,
           "subtotal": 650000
+        }
+      ]
+    },
+    {
+      "id": "mh0avf19babba54eotk",
+      "username": "gabi",
+      "fechaCompra": "2025-10-21T08:26:11.805Z",
+      "totalVenta": 650000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "cantidad": 1,
+          "subtotal": 650000
+        }
+      ]
+    },
+    {
+      "id": "mh0awbr274il8m2il4n",
+      "username": "gabi",
+      "fechaCompra": "2025-10-21T08:26:54.206Z",
+      "totalVenta": 1345000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "cantidad": 2,
+          "subtotal": 1300000
+        },
+        {
+          "id": "3",
+          "nombre": "Auriculares JBL Tune 510BT",
+          "precioUnitario": 45000,
+          "cantidad": 1,
+          "subtotal": 45000
         }
       ]
     }

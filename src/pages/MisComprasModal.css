@@ -17,7 +17,7 @@
     background: #fff;
     padding: 25px;
     border-radius: 10px;
-    width: 90%;
+    width: 92%;
     max-width: 600px; /* Ancho máximo moderado */
     max-height: 80vh; /* Altura máxima para evitar desbordamiento */
     overflow-y: auto; /* Permitir scroll si hay muchas compras */
@@ -26,9 +26,9 @@
 }
 
 .compras-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    position: fixed;
+    top: 15px;
+    right: 350px;
     background: none;
     border: none;
     font-size: 1.5rem;
@@ -56,6 +56,27 @@
     padding: 15px;
     margin-bottom: 15px;
     background-color: #f8f9fa;
+}
+
+.compra-id-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.compra-id {
+    font-size: 1rem;
+    color: #0b2545;
+    margin: 0;
+}
+
+.compra-small-id {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.compra-estado-wrap {
+    display: flex;
+    align-items: center;
 }
 
 .compra-header {
@@ -121,4 +142,80 @@
     display: inline-block;
     width: 1em;
     margin-left: -1em;
+}
+
+/* Tabla de productos */
+.productos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.productos-table th, .productos-table td {
+    border: 1px solid #e9ecef;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.productos-table thead th {
+    background: #f1f5f9;
+    color: #0b2545;
+    font-weight: 700;
+}
+
+.compra-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-comprobante {
+    background: linear-gradient(90deg, #0b2545, #1f6f9f);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-comprobante:hover { opacity: 0.95; transform: translateY(-1px); }
+
+/* Grid for meta and total */
+.compra-details.grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .compra-details.grid { grid-template-columns: 1fr; }
+    .productos-table th, .productos-table td { font-size: 0.85rem; }
+}
+
+/* Botón para abrir historial desde la página */
+.btn-open-historial {
+    background: linear-gradient(90deg,#0b2545,#1f6f9f);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+.btn-open-historial:hover { opacity: 0.95; transform: translateY(-2px); }
+
+/* Modal historial */
+.historial-modal { max-width: 900px; width: 95%; max-height: 88vh; overflow-y: auto; }
+.historial-title { margin-top: 0; color: #0b2545; border-bottom: 1px solid #e9eef5; padding-bottom: 8px; }
+.historial-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 700px) {
+    .historial-modal { width: 98%; padding: 12px; }
+    .compra-id { font-size: 0.95rem; }
+    .compra-details.grid { grid-template-columns: 1fr; }
 }
