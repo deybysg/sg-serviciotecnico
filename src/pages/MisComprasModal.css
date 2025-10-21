@@ -1,46 +1,61 @@
-/* Estilos para MisComprasModal.jsx */
+/* === Estilos para MisComprasModal.jsx (Optimización Estructural) === */
 
+/* --- Overlay del Modal --- */
 .compras-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro */
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1001; /* Asegúrate de que esté por encima del navbar y otros elementos */
+    z-index: 1001;
 }
 
+/* --- Contenido del Modal --- */
 .compras-modal-content {
     background: #fff;
-    padding: 25px;
+    padding: 25px; /* Padding de PC */
     border-radius: 10px;
     width: 92%;
-    max-width: 600px; /* Ancho máximo moderado */
-    max-height: 80vh; /* Altura máxima para evitar desbordamiento */
-    overflow-y: auto; /* Permitir scroll si hay muchas compras */
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    max-width: 600px; 
+    max-height: 85vh; 
+    overflow-y: auto; 
+    position: relative; 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
+}
+
+/* --- Header y Botón de Cierre (Diseño de PC) --- */
+.compras-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compras-title {
+    color: #0b2545;
+    border-bottom: 2px solid #0b2545;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+.compras-modal-content > .compras-title {
+    padding-right: 30px; 
 }
 
 .compras-close-btn {
     position: fixed;
-    top: 15px;
-    right: 350px;
+    top: 8px;
+    right: 347px; 
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
     color: #dc3545;
-}
-
-.compras-title {
-    color: #0b2545; /* Color principal de tu tema */
-    border-bottom: 2px solid #0b2545;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    z-index: 10;
 }
 
 .compras-empty-message {
@@ -53,7 +68,7 @@
 .compra-item {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 15px;
+    padding: 15px; /* Padding de PC */
     margin-bottom: 15px;
     background-color: #f8f9fa;
 }
@@ -61,6 +76,9 @@
 .compra-id-wrap {
     display: flex;
     flex-direction: column;
+    /* CRÍTICO: Asegura que el texto largo se rompa si es necesario */
+    max-width: 100%;
+    word-wrap: break-word; 
 }
 
 .compra-id {
@@ -84,12 +102,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-}
-
-.compra-id {
-    font-size: 0.9rem;
-    color: #6c757d;
-    font-weight: normal;
+    /* CRÍTICO: Permite que los elementos se encojan si es necesario */
+    flex-wrap: nowrap;
 }
 
 .compra-estado {
@@ -97,6 +111,7 @@
     border-radius: 5px;
     font-size: 0.8rem;
     font-weight: bold;
+    flex-shrink: 0; 
 }
 
 /* Colores de estado (ejemplos) */
@@ -109,46 +124,13 @@
     color: #333;
 }
 
-.compra-details p {
-    margin: 5px 0;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.compra-productos h5 {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #0b2545;
-}
-
-.compra-productos ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-.compra-productos li {
-    font-size: 0.9rem;
-    color: #333;
-    margin-left: 20px;
-    position: relative;
-}
-
-.compra-productos li::before {
-    content: "•";
-    color: #0b2545; 
-    font-weight: bold;
-    display: inline-block;
-    width: 1em;
-    margin-left: -1em;
-}
-
-/* Tabla de productos */
+/* --- Tabla de productos: CLAVE PARA EL DESBORDAMIENTO --- */
 .productos-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 8px;
+    /* ELIMINADO: display: block; overflow-x: auto; */
+    /* Esto es lo que causaba el scroll horizontal. En su lugar, hacemos la tabla compacta. */
 }
 
 .productos-table th, .productos-table td {
@@ -156,13 +138,9 @@
     padding: 8px 10px;
     text-align: left;
     font-size: 0.95rem;
+    white-space: normal;
 }
 
-.productos-table thead th {
-    background: #f1f5f9;
-    color: #0b2545;
-    font-weight: 700;
-}
 
 .compra-actions {
     margin-top: 12px;
@@ -171,6 +149,7 @@
 }
 
 .btn-comprobante {
+    /* Manteniendo estilos y colores */
     background: linear-gradient(90deg, #0b2545, #1f6f9f);
     color: white;
     border: none;
@@ -182,9 +161,6 @@
     gap: 8px;
 }
 
-.btn-comprobante:hover { opacity: 0.95; transform: translateY(-1px); }
-
-/* Grid for meta and total */
 .compra-details.grid {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -192,12 +168,7 @@
     align-items: center;
 }
 
-@media (max-width: 600px) {
-    .compra-details.grid { grid-template-columns: 1fr; }
-    .productos-table th, .productos-table td { font-size: 0.85rem; }
-}
-
-/* Botón para abrir historial desde la página */
+/* --- Botón abrir historial y Modal historial (manteniendo) --- */
 .btn-open-historial {
     background: linear-gradient(90deg,#0b2545,#1f6f9f);
     color: #fff;
@@ -207,15 +178,77 @@
     cursor: pointer;
     font-weight: 700;
 }
-.btn-open-historial:hover { opacity: 0.95; transform: translateY(-2px); }
-
-/* Modal historial */
-.historial-modal { max-width: 900px; width: 95%; max-height: 88vh; overflow-y: auto; }
+.historial-modal { max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; }
 .historial-title { margin-top: 0; color: #0b2545; border-bottom: 1px solid #e9eef5; padding-bottom: 8px; }
 .historial-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
 
+
+/* ########################################## */
+/* ### ADAPTACIÓN PARA MÓVILES (Compacto) ### */
+/* ########################################## */
+
+/* Adaptación para pantallas medianas (Tablet/General) */
 @media (max-width: 700px) {
-    .historial-modal { width: 98%; padding: 12px; }
-    .compra-id { font-size: 0.95rem; }
-    .compra-details.grid { grid-template-columns: 1fr; }
+    
+    /* Adaptación del modal historial */
+    .historial-modal { width: 100%; padding: 0; } 
+    .historial-modal .compras-modal-content {
+        max-width: none;
+        width: 100%;
+        padding: 15px;
+        border-radius: 0;
+    }
+    
+    /* Encabezado de la compra (Apilado) */
+    .compra-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .compra-details.grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+
+/* Adaptación para pantallas pequeñas (Celulares) */
+@media (max-width: 600px) {
+    .compras-modal-content {
+        padding: 10px; /* **MÁS COMPACTO:** Reduce el padding de 25px a 10px */
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border-radius: 0; 
+        max-height: 100vh;
+    }
+    
+    .compras-close-btn {
+        top: 8px;
+        right: 8px; /* Ajusta la posición del botón de cierre */
+        font-size: 1.3rem; /* Ligeramente más pequeño para ahorrar espacio */
+    }
+
+    .compras-title {
+        font-size: 1.4rem; /* Título un poco más pequeño */
+        padding-right: 30px; /* Asegura espacio para el botón de cierre */
+        padding-bottom: 8px;
+        margin-bottom: 15px; /* Más compacto */
+    }
+    
+    .compra-item {
+        padding: 10px; /* **MÁS COMPACTO:** Reduce el padding de la tarjeta interna */
+        margin-bottom: 10px; /* Margen más pequeño */
+    }
+    
+    /* Tabla: Hacemos los ítems muy compactos */
+    .productos-table th, .productos-table td { 
+        font-size: 0.8rem; /* **MÁS COMPACTO:** Fuente más pequeña */
+        padding: 4px 6px; /* **MÁS COMPACTO:** Padding más reducido */
+    }
+    
+    .compra-actions {
+        justify-content: center;
+    }
 }

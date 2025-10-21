@@ -184,7 +184,7 @@ function MisComprasModal({ isOpen, onClose }) {
                         <h2 id="compras-title" className="compras-title">Historial de Compras de {user?.username || 'Usuario'}</h2>
                         <p className="miscompras-intro">Aquí tienes un resumen de tus compras. Pulsa el botón para ver el historial completo.</p>
                         <div className="miscompras-summary">
-                            <span className="summary-item">Compras: <strong>{compras.length}</strong></span>
+                            <span className="summary-item">Compras: <strong>{compras.length}</strong>, </span>
                             <span className="summary-item">Gasto total: <strong>{formatCurrency(compras.reduce((s, c) => s + (c.totalVenta || 0), 0))}</strong></span>
                         </div>
                         <div style={{ marginTop: 12 }}>

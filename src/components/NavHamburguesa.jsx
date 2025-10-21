@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
     FaBars, FaTimes, FaHome, FaServicestack, FaSignInAlt, 
-    FaShoppingCart, FaUsers, FaChartBar, FaHistory, FaTools
+    FaShoppingCart, FaUsers, FaChartBar, FaHistory, FaTools, FaShoppingBag
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
@@ -16,6 +16,7 @@ function NavHamburguesa() {
 
     if (!user) {
         menuItems = [
+            { nombre: 'Seguimiento de tu servicio', to: '/seguimiento', icon: <FaTools />, isCta: true },
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
             { nombre: 'Ayuda', to: '/servicios', icon: <FaServicestack /> },
@@ -23,10 +24,10 @@ function NavHamburguesa() {
         ];
     } else if (user.role === 'user') {
         menuItems = [
+            { nombre: 'Seguimiento de tu servicio', to: '/seguimiento', icon: <FaTools />, isCta: true },
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
-            // { nombre: 'Carrito', to: '/carrito', icon: <FaShoppingCart /> },
-            { nombre: 'Ayuda', to: '/servicios', icon: <FaServicestack /> },
+            { nombre: 'Mis compras', to: '/miscomprasmodal', icon: <FaShoppingBag /> },
         ];
     } else if (user.role === 'admin') {
         menuItems = [
@@ -84,21 +85,43 @@ function NavHamburguesa() {
 
                 <ul className="nav-hamburguesa-list">
                     {menuItems.map(item => (
-                        <li key={item.to}>
+                        <li 
+                            key={item.to}
+                            className={item.isCta ? 'nav-hamburguesa-tracking-item' : ''}
+                        >
                             <Link 
                                 to={item.to} 
-                                className="nav-hamburguesa-link" 
+                                className={item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'} 
                                 onClick={() => setOpen(false)}
                             >
-                                <span className="nav-hamburguesa-icon">{item.icon}</span>
-                                {item.nombre}
+                                {item.isCta ? (
+                                    <>
+                                        <span className="tracking-icon">{item.icon}</span>
+                                        <div className="tracking-text-group">
+                                            <span className="tracking-title">{item.nombre}</span>
+                                            <span className="tracking-subtitle">¡Ver estado de tu orden!</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="nav-hamburguesa-icon">{item.icon}</span>
+                                        {item.nombre}
+                                    </>
+                                )}
                             </Link>
                         </li>
                     ))}
+
+                    {/* 🔹 Logout alineado igual que los demás enlaces */}
                     {user && (
                         <li>
-                            <button className="nav-hamburguesa-link" onClick={handleLogout}>
-                                <FaSignInAlt /> Logout
+                            <button 
+                                className="nav-hamburguesa-link" 
+                                onClick={handleLogout}
+                                style={{ width: '100%', textAlign: 'left' }}
+                            >
+                                <span className="menu-item logout"  ><FaSignInAlt  /></span>
+                                Logout
                             </button>
                         </li>
                     )}
