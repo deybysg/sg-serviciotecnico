@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import './EstadisticasAdmin.css';
-// Si App.css tiene estilos globales o resets, asegúrate de que esté importado donde corresponde (ej. index.js o App.js)
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Swal from 'sweetalert2';
+import { FaMoneyBillWave, FaShoppingCart, FaBoxOpen } from 'react-icons/fa'; 
+import './EstadisticasAdmin.css'; // Asegúrate de que este archivo CSS existe
 
 // =================================================================
 // 1. CONSTANTES Y FUNCIONES DE UTILIDAD
 // =================================================================
 
-// Asignación de colores fijos para los 4 tipos de servicio definidos
 const SERVICE_COLORS = {
     'celulares': '#4CAF50',
     'computadora': '#2196F3',
@@ -16,38 +16,30 @@ const SERVICE_COLORS = {
 
 const KNOWN_SERVICE_TYPES = ['celulares', 'computadora', 'parlantes', 'otros'];
 
+const API_SERVICIOS_URL = 'http://localhost:3001/servicios';
+const API_VENTAS_URL = 'http://localhost:3001/ventas'; // URL para las ventas
+const LOCALE = 'es-AR';
+
 
 /**
- * Formatea un número para usar separador de miles (punto) y decimales (coma).
+ * Formatea un número como moneda.
  */
 const formatCurrency = (value) => {
-    if (value === null || value === undefined || isNaN(Number(value))) return '$0,00';
-    // Se usa 'es-AR' para formato local (Argentina) con $ y ,/.
-    return new Intl.NumberFormat('es-AR', {
+    if (value === null || value === undefined || isNaN(Number(value))) return '$0';
+    return new Intl.NumberFormat(LOCALE, {
         style: 'currency',
         currency: 'ARS',
-        minimumFractionDigits: 2
+        minimumFractionDigits: 0
     }).format(Number(value));
 };
 
+// =================================================================
+// 2. LÓGICA DE CÁLCULO DE SERVICIOS (Tu función original)
+// =================================================================
 
-/**
- * Procesa la lista de servicios para calcular las métricas clave, y agrupa
- * los servicios entregados por mes para el detalle al hacer clic.
- * * NOTA DE CORRECCIÓN: El conteo de servicios activos se calcula sobre TODOS los servicios
- * antes de aplicar los filtros de fecha de SALIDA (que solo afectan a entregados).
- */
 const analyzeServiceData = (services, filterYear, filterMonth) => {
     const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-
-    // --- CÁLCULO DE MÉTRICAS GENERALES (NO FILTRABLES POR FECHA DE SALIDA) ---
-    // El conteo de activos debe ser independiente de los filtros de fecha,
-    // ya que no tienen fecha de salida definida.
     const activeServicesCount = services.filter(s => s.estado !== 'entregado').length;
-
-    // --------------------------------------------------------------------------
-
-    // --- APLICAR FILTROS (Solo afectan a Entregados, Ingresos y Distribución) ---
     let filteredServices = services;
 
     if (filterYear && filterYear !== 'Todos') {
@@ -61,17 +53,14 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
         );
     }
 
-    // --- CÁLCULO DE MÉTRICAS GENERALES (FILTRADAS) ---
     const calculableServices = filteredServices.filter(s => s.presupuesto?.total > 0);
 
     const totalRevenue = calculableServices
         .filter(s => s.estado === 'entregado')
         .reduce((sum, s) => sum + s.presupuesto.total, 0);
 
-    // Conteo de entregados (ya está filtrado)
     const deliveredServicesCount = filteredServices.filter(s => s.estado === 'entregado').length;
 
-    // Días Promedio de Servicio (solo con entregados que pasaron el filtro)
     let totalServiceDays = 0;
     let completedServicesWithDates = 0;
 
@@ -91,7 +80,6 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
         ? (totalServiceDays / completedServicesWithDates).toFixed(1)
         : 'N/A';
 
-    // --- DATOS PARA GRÁFICO DE BARRAS e Ingresos Mensuales Detallados ---
     const monthlyRevenueMap = {};
     const monthlyServiceDetails = {};
 
@@ -99,7 +87,7 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
         .filter(s => s.estado === 'entregado' && s.fechaSalida)
         .forEach(s => {
             const date = new Date(s.fechaSalida);
-            const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`; // Formato YYYY-MM
+            const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             const monthLabel = date.toLocaleString('es-ES', { month: 'short', year: '2-digit' });
 
             monthlyRevenueMap[yearMonthKey] = (monthlyRevenueMap[yearMonthKey] || 0) + s.presupuesto.total;
@@ -130,7 +118,6 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
             details: monthlyServiceDetails[key].services
         }));
 
-    // --- DATOS PARA GRÁFICO DE TORTA: Distribución por Tipo de Servicio ---
     const serviceTypeDistributionMap = filteredServices.reduce((acc, s) => {
         const tipo = s.tipoServicio?.toLowerCase() || 'otros';
         const finalType = KNOWN_SERVICE_TYPES.includes(tipo) ? tipo : 'otros';
@@ -151,7 +138,6 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
         .sort((a, b) => b.count - a.count)
         .filter(item => parseFloat(item.percentage) > 0);
 
-    // --- CADENA CONIC-GRADIENT PARA EL GRÁFICO DE TORTA ---
     let currentAngle = 0;
     const gradientSegments = serviceTypeDistribution.map(item => {
         const startAngle = currentAngle;
@@ -166,7 +152,7 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
 
     return {
         totalRevenue,
-        activeServicesCount, // YA NO ESTÁ AFECTADO POR EL FILTRO DE FECHA DE SALIDA
+        activeServicesCount,
         deliveredServicesCount,
         avgServiceDays,
         monthlySalesData,
@@ -176,103 +162,111 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
     };
 };
 
-
 // =================================================================
-// 2. COMPONENTE PRINCIPAL: EstadisticasAdmin
+// 3. NUEVA LÓGICA DE CÁLCULO DE VENTAS (Añadido Filtrado y Agrupación Mensual)
 // =================================================================
 
-const API_URL = 'http://localhost:3001/servicios';
+const analyzeSalesData = (sales, filterYear, filterMonth) => {
+    let filteredSales = sales;
 
-function EstadisticasAdmin() {
-    const [allServices, setAllServices] = useState([]);
-    const [filterYear, setFilterYear] = useState('Todos');
-    const [filterMonth, setFilterMonth] = useState('Todos');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Estado para el modal de detalle de servicio
-    const [selectedMonthData, setSelectedMonthData] = useState(null);
-
-    // --- Fetch de Datos ---
-    const fetchAllServices = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(API_URL);
-            if (!response.ok) {
-                throw new Error(`Error al cargar datos: ${response.statusText}`);
-            }
-            const servicesData = await response.json();
-            setAllServices(servicesData);
-        } catch (err) {
-            console.error("Fallo al obtener datos:", err);
-            setError("No se pudieron cargar los datos estadísticos desde la API. Asegúrese que json-server esté corriendo en el puerto 3001.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchAllServices();
-    }, []);
-
-    // --- Lógica de Filtros ---
-    const availableYears = useMemo(() => {
-        const years = new Set(allServices.map(s => s.fechaSalida && new Date(s.fechaSalida).getFullYear().toString()).filter(Boolean));
-        return ['Todos', ...Array.from(years).sort((a,b) => b - a)];
-    }, [allServices]);
-
-    const availableMonths = useMemo(() => {
-        if (filterYear === 'Todos') return ['Todos'];
-
-        const months = new Set(
-            allServices
-                .filter(s => s.fechaSalida && new Date(s.fechaSalida).getFullYear().toString() === filterYear)
-                .map(s => (new Date(s.fechaSalida).getMonth() + 1).toString().padStart(2, '0'))
-                .filter(Boolean)
+    // Asumimos que la propiedad de fecha de venta es 'fechaCompra'
+    if (filterYear && filterYear !== 'Todos') {
+        filteredSales = filteredSales.filter(s =>
+            s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString() === filterYear
         );
-        const monthNames = Array.from(months)
-            .sort((a, b) => parseInt(a) - parseInt(b))
-            .map(m => ({
-                value: m,
-                label: new Date(2000, parseInt(m) - 1, 1).toLocaleString('es-ES', { month: 'long' })
-            }));
-
-        return ['Todos', ...monthNames];
-    }, [allServices, filterYear]);
-
-    // --- Cálculo de Estadísticas ---
-    // Recalcula cada vez que allServices, filterYear o filterMonth cambian
-    const stats = useMemo(() => {
-        if (!allServices.length) return null;
-        return analyzeServiceData(allServices, filterYear, filterMonth);
-    }, [allServices, filterYear, filterMonth]);
-
-    // --- Renderizado ---
-    if (loading) {
-        return <div className="loading-message">Cargando Estadísticas...</div>;
     }
-
-    if (error) {
-        return <div className="error-message-full">{error}</div>;
+    if (filterMonth && filterMonth !== 'Todos') {
+        filteredSales = filteredSales.filter(s =>
+            s.fechaCompra && (new Date(s.fechaCompra).getMonth() + 1).toString().padStart(2, '0') === filterMonth
+        );
     }
+    
+    let totalVendido = 0;
+    let cantidadVentas = filteredSales.length;
+    const productosVendidosMap = new Map();
+    const monthlyRevenueMap = {};
 
+    filteredSales.forEach(venta => {
+        totalVendido += venta.totalVenta || 0; 
+        
+        // Agrupación mensual para el gráfico
+        if (venta.fechaCompra) {
+            const date = new Date(venta.fechaCompra);
+            const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+            const monthLabel = date.toLocaleString('es-ES', { month: 'short', year: '2-digit' });
+            
+            if (!monthlyRevenueMap[yearMonthKey]) {
+                monthlyRevenueMap[yearMonthKey] = {
+                    month: monthLabel,
+                    revenue: 0,
+                    details: []
+                };
+            }
+            monthlyRevenueMap[yearMonthKey].revenue += venta.totalVenta || 0;
+            monthlyRevenueMap[yearMonthKey].details.push(venta); // Podrías guardar la venta completa o solo el ID/total
+        }
+
+
+        // Conteo de productos para la métrica "Más Vendido"
+        venta.productosComprados?.forEach(producto => {
+            const nombre = producto.nombre;
+            const cantidad = producto.cantidad || 1;
+            
+            if (productosVendidosMap.has(nombre)) {
+                productosVendidosMap.set(nombre, productosVendidosMap.get(nombre) + cantidad);
+            } else {
+                productosVendidosMap.set(nombre, cantidad);
+            }
+        });
+    });
+
+    // Encontrar el producto más vendido
+    let productoMasVendido = 'N/A';
+    let cantidadProductosVendidos = 0;
+    
+    for (const [nombre, cantidad] of productosVendidosMap.entries()) {
+        if (cantidad > cantidadProductosVendidos) {
+            cantidadProductosVendidos = cantidad;
+            productoMasVendido = nombre;
+        }
+    }
+    
+    // Preparar datos para el gráfico de barras
+    const monthlySalesData = Object.keys(monthlyRevenueMap)
+        .sort()
+        .map(key => monthlyRevenueMap[key]);
+
+    return {
+        totalVendido,
+        cantidadVentas,
+        productoMasVendido: cantidadProductosVendidos > 0 ? `${productoMasVendido} (${cantidadProductosVendidos} uds)` : 'N/A',
+        cantidadProductosVendidos,
+        monthlySalesData // Datos listos para el gráfico
+    };
+};
+
+// =================================================================
+// 4. COMPONENTE: Vista de Estadísticas de SERVICIOS (Refactorizado)
+// =================================================================
+
+const EstadisticasServiciosView = ({ 
+    stats, 
+    filterYear, 
+    setFilterYear, 
+    filterMonth, 
+    setFilterMonth, 
+    availableYears, 
+    availableMonths,
+    setSelectedMonthData,
+    maxRevenue 
+}) => {
+    
     if (!stats || (stats.totalRevenue === 0 && stats.activeServicesCount === 0 && stats.deliveredServicesCount === 0)) {
-        // En este caso, solo mostramos el mensaje si *realmente* no hay datos para mostrar.
-        // Si hay activos, la condición stats.activeServicesCount === 0 será falsa.
-        return <div className="no-data-message">No hay datos disponibles para generar estadísticas en el periodo seleccionado.</div>;
+        return <div className="no-data-message">No hay datos de **Servicios** disponibles para generar estadísticas en el periodo seleccionado.</div>;
     }
-
-
-    const maxRevenue = Math.max(...stats.monthlySalesData.map(d => d.revenue), 1000);
-
+    
     return (
-        <div className="estadisticas-admin-page-custom">
-            <header className="admin-header">
-                <h1 className="title-bold">📊 Panel de Estadísticas</h1>
-                <p>Resumen de rendimiento del taller.</p>
-            </header>
-
+        <>
             {/* --- FILTROS --- */}
             <div className="filters-container">
                 <div className="filter-group">
@@ -312,7 +306,7 @@ function EstadisticasAdmin() {
 
             {/* --- Key Metrics Grid --- */}
             <div className="stats-cards-grid">
-
+                {/* Tarjetas de Servicios */}
                 <div className="stat-card revenue-card">
                     <div className="stat-value">{formatCurrency(stats.totalRevenue)}</div>
                     <div className="stat-label">Ingresos Totales (Servicios Entregados)</div>
@@ -341,9 +335,9 @@ function EstadisticasAdmin() {
             {/* --- Charts Row --- */}
             <div className="stats-charts-row">
 
-                {/* Bloque 1: Gráfico de Barras - Ingresos Mensuales */}
+                {/* Bloque 1: Gráfico de Barras - Ingresos Mensuales de SERVICIOS */}
                 <div className="chart-block monthly-performance">
-                    <h2>Ingresos por Mes</h2>
+                    <h2>Ingresos por Mes (Servicios)</h2>
                     <p className="chart-subtitle">Ganancias de servicios entregados por periodo</p>
                     <div className="bar-chart-container">
                         {stats.monthlySalesData.length === 0 ? (
@@ -352,10 +346,10 @@ function EstadisticasAdmin() {
                             stats.monthlySalesData.map((data, index) => (
                                 <div
                                     key={index}
-                                    className="chart-bar"
+                                    className="chart-bar service-bar" // Clase específica para diferenciar
                                     style={{ height: `${(data.revenue / maxRevenue) * 90}%` }}
                                     title={`Total: ${formatCurrency(data.revenue)}. Click para ver detalle.`}
-                                    onClick={() => setSelectedMonthData(data)} // **ACCIÓN AL HACER CLIC**
+                                    onClick={() => setSelectedMonthData(data)}
                                 >
                                     <span className="bar-value">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
                                     <span className="bar-label">{data.month.toUpperCase()}</span>
@@ -370,7 +364,7 @@ function EstadisticasAdmin() {
                     <h2>Distribución por Tipo de Servicio</h2>
                     <p className="chart-subtitle">Proporción de equipos por categoría</p>
                     {stats.totalServicesForPie === 0 ? (
-                             <p className="no-chart-data">No hay servicios para mostrar en el gráfico de torta.</p>
+                                     <p className="no-chart-data">No hay servicios para mostrar en el gráfico de torta.</p>
                     ) : (
                         <div className="pie-chart-container">
                             <div className="pie-chart">
@@ -393,6 +387,313 @@ function EstadisticasAdmin() {
                     )}
                 </div>
             </div>
+        </>
+    );
+}
+
+// =================================================================
+// 5. NUEVO COMPONENTE: Vista de Estadísticas de VENTAS (Con Filtros y Gráfico)
+// =================================================================
+
+const EstadisticasVentasView = ({ 
+    salesStats, 
+    loading, 
+    error,
+    filterYear, 
+    setFilterYear, 
+    filterMonth, 
+    setFilterMonth, 
+    availableYears, 
+    availableMonths
+}) => {
+    
+    if (loading) return <div className="loading-message">Cargando Estadísticas de Ventas...</div>;
+    if (error) return <div className="error-message-full">{error}</div>;
+
+    if (!salesStats || salesStats.cantidadVentas === 0) {
+        return <div className="no-data-message">No hay datos de **Ventas de Productos** registrados en el periodo seleccionado.</div>;
+    }
+    
+    // Cálculo del valor máximo para el gráfico de barras de ventas
+    const maxSalesRevenue = Math.max(...salesStats.monthlySalesData.map(d => d.revenue), 1000);
+
+    return (
+        <>
+            {/* --- FILTROS --- */}
+            <div className="filters-container">
+                <div className="filter-group">
+                    <label htmlFor="filterSalesYear">Año:</label>
+                    <select
+                        id="filterSalesYear"
+                        value={filterYear}
+                        onChange={(e) => {
+                            setFilterYear(e.target.value);
+                            setFilterMonth('Todos');
+                        }}
+                    >
+                        {availableYears.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="filter-group">
+                    <label htmlFor="filterSalesMonth">Mes:</label>
+                    <select
+                        id="filterSalesMonth"
+                        value={filterMonth}
+                        onChange={(e) => setFilterMonth(e.target.value)}
+                        disabled={filterYear === 'Todos'}
+                    >
+                        {availableMonths.map(month => (
+                            <option
+                                key={month.value || month}
+                                value={month.value || month}
+                            >
+                                {month.label || month}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            
+            <div className="stats-cards-grid sales-grid-override">
+                
+                {/* Tarjeta 1: Total Vendido */}
+                <div className="stat-card sales-card-1">
+                    <FaMoneyBillWave className="stat-icon sales-icon-1" />
+                    <div className="stat-info">
+                        <div className="stat-value">{formatCurrency(salesStats.totalVendido)}</div>
+                        <div className="stat-label">Total Recaudado (Ventas)</div>
+                    </div>
+                </div>
+                
+                {/* Tarjeta 2: Cantidad de Ventas */}
+                <div className="stat-card sales-card-2">
+                    <FaShoppingCart className="stat-icon sales-icon-2" />
+                    <div className="stat-info">
+                        <div className="stat-value">{salesStats.cantidadVentas}</div>
+                        <div className="stat-label">Transacciones de Ventas</div>
+                    </div>
+                </div>
+
+                {/* Tarjeta 3: Producto Más Vendido */}
+                <div className="stat-card sales-card-3">
+                    <FaBoxOpen className="stat-icon sales-icon-3" />
+                    <div className="stat-info">
+                        <div className="stat-value-producto">{salesStats.productoMasVendido}</div>
+                        <div className="stat-label">Producto Líder (Unidades)</div>
+                    </div>
+                </div>
+                
+                <div className="stat-card sales-card-4">
+                    <div className="stat-value">{salesStats.cantidadProductosVendidos}</div>
+                    <div className="stat-label">Total de Items Vendidos</div>
+                    <span className="stat-icon">📦</span>
+                </div>
+            </div>
+            
+            {/* --- Charts Row (Solo un Bloque de Gráfico) --- */}
+            <div className="stats-charts-row">
+                {/* Bloque 1: Gráfico de Barras - Ingresos Mensuales de VENTAS */}
+                <div className="chart-block monthly-performance ventas-performance">
+                    <h2>Ingresos por Mes (Ventas)</h2>
+                    <p className="chart-subtitle">Ganancias de productos vendidos por periodo</p>
+                    <div className="bar-chart-container">
+                        {salesStats.monthlySalesData.length === 0 ? (
+                            <p className="no-chart-data">No hay datos de ingresos para el periodo seleccionado.</p>
+                        ) : (
+                            salesStats.monthlySalesData.map((data, index) => (
+                                <div
+                                    key={index}
+                                    className="chart-bar sales-bar" // Clase específica para ventas
+                                    style={{ height: `${(data.revenue / maxSalesRevenue) * 90}%` }}
+                                    title={`Total: ${formatCurrency(data.revenue)}.`}
+                                    // No hay modal de detalle para ventas aquí, pero podrías agregarlo si quieres
+                                >
+                                    <span className="bar-value">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
+                                    <span className="bar-label">{data.month.toUpperCase()}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+                
+                {/* Opcional: Podrías añadir un gráfico de torta de Ventas por Categoría aquí */}
+                <div className="chart-block placeholder-ventas">
+                    <h2>Estadística Adicional de Ventas</h2>
+                    <p className="chart-subtitle">Aquí podrías añadir un gráfico de productos por categoría.</p>
+                    <div className="placeholder-content">Próximamente: Top Categorías</div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+
+// =================================================================
+// 6. COMPONENTE PRINCIPAL: EstadisticasAdmin (con manejo de estados para ambos filtros)
+// =================================================================
+
+function EstadisticasAdmin() {
+    // Estado principal para la vista (servicios o ventas)
+    const [viewMode, setViewMode] = useState('servicios'); // 'servicios' o 'ventas'
+
+    // --- Estados para Servicios ---
+    const [allServices, setAllServices] = useState([]);
+    const [filterYearServicios, setFilterYearServicios] = useState('Todos');
+    const [filterMonthServicios, setFilterMonthServicios] = useState('Todos');
+    const [loadingServices, setLoadingServices] = useState(true);
+    const [errorServices, setErrorServices] = useState(null);
+    const [selectedMonthData, setSelectedMonthData] = useState(null);
+
+    // --- Estados para Ventas ---
+    const [allSales, setAllSales] = useState([]);
+    const [filterYearVentas, setFilterYearVentas] = useState('Todos');
+    const [filterMonthVentas, setFilterMonthVentas] = useState('Todos');
+    const [loadingSales, setLoadingSales] = useState(true);
+    const [errorSales, setErrorSales] = useState(null);
+
+    // --- Fetch de Datos ---
+    const fetchAllData = useCallback(async (url, setter, errorSetter, loadingSetter, dataType) => {
+        loadingSetter(true);
+        errorSetter(null);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error al cargar ${dataType}: ${response.statusText}`);
+            const data = await response.json();
+            const finalData = Array.isArray(data) ? data : data[dataType] || [];
+            setter(finalData);
+        } catch (err) {
+            console.error(`Fallo al obtener datos de ${dataType}:`, err);
+            errorSetter(`No se pudieron cargar ${dataType}. Revise la API.`);
+        } finally {
+            loadingSetter(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAllData(API_SERVICIOS_URL, setAllServices, setErrorServices, setLoadingServices, 'servicios');
+        fetchAllData(API_VENTAS_URL, setAllSales, setErrorSales, setLoadingSales, 'ventas');
+    }, [fetchAllData]);
+
+    // --- Lógica de Filtros (Comunes para Servicios) ---
+    const { availableYears: availableYearsServicios, availableMonths: availableMonthsServicios } = useMemo(() => {
+        const years = new Set(allServices.map(s => s.fechaSalida && new Date(s.fechaSalida).getFullYear().toString()).filter(Boolean));
+        const availableYears = ['Todos', ...Array.from(years).sort((a,b) => b - a)];
+
+        const months = new Set(
+            allServices
+                .filter(s => s.fechaSalida && new Date(s.fechaSalida).getFullYear().toString() === filterYearServicios)
+                .map(s => (new Date(s.fechaSalida).getMonth() + 1).toString().padStart(2, '0'))
+                .filter(Boolean)
+        );
+        const availableMonths = ['Todos', ...Array.from(months)
+            .sort((a, b) => parseInt(a) - parseInt(b))
+            .map(m => ({
+                value: m,
+                label: new Date(2000, parseInt(m) - 1, 1).toLocaleString('es-ES', { month: 'long' })
+            }))];
+            
+        return { availableYears, availableMonths };
+    }, [allServices, filterYearServicios]);
+
+    // --- Lógica de Filtros (Comunes para Ventas) ---
+    const { availableYears: availableYearsVentas, availableMonths: availableMonthsVentas } = useMemo(() => {
+        const years = new Set(allSales.map(s => s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString()).filter(Boolean));
+        const availableYears = ['Todos', ...Array.from(years).sort((a,b) => b - a)];
+
+        const months = new Set(
+            allSales
+                .filter(s => s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString() === filterYearVentas)
+                .map(s => (new Date(s.fechaCompra).getMonth() + 1).toString().padStart(2, '0'))
+                .filter(Boolean)
+        );
+        const availableMonths = ['Todos', ...Array.from(months)
+            .sort((a, b) => parseInt(a) - parseInt(b))
+            .map(m => ({
+                value: m,
+                label: new Date(2000, parseInt(m) - 1, 1).toLocaleString('es-ES', { month: 'long' })
+            }))];
+            
+        return { availableYears, availableMonths };
+    }, [allSales, filterYearVentas]);
+
+    // --- Cálculo de Estadísticas ---
+    const statsServicios = useMemo(() => {
+        if (!allServices.length) return null;
+        return analyzeServiceData(allServices, filterYearServicios, filterMonthServicios);
+    }, [allServices, filterYearServicios, filterMonthServicios]);
+    
+    const statsVentas = useMemo(() => {
+        if (!allSales.length) return null;
+        return analyzeSalesData(allSales, filterYearVentas, filterMonthVentas);
+    }, [allSales, filterYearVentas, filterMonthVentas]);
+
+    
+    const maxRevenueServicios = useMemo(() => {
+        if (!statsServicios) return 1000;
+        return Math.max(...statsServicios.monthlySalesData.map(d => d.revenue), 1000);
+    }, [statsServicios]);
+    
+    
+    // --- Renderizado de Carga Global ---
+    if (loadingServices && loadingSales) {
+        return <div className="loading-message">Cargando todos los datos estadísticos...</div>;
+    }
+
+
+    return (
+        <div className="estadisticas-admin-page-custom">
+            <header className="admin-header">
+                <h1 className="title-bold">📊 Panel de Estadísticas</h1>
+                <p>Resumen de rendimiento del taller y ventas de productos.</p>
+            </header>
+
+            {/* --- NAVEGACIÓN DE PESTAÑAS (TABS) --- */}
+            <div className="tabs-navigation">
+                <button
+                    className={`tab-button ${viewMode === 'servicios' ? 'active-tab' : ''}`}
+                    onClick={() => setViewMode('servicios')}
+                >
+                    Estadísticas de Servicios
+                </button>
+                <button
+                    className={`tab-button ${viewMode === 'ventas' ? 'active-tab' : ''}`}
+                    onClick={() => setViewMode('ventas')}
+                >
+                    Estadísticas de Ventas
+                </button>
+            </div>
+            
+            <div className="content-view">
+                {viewMode === 'servicios' && (
+                    <EstadisticasServiciosView
+                        stats={statsServicios}
+                        filterYear={filterYearServicios}
+                        setFilterYear={setFilterYearServicios}
+                        filterMonth={filterMonthServicios}
+                        setFilterMonth={setFilterMonthServicios}
+                        availableYears={availableYearsServicios}
+                        availableMonths={availableMonthsServicios}
+                        setSelectedMonthData={setSelectedMonthData}
+                        maxRevenue={maxRevenueServicios}
+                    />
+                )}
+                
+                {viewMode === 'ventas' && (
+                    <EstadisticasVentasView
+                        salesStats={statsVentas}
+                        loading={loadingSales}
+                        error={errorSales}
+                        filterYear={filterYearVentas}
+                        setFilterYear={setFilterYearVentas}
+                        filterMonth={filterMonthVentas}
+                        setFilterMonth={setFilterMonthVentas}
+                        availableYears={availableYearsVentas}
+                        availableMonths={availableMonthsVentas}
+                    />
+                )}
+            </div>
 
             {/* --- MODAL DE DETALLE DE SERVICIOS --- */}
             {selectedMonthData && (
@@ -406,7 +707,7 @@ function EstadisticasAdmin() {
 }
 
 // =================================================================
-// 3. NUEVO COMPONENTE: Modal de Detalle de Servicios (Clases Únicas)
+// 7. COMPONENTE: Modal de Detalle de Servicios (Se mantiene igual)
 // =================================================================
 
 const MonthlyServiceDetailModal = ({ data, onClose }) => {
@@ -440,7 +741,7 @@ const MonthlyServiceDetailModal = ({ data, onClose }) => {
                                     <tr key={service.id}>
                                         <td>
                                             <span className="monthly-service-id">{service.id.substring(0, 4)}...</span>
-                                            <span className="monthly-service-date"> ({new Date(service.fecha).toLocaleDateString('es-AR')})</span>
+                                            <span className="monthly-service-date"> ({new Date(service.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
                                         <td><span className={`monthly-service-type-tag tag-${service.tipo.toLowerCase()}`}>{service.tipo}</span></td>
                                         <td>{service.marca}</td>

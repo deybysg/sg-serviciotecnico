@@ -36,7 +36,8 @@ function NavHamburguesa() {
             { nombre: 'Productos', to: '/admin/productosAdmin', icon: <FaShoppingCart /> },
             { nombre: 'Servicios', to: '/admin/servicios', icon: <FaServicestack /> },
             { nombre: 'Estadísticas', to: '/admin/estadisticas', icon: <FaChartBar /> },
-            { nombre: 'Historial', to: '/admin/historial', icon: <FaHistory /> },
+            { nombre: 'H. Servicios', to: '/admin/historial', icon: <FaHistory /> },
+            { nombre: 'H. Ventas', to: '/admin/historialventas', icon: <FaHistory /> },
         ];
     }
 

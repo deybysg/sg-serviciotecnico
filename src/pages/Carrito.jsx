@@ -33,6 +33,7 @@ const simulatePurchaseAndSave = async (userId, username, items, total, updateSto
             id: item.id,
             nombre: item.nombre,
             precioUnitario: item.precio,
+            categoria: item.categoria,
             cantidad: item.cantidad,
             subtotal: item.precio * item.cantidad,
         }))

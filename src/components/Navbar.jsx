@@ -112,7 +112,8 @@ function Navbar() {
               <li><NavLink to="/admin/productosAdmin">Productos</NavLink></li>
               <li><NavLink to="/admin/servicios">Servicios</NavLink></li>
               <li><NavLink to="/admin/estadisticas">Estadísticas</NavLink></li>
-              <li><NavLink to="/admin/historial">Historial</NavLink></li>
+              <li><NavLink to="/admin/historial">H. Servicios</NavLink></li>
+              <li><NavLink to="/admin/historialventas">H. Ventas</NavLink></li>
               <li>
                 <button onClick={handleLogout} className="logout-btn">Logout</button>
               </li>

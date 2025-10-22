@@ -17,6 +17,7 @@ import ServiciosAdmin from "./admin/ServiciosAdmin";
 import EstadisticasAdmin from "./admin/EstadisticasAdmin";
 import HistorialAdmin from "./admin/HistorialAdmin";
 import Paneltrabajos from "./admin/Paneltrabajos";
+import HistorialDeVentas from "./admin/HistorialDeVentas";
 
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext"; 
@@ -102,8 +103,16 @@ function App() {
               </PrivateRoute>
             }
           />
+         <Route
+            path="/admin/historialventas"
+            element={
+              <PrivateRoute role="admin">
+                <HistorialDeVentas />
+              </PrivateRoute>
+            }
+          />
 
-                    {/* Ruta para ver comprobante de venta (abre en nueva pestaña desde MisCompras) */}
+        {/* Ruta para ver comprobante de venta (abre en nueva pestaña desde MisCompras) */}
                     <Route
                         path="/comprobante/:id"
                         element={

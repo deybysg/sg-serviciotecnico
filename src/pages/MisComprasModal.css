@@ -225,8 +225,9 @@
     }
     
     .compras-close-btn {
-        top: 8px;
-        right: 8px; /* Ajusta la posición del botón de cierre */
+        position: fixed;
+        top: 13rem;
+        right: -0.5rem; /* Ajusta la posición del botón de cierre */
         font-size: 1.3rem; /* Ligeramente más pequeño para ahorrar espacio */
     }
 

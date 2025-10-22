@@ -493,7 +493,7 @@
       "id": "gabi",
       "username": "gabi",
       "items": [],
-      "updatedAt": "2025-10-21T22:19:02.378Z"
+      "updatedAt": "2025-10-22T07:48:22.263Z"
     },
     {
       "id": "ggg",
@@ -515,76 +515,20 @@
     {
       "id": "gggg",
       "username": "gggg",
-      "items": [
-        {
-          "id": "2",
-          "nombre": "Notebook Lenovo V15",
-          "categoria": "computadoras",
-          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
-          "precio": 650000,
-          "stock": 45,
-          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
-          "cantidad": 1
-        },
-        {
-          "id": "6",
-          "nombre": "Iphone 17",
-          "categoria": "accesorios",
-          "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
-          "precio": 45000,
-          "stock": 12,
-          "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg",
-          "cantidad": 1
-        },
-        {
-          "id": "7",
-          "nombre": "S24 Ultra",
-          "categoria": "celulares",
-          "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
-          "precio": 1200000,
-          "stock": 8,
-          "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp",
-          "cantidad": 1
-        }
-      ],
-      "updatedAt": "2025-10-16T22:09:13.522Z"
+      "items": [],
+      "updatedAt": "2025-10-22T04:14:18.976Z"
     },
     {
       "id": "admin",
       "username": "admin",
-      "items": [
-        {
-          "id": "2",
-          "nombre": "Notebook Lenovo V15",
-          "categoria": "computadoras",
-          "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
-          "precio": 650000,
-          "stock": 45,
-          "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg",
-          "cantidad": 1
-        },
-        {
-          "id": "6",
-          "nombre": "Iphone 17",
-          "categoria": "accesorios",
-          "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
-          "precio": 45000,
-          "stock": 12,
-          "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg",
-          "cantidad": 1
-        },
-        {
-          "id": "7",
-          "nombre": "S24 Ultra",
-          "categoria": "celulares",
-          "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
-          "precio": 1200000,
-          "stock": 8,
-          "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp",
-          "cantidad": 1
-        }
-      ],
-      "updatedAt": "2025-10-21T22:16:39.598Z"
+      "items": [],
+      "updatedAt": "2025-10-22T07:40:59.671Z"
+    },
+    {
+      "id": "deyby",
+      "username": "deyby",
+      "items": [],
+      "updatedAt": "2025-10-22T07:51:38.003Z"
     }
   ],
   "productos": [
@@ -603,7 +547,7 @@
       "categoria": "computadoras",
       "descripcion": "Notebook 15.6 pulgadas, Ryzen 5, 8GB RAM, 256GB SSD.",
       "precio": 650000,
-      "stock": 40,
+      "stock": 43,
       "imagen": "https://mexx-img-2019.s3.amazonaws.com/Notebook-Lenovo-V15-G4-Ryzen-7-8Gb-Ssd-512Gb-15_48341_1.jpeg"
     },
     {
@@ -621,7 +565,7 @@
       "categoria": "computadoras",
       "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
       "precio": 45000,
-      "stock": 12,
+      "stock": 11,
       "imagen": "https://yuhmak.vtexassets.com/arquivos/ids/192783-800-auto?v=638894997514700000&width=800&height=auto&aspect=true"
     },
     {
@@ -639,7 +583,7 @@
       "categoria": "accesorios",
       "descripcion": "Auriculares inalámbricos Bluetooth, batería 40h.",
       "precio": 45000,
-      "stock": 12,
+      "stock": 11,
       "imagen": "https://resizer.iproimg.com/unsafe/1280x/filters:format(webp):quality(85):max_bytes(102400)/https://assets.iprofesional.com/assets/jpg/2025/09/602828.jpg"
     },
     {
@@ -648,7 +592,7 @@
       "categoria": "celulares",
       "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
       "precio": 1200000,
-      "stock": 8,
+      "stock": 7,
       "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp"
     },
     {
@@ -775,6 +719,72 @@
           "precioUnitario": 45000,
           "cantidad": 1,
           "subtotal": 45000
+        }
+      ]
+    },
+    {
+      "id": "mh1h9gieixfcebnvct",
+      "username": "gggg",
+      "fechaCompra": "2025-10-22T04:12:50.774Z",
+      "totalVenta": 1895000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "cantidad": 1,
+          "subtotal": 650000
+        },
+        {
+          "id": "6",
+          "nombre": "Iphone 17",
+          "precioUnitario": 45000,
+          "cantidad": 1,
+          "subtotal": 45000
+        },
+        {
+          "id": "7",
+          "nombre": "S24 Ultra",
+          "precioUnitario": 1200000,
+          "cantidad": 1,
+          "subtotal": 1200000
+        }
+      ]
+    },
+    {
+      "id": "mh1hbcgyhtjyd84e72l",
+      "username": "gggg",
+      "fechaCompra": "2025-10-22T04:14:18.850Z",
+      "totalVenta": 45000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "4",
+          "nombre": "noot",
+          "precioUnitario": 45000,
+          "cantidad": 1,
+          "subtotal": 45000
+        }
+      ]
+    },
+    {
+      "id": "mh1nn5k6nb8t2z2xcpm",
+      "username": "deyby",
+      "fechaCompra": "2025-10-22T07:11:27.462Z",
+      "totalVenta": 650000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "2",
+          "nombre": "Notebook Lenovo V15",
+          "precioUnitario": 650000,
+          "categoria": "computadoras",
+          "cantidad": 1,
+          "subtotal": 650000
         }
       ]
     }

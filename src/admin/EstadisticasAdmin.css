@@ -8,14 +8,14 @@
 /* --- VARIABLES CSS PERSONALIZADAS --- */
 :root {
     /* Fondos */
-    --bg-color: #0b1a2e;        /* Fondo principal (Azul muy oscuro/Petróleo) */
-    --card-bg: #1c2b46;         /* Fondo de tarjetas/módulos (Azul Grisáceo) */
-    --hover-bg: #273859;        /* Fondo al pasar el mouse */
+    --bg-color: #0b1a2e; 	 	/* Fondo principal (Azul muy oscuro/Petróleo) */
+    --card-bg: #1c2b46; 	 	 /* Fondo de tarjetas/módulos (Azul Grisáceo) */
+    --hover-bg: #273859; 	 	/* Fondo al pasar el mouse */
     /* Colores primarios y de acento */
-    --primary-color: #00bcd4;   /* Cian Brillante (Para títulos/iconos/barras) */
+    --primary-color: #00bcd4; 	/* Cian Brillante (Para títulos/iconos/barras) */
     --secondary-color: #4CAF50; /* Verde Esmeralda (Para Ingresos/Éxito) */
-    --text-color: #e0e7ff;      /* Texto principal (Blanco Azulado) */
-    --text-muted: #94a3b8;      /* Texto secundario/etiquetas */
+    --text-color: #e0e7ff; 	 	/* Texto principal (Blanco Azulado) */
+    --text-muted: #94a3b8; 	 	/* Texto secundario/etiquetas */
     /* Sombras y Bordes */
     --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.4); /* Sombra elegante y profunda */
     --border-color: rgba(255, 255, 255, 0.08); /* Líneas de separación sutiles */
@@ -35,6 +35,7 @@
     
     width: 100vw; /* Mantenido a petición */
     min-height: 100vh;
+    
     
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
@@ -87,8 +88,12 @@
     justify-content: center; 
     display: flex;
     gap: 15px; 
-    /* Ajuste para que se pegue al borde (10px del padding principal) */
-    margin-left: 0; 
+    /* AJUSTE para el tema oscuro */
+    background-color: var(--card-bg); /* Cambiado de #f7f9fb */
+    border: 1px solid var(--border-color); /* Cambiado de #e0e6ed */
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
 }
 
 .filter-group {
@@ -104,7 +109,7 @@
 }
 
 .filter-group select {
-    background-color: #1c2b46; 
+    background-color: var(--hover-bg); /* Ajustado a hover-bg para contraste */
     color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -114,7 +119,7 @@
     outline: none;
     transition: all 0.3s ease-in-out;
     appearance: none; 
-    /* Flecha SVG para mantener el estilo */
+    /* Flecha SVG para mantener el estilo (el color es el correcto para text-muted) */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -122,6 +127,10 @@
 
 .filter-group select:hover {
     border-color: var(--primary-color);
+}
+.filter-group select:disabled {
+    background-color: var(--card-bg); /* Opacidad en el fondo */
+    cursor: not-allowed;
 }
 
 
@@ -159,6 +168,17 @@
     color: var(--text-color);
     margin-bottom: 3px;
 }
+/* Nuevo estilo para el texto de producto largo */
+.stat-value-producto {
+    /* Estilo para el producto líder, ya que es texto */
+    font-size: 1.4rem; /* Aumentado un poco para que se vea bien en oscuro */
+    font-weight: 600;
+    color: var(--text-color); /* Ajustado para oscuro */
+    /* Para manejar nombres largos */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .stat-label {
     font-size: 0.9em; /* Reducido */
@@ -173,9 +193,10 @@
     font-size: 3.5em; 
     opacity: 0.15; 
     color: var(--primary-color);
+    /* Removido el color de fondo para que la opacidad del color del icono se vea mejor sobre el card-bg */
 }
 
-/* Colores específicos para las tarjetas (Icono y Borde Superior) */
+/* Colores específicos para las tarjetas (Icono y Borde Superior) - Servicios */
 .revenue-card { border-top-color: var(--secondary-color); } 
 .revenue-card .stat-icon { 
     color: var(--secondary-color);
@@ -238,7 +259,6 @@
 .chart-bar {
     flex: 1; 
     max-width: 50px; /* Barras más delgadas para compactar */
-    background-color: var(--primary-color);
     margin: 0 5px;
     border-radius: 4px 4px 0 0;
     transition: height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.2s ease, transform 0.2s; 
@@ -251,11 +271,27 @@
     box-shadow: 0 0 10px rgba(0, 188, 212, 0.5); 
 }
 
+/* **ESTILOS ESPECÍFICOS DE BARRAS (NUEVO/AJUSTADO)** */
+
+/* Barra de Servicios (Azul/Cian) */
+.chart-bar.service-bar { 
+    background-color: var(--primary-color); 
+}
+
+/* Barra de Ventas (Verde/Éxito) */
+.chart-bar.sales-bar { 
+    background-color: var(--secondary-color); 
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); 
+}
+
+/* Hover general */
 .chart-bar:hover {
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color); /* El hover general lo hacemos verde */
     transform: scaleY(1.02);
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.8); 
 }
+/* Excepción: Si es barra de servicio y no tiene hover específico, se mantendrá el hover verde general */
+
 
 .bar-label {
     position: absolute;
@@ -356,7 +392,7 @@
 }
 
 /* ================================================================= */
-/* --- ESTILOS DEL MODAL DE DETALLE DE SERVICIOS (Clases Únicas) --- */
+/* --- ESTILOS DEL MODAL DE DETALLE DE SERVICIOS (Se mantiene igual) --- */
 /* ================================================================= */
 
 .monthly-modal-overlay {
@@ -495,6 +531,96 @@
 }
 
 
+/* ================================================= */
+/* === ESTILOS PARA LA NAVEGACIÓN DE PESTAÑAS (TABS) (AJUSTADO PARA TEMA OSCURO) === */
+/* ================================================= */
+
+.tabs-navigation {
+    display: flex;
+    margin-bottom: 25px;
+    /* AJUSTADO: Fondo oscuro */
+    border-bottom: 2px solid var(--border-color); 
+}
+
+.tab-button {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    /* AJUSTADO: Color de texto en inactivo */
+    color: var(--text-muted); 
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 15px;
+    outline: none;
+}
+
+.tab-button:hover:not(.active-tab) {
+    /* AJUSTADO: Hover sutil */
+    color: var(--text-color);
+    border-bottom-color: var(--hover-bg);
+}
+
+.tab-button.active-tab {
+    /* AJUSTADO: Color activo */
+    color: var(--primary-color); 
+    border-bottom-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.content-view {
+    /* Asegura que el contenido debajo de las pestañas se muestre correctamente */
+    padding-top: 10px;
+}
+
+
+/* ================================================= */
+/* === ESTILOS PARA LA VISTA DE VENTAS (EstadisticasVentasView) (NUEVO) === */
+/* ================================================= */
+
+/* Reutilizamos el grid principal, pero le damos un pequeño ajuste si es necesario */
+.sales-grid-override {
+    /* Mantenido el ajuste del ancho para las 4 tarjetas de ventas */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Estilos de las tarjetas de ventas específicas (Borde Superior) */
+/* Usaremos colores distintos para diferenciar visualmente los tipos de métrica */
+.stat-card.sales-card-1 { border-top-color: #e74c3c; } /* Total Recaudado (Rojo) */
+.stat-card.sales-card-2 { border-top-color: #f1c40f; } /* Transacciones (Amarillo) */
+.stat-card.sales-card-3 { border-top-color: #1abc9c; } /* Producto Líder (Turquesa) */
+.stat-card.sales-card-4 { border-top-color: #9b59b6; } /* Items Vendidos (Púrpura) */
+
+/* Estilos de Iconos de Ventas (Para que se vean en oscuro) */
+.stat-card.sales-card-1 .stat-icon { color: #e74c3c; opacity: 0.25; }
+.stat-card.sales-card-2 .stat-icon { color: #f1c40f; opacity: 0.25; }
+.stat-card.sales-card-3 .stat-icon { color: #1abc9c; opacity: 0.25; }
+.stat-card.sales-card-4 .stat-icon { color: #9b59b6; opacity: 0.25; }
+
+
+/* Placeholder para el segundo bloque de gráfico de ventas */
+.placeholder-ventas {
+    /* Ocupa el 100% de ancho en el grid si solo hay un gráfico */
+    width: 100%;
+}
+
+.placeholder-content {
+    background-color: var(--hover-bg); /* Fondo oscuro coherente */
+    border: 1px dashed var(--border-color); 
+    color: var(--text-muted);
+    padding: 30px;
+    text-align: center;
+    border-radius: 8px;
+    height: 300px; /* Mantener la altura similar al gráfico de barras */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+
 /* ================================================================= */
 /* --- RESPONSIVE DESIGN (FINAL OPTIMIZADO) --- */
 /* ================================================================= */
@@ -508,6 +634,10 @@
         /* Tamaño de tarjetas más compacto en tablet */
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
         gap: 10px; 
+    }
+    /* Ajuste para que las 4 tarjetas de ventas entren bien */
+    .sales-grid-override {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
     .chart-block {
         padding: 15px; 
@@ -543,6 +673,9 @@
     .stat-value {
         font-size: 2em;
     }
+    .stat-value-producto {
+        font-size: 1.2rem;
+    }
     
     /* Adaptar tabla en móvil */
     .monthly-service-detail-table th, .monthly-service-detail-table td {
@@ -575,5 +708,10 @@
     /* Ocultar la fecha en la lista de servicios para ahorrar espacio */
     .monthly-service-detail-table td .monthly-service-date {
         display: none;
+    }
+    /* El contenedor de filtros se muestra en 2 filas */
+    .filters-container {
+        padding: 10px;
+        gap: 10px;
     }
 }
