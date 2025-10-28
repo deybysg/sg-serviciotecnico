@@ -467,7 +467,7 @@ function ServiciosAdmin() {
                                 const clienteNombre = cliente?.label || "Cliente desconocido";
                                 const isEditing = editId === s.id; 
                                 const isBudgetOpen = showBudgetId === s.id; 
-                                const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${s.id}`;
+             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${s.id}`;
 
                                 return (
                                     <div 
@@ -476,7 +476,25 @@ function ServiciosAdmin() {
                                     >
                                         <div className="qr-info-header">
                                             <h4>ID: {s.id}</h4>
-                                            <QRCodeSVG value={qrUrl} size={80} /> 
+                                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                <QRCodeSVG value={qrUrl} size={80} level="H" />
+                                                <img 
+                                                    src="/img/logo2.png"
+                                                    alt="Logo"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '50%',
+                                                        transform: 'translate(-50%, -50%)',
+                                                        width: '26px',
+                                                        height: '26px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: 'white',
+                                                        padding: '0px',
+                                                        // border: '1px solid #ccc'
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
                                         {isEditing ? (
                                             <>

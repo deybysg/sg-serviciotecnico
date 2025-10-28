@@ -31,13 +31,31 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
             <div style={styles.header}>
                 <p style={styles.qrText}>Escanea para seguimiento</p>
                 <div style={styles.qrCode}>
-                    <QRCodeSVG 
-                        value={`http://192.168.1.22:5173/seguimiento/${service.id}`} 
-                        size={65} 
-                        level="L"
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                    />
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <QRCodeSVG 
+                            value={`http://192.168.1.22:5173/seguimiento/${service.id}`} 
+                            size={85} 
+                            level="H"
+                            bgColor="#ffffff"
+                            fgColor="#000000"
+                        />
+                        <img 
+                            src="/img/logo2.png"
+                            alt="Logo"
+                            style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                width: '26px',
+                                height: '26px',
+                                borderRadius: '50%',
+                                backgroundColor: 'white',
+                                padding: '0px',
+                                // border: '1px solid #ccc'
+                            }}
+                        />
+                    </div>
                 </div>
                 <div style={styles.headerInfo}>
                     <h1 style={styles.title}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
@@ -94,10 +112,10 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     <tfoot>
                         <tr>
                             <td style={styles.tdTotalLabel}>
-                                **{presupuestoCero ? 'COSTO TOTAL (A COMPLETAR):' : 'TOTAL ESTIMADO:'}**
+                                {presupuestoCero ? 'COSTO TOTAL (A COMPLETAR):' : 'TOTAL ESTIMADO:'}
                             </td>
                             <td style={styles.tdTotalValue}>
-                                **{presupuestoCero ? '___________' : `$${service.presupuesto.total.toFixed(2)}`}**
+                                {presupuestoCero ? '___________' : `$${service.presupuesto.total.toFixed(2)}`}
                             </td>
                         </tr>
                     </tfoot>
