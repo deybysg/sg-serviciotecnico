@@ -16,6 +16,14 @@ const SERVICE_COLORS = {
 
 const KNOWN_SERVICE_TYPES = ['celulares', 'computadora', 'parlantes', 'otros'];
 
+const CATEGORY_COLORS = {
+    'celulares': '#e74c3c',
+    'computadoras': '#3498db',
+    'accesorios': '#f39c12'
+};
+
+const getCategoryColor = (cat) => CATEGORY_COLORS[cat.toLowerCase()] || '#3498db';
+
 const API_SERVICIOS_URL = 'http://localhost:3001/servicios';
 const API_VENTAS_URL = 'http://localhost:3001/ventas'; // URL para las ventas
 const LOCALE = 'es-AR';
@@ -118,7 +126,10 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
             details: monthlyServiceDetails[key].services
         }));
 
-    const serviceTypeDistributionMap = filteredServices.reduce((acc, s) => {
+    // Gráfico de torta: solo servicios entregados con fechaSalida (respetando filtros de año/mes)
+    const deliveredFilteredServices = filteredServices.filter(s => s.estado === 'entregado' && s.fechaSalida);
+    
+    const serviceTypeDistributionMap = deliveredFilteredServices.reduce((acc, s) => {
         const tipo = s.tipoServicio?.toLowerCase() || 'otros';
         const finalType = KNOWN_SERVICE_TYPES.includes(tipo) ? tipo : 'otros';
 
@@ -185,6 +196,7 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
     let cantidadVentas = filteredSales.length;
     const productosVendidosMap = new Map();
     const monthlyRevenueMap = {};
+    const categoryDistributionMap = {};
 
     filteredSales.forEach(venta => {
         totalVendido += venta.totalVenta || 0; 
@@ -203,11 +215,17 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
                 };
             }
             monthlyRevenueMap[yearMonthKey].revenue += venta.totalVenta || 0;
-            monthlyRevenueMap[yearMonthKey].details.push(venta); // Podrías guardar la venta completa o solo el ID/total
+            monthlyRevenueMap[yearMonthKey].details.push({
+                id: venta.id,
+                username: venta.username,
+                total: venta.totalVenta,
+                fecha: venta.fechaCompra,
+                productosComprados: venta.productosComprados || []
+            });
         }
 
 
-        // Conteo de productos para la métrica "Más Vendido"
+        // Conteo de productos para la métrica "Más Vendido" y categorías
         venta.productosComprados?.forEach(producto => {
             const nombre = producto.nombre;
             const cantidad = producto.cantidad || 1;
@@ -217,6 +235,10 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
             } else {
                 productosVendidosMap.set(nombre, cantidad);
             }
+            
+            // Distribución por categoría
+            const categoria = producto.categoria || 'accesorios';
+            categoryDistributionMap[categoria] = (categoryDistributionMap[categoria] || 0) + cantidad;
         });
     });
 
@@ -236,12 +258,41 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
         .sort()
         .map(key => monthlyRevenueMap[key]);
 
+    // Calcular distribución por categoría para gráfico de torta
+    const totalProductos = Object.values(categoryDistributionMap).reduce((sum, count) => sum + count, 0);
+
+    const categoryDistribution = Object.keys(categoryDistributionMap)
+        .map(cat => ({
+            category: cat,
+            count: categoryDistributionMap[cat],
+            percentage: totalProductos > 0 ? ((categoryDistributionMap[cat] / totalProductos) * 100).toFixed(1) : 0,
+            color: getCategoryColor(cat)
+        }))
+        .sort((a, b) => b.count - a.count)
+        .filter(item => parseFloat(item.percentage) > 0);
+
+    // Crear conic-gradient para el gráfico de torta
+    let currentAngle = 0;
+    const gradientSegments = categoryDistribution.map(item => {
+        const startAngle = currentAngle;
+        const endAngle = currentAngle + (parseFloat(item.percentage) * 3.6);
+        currentAngle = endAngle;
+        return `${item.color} ${startAngle}deg ${endAngle}deg`;
+    });
+
+    const conicGradientCSS = gradientSegments.length > 0
+        ? `conic-gradient(${gradientSegments.join(', ')})`
+        : `var(--card-bg)`;
+
     return {
         totalVendido,
         cantidadVentas,
         productoMasVendido: cantidadProductosVendidos > 0 ? `${productoMasVendido} (${cantidadProductosVendidos} uds)` : 'N/A',
         cantidadProductosVendidos,
-        monthlySalesData // Datos listos para el gráfico
+        monthlySalesData,
+        categoryDistribution,
+        totalProductos,
+        conicGradientCSS
     };
 };
 
@@ -404,7 +455,9 @@ const EstadisticasVentasView = ({
     filterMonth, 
     setFilterMonth, 
     availableYears, 
-    availableMonths
+    availableMonths,
+    setSelectedMonthData,
+    maxRevenue
 }) => {
     
     if (loading) return <div className="loading-message">Cargando Estadísticas de Ventas...</div>;
@@ -414,8 +467,7 @@ const EstadisticasVentasView = ({
         return <div className="no-data-message">No hay datos de **Ventas de Productos** registrados en el periodo seleccionado.</div>;
     }
     
-    // Cálculo del valor máximo para el gráfico de barras de ventas
-    const maxSalesRevenue = Math.max(...salesStats.monthlySalesData.map(d => d.revenue), 1000);
+    // Eliminada línea duplicada: const maxSalesRevenue ya viene por props como maxRevenue
 
     return (
         <>
@@ -506,9 +558,9 @@ const EstadisticasVentasView = ({
                                 <div
                                     key={index}
                                     className="chart-bar sales-bar" // Clase específica para ventas
-                                    style={{ height: `${(data.revenue / maxSalesRevenue) * 90}%` }}
-                                    title={`Total: ${formatCurrency(data.revenue)}.`}
-                                    // No hay modal de detalle para ventas aquí, pero podrías agregarlo si quieres
+                                    style={{ height: `${(data.revenue / maxRevenue) * 90}%` }}
+                                    title={`Total: ${formatCurrency(data.revenue)}. Click para ver detalle.`}
+                                    onClick={() => setSelectedMonthData(data)}
                                 >
                                     <span className="bar-value">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
                                     <span className="bar-label">{data.month.toUpperCase()}</span>
@@ -518,11 +570,32 @@ const EstadisticasVentasView = ({
                     </div>
                 </div>
                 
-                {/* Opcional: Podrías añadir un gráfico de torta de Ventas por Categoría aquí */}
-                <div className="chart-block placeholder-ventas">
-                    <h2>Estadística Adicional de Ventas</h2>
-                    <p className="chart-subtitle">Aquí podrías añadir un gráfico de productos por categoría.</p>
-                    <div className="placeholder-content">Próximamente: Top Categorías</div>
+                {/* Gráfico de Torta - Distribución por Categoría de Ventas */}
+                <div className="chart-block sales-category-distribution">
+                    <h2>Distribución por Categoría (Ventas)</h2>
+                    <p className="chart-subtitle">Proporción de productos vendidos por categoría</p>
+                    {salesStats.totalProductos === 0 ? (
+                        <p className="no-chart-data">No hay productos para mostrar en el gráfico de torta.</p>
+                    ) : (
+                        <div className="pie-chart-container">
+                            <div className="pie-chart">
+                                <div
+                                    className="conic-pie-chart"
+                                    style={{ background: salesStats.conicGradientCSS }}
+                                ></div>
+                            </div>
+                            <div className="pie-legend">
+                                {salesStats.categoryDistribution.map((data, index) => (
+                                    <div key={index} className="legend-item">
+                                        <span className="legend-color" style={{ backgroundColor: data.color }}></span>
+                                        <span className="legend-label">
+                                            {data.category.charAt(0).toUpperCase() + data.category.slice(1)} ({data.percentage}%)
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
@@ -552,6 +625,7 @@ function EstadisticasAdmin() {
     const [filterMonthVentas, setFilterMonthVentas] = useState('Todos');
     const [loadingSales, setLoadingSales] = useState(true);
     const [errorSales, setErrorSales] = useState(null);
+    const [selectedMonthSalesData, setSelectedMonthSalesData] = useState(null);
 
     // --- Fetch de Datos ---
     const fetchAllData = useCallback(async (url, setter, errorSetter, loadingSetter, dataType) => {
@@ -635,6 +709,11 @@ function EstadisticasAdmin() {
         return Math.max(...statsServicios.monthlySalesData.map(d => d.revenue), 1000);
     }, [statsServicios]);
     
+    const maxRevenueVentas = useMemo(() => {
+        if (!statsVentas || !statsVentas.monthlySalesData.length) return 1000;
+        return Math.max(...statsVentas.monthlySalesData.map(d => d.revenue), 1000);
+    }, [statsVentas]);
+    
     
     // --- Renderizado de Carga Global ---
     if (loadingServices && loadingSales) {
@@ -691,6 +770,8 @@ function EstadisticasAdmin() {
                         setFilterMonth={setFilterMonthVentas}
                         availableYears={availableYearsVentas}
                         availableMonths={availableMonthsVentas}
+                        setSelectedMonthData={setSelectedMonthSalesData}
+                        maxRevenue={maxRevenueVentas}
                     />
                 )}
             </div>
@@ -700,6 +781,14 @@ function EstadisticasAdmin() {
                 <MonthlyServiceDetailModal
                     data={selectedMonthData}
                     onClose={() => setSelectedMonthData(null)}
+                />
+            )}
+            
+            {/* --- MODAL DE DETALLE DE VENTAS --- */}
+            {selectedMonthSalesData && (
+                <MonthlySalesDetailModal
+                    data={selectedMonthSalesData}
+                    onClose={() => setSelectedMonthSalesData(null)}
                 />
             )}
         </div>
@@ -746,6 +835,63 @@ const MonthlyServiceDetailModal = ({ data, onClose }) => {
                                         <td><span className={`monthly-service-type-tag tag-${service.tipo.toLowerCase()}`}>{service.tipo}</span></td>
                                         <td>{service.marca}</td>
                                         <td className="monthly-text-right">{formatCurrency(service.precio)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// =================================================================
+// 8. COMPONENTE: Modal de Detalle de Ventas (NUEVO)
+// =================================================================
+
+const MonthlySalesDetailModal = ({ data, onClose }) => {
+    return (
+        <div className="monthly-modal-overlay" onClick={onClose}>
+            <div className="monthly-service-detail-modal" onClick={e => e.stopPropagation()}>
+                <div className="monthly-modal-header">
+                    <h2>Ventas Realizadas en {data.month.toUpperCase()}</h2>
+                    <button className="monthly-close-button" onClick={onClose}>&times;</button>
+                </div>
+                <div className="monthly-modal-summary">
+                    <p>Total Ingresos: <strong>{formatCurrency(data.revenue)}</strong></p>
+                    <p>Total Ventas: <strong>{data.details.length}</strong></p>
+                </div>
+
+                <div className="monthly-modal-list-container">
+                    {data.details.length === 0 ? (
+                        <p className="monthly-no-data-message-modal">No se encontraron ventas para este mes.</p>
+                    ) : (
+                        <table className="monthly-service-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>ID/Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Productos</th>
+                                    <th className="monthly-text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.details.map((venta) => (
+                                    <tr key={venta.id}>
+                                        <td>
+                                            <span className="monthly-service-id">{venta.id.substring(0, 6)}...</span>
+                                            <span className="monthly-service-date"> ({new Date(venta.fecha).toLocaleDateString(LOCALE)})</span>
+                                        </td>
+                                        <td>{venta.username}</td>
+                                        <td className="productos-list-modal">
+                                            {venta.productosComprados.map((p, idx) => (
+                                                <span key={idx} className="producto-badge">
+                                                    {p.nombre} ({p.cantidad})
+                                                </span>
+                                            ))}
+                                        </td>
+                                        <td className="monthly-text-right">{formatCurrency(venta.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>

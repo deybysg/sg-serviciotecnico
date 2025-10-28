@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-function PrivateRoute({ children, role }) {
+// PrivateRoute ahora soporta 'role' (string) o 'roles' (array de strings)
+function PrivateRoute({ children, role, roles }) {
   const { user } = useAuth();
 
   // Si no hay usuario → redirige a login
@@ -9,8 +10,11 @@ function PrivateRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
+  // Normaliza roles permitidos
+  const allowedRoles = roles || (role ? [role] : null);
+
   // Si hay restricción de rol y el usuario no cumple → redirige a inicio
-  if (role && user.role !== role) {
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 

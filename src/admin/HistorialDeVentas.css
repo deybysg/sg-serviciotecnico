@@ -1,7 +1,9 @@
 /* ================================================= */
 /* === HISTORIAL DE VENTAS (Diseño Moderno + Modal) === */
 /* ================================================= */
-
+body[data-role="superadmin"] .ventas-historial-container {
+  max-width: 1240px;
+}
 .ventas-historial-container {
     width: 100vw;
     padding: 20px;

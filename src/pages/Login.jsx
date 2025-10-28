@@ -24,7 +24,10 @@ function Login() {
     if (user) { 
         if (user.role === "admin") {
             navigate("/admin/clientes", { replace: true });
-        } else {
+        } else if (user.role === "superadmin") {
+            navigate("/admin/clientes", { replace: true });
+        }
+        else {
             navigate("/productos", { replace: true });
         }
     }
@@ -69,7 +72,7 @@ function Login() {
       });
 
       setTimeout(() => {
-        navigate(result.user?.role === "admin" ? "/admin/clientes" : "/productos");
+        navigate(result.user?.role === "admin" || result.user?.role === "superadmin" ? "/admin/clientes" : "/productos");
       }, 2000);
 
     // Login
@@ -87,8 +90,16 @@ function Login() {
         return;
       }
 
-      const redirectPath = result.user.role === "admin" ? "/admin/clientes" : "/productos";
-      const title = result.user.role === "admin" ? "Bienvenido Admin" : `Bienvenido ${result.user.username}`;
+      const redirectPath = result.user.role === "admin" || result.user.role === "superadmin" ? "/admin/clientes" : "/productos";
+      
+      let title;
+      if (result.user.role === "superadmin") {
+        title = "Bienvenido SuperAdmin";
+      } else if (result.user.role === "admin") {
+        title = "Bienvenido Admin";
+      } else {
+        title = `Bienvenido ${result.user.username}`;
+      }
 
       Swal.fire({
         icon: 'success',

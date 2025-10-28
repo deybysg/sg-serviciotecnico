@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { useCart } from '../context/CartContext'; 
 import Carrito from '../pages/Carrito'; 
 import './Navbar.css';
@@ -14,6 +14,11 @@ function Navbar() {
   const navigate = useNavigate();
   const { totalItems } = useCart(); 
   const [isCartOpen, setIsCartOpen] = useState(false); 
+
+  useEffect(() => {
+    document.body.dataset.role = user?.role || 'guest';
+    return () => { delete document.body.dataset.role; };
+  }, [user]);
 
   const handleLogout = () => {
     Swal.fire({
@@ -41,7 +46,8 @@ function Navbar() {
     });
   };
 
-  const navbarClass = user?.role === 'admin' ? 'navbar-sg navbar-admin-mode' : 'navbar-sg';
+  const isAdminish = user?.role === 'admin' || user?.role === 'superadmin';
+  const navbarClass = isAdminish ? 'navbar-sg navbar-admin-mode' : 'navbar-sg';
 
   return (
     <>
@@ -55,9 +61,9 @@ function Navbar() {
             <img src="/img/logo2.png" alt="Logo SG" className="navbar-logo-image" />
             <span 
               className="navbar-title-text" 
-              style={{ color: user?.role === "admin" ? "#FFD700" : "#ffffff" }}
+              style={{ color: isAdminish ? "#FFD700" : "#ffffff" }}
             >
-              {user?.role === "admin" ? "Panel Admin" : "Servicio Técnico"}
+              {user?.role === "superadmin" ? "SuperAdmin" : (user?.role === "admin" ? "Panel Admin" : "Servicio Técnico")}
             </span>
           </h1>
         </div>
@@ -111,9 +117,18 @@ function Navbar() {
               <li><NavLink to="/admin/clientes">Clientes</NavLink></li>
               <li><NavLink to="/admin/productosAdmin">Productos</NavLink></li>
               <li><NavLink to="/admin/servicios">Servicios</NavLink></li>
-              <li><NavLink to="/admin/estadisticas">Estadísticas</NavLink></li>
+              {/* <li><NavLink to="/admin/estadisticas">Estadísticas</NavLink></li>
               <li><NavLink to="/admin/historial">H. Servicios</NavLink></li>
-              <li><NavLink to="/admin/historialventas">H. Ventas</NavLink></li>
+              <li><NavLink to="/admin/historialventas">H. Ventas</NavLink></li> */}
+              <li>
+                <button onClick={handleLogout} className="logout-btn">Logout</button>
+              </li>
+            </>
+          )}
+
+          {user?.role === 'superadmin' && (
+            <>
+              {/* Para superadmin usamos la barra lateral; aquí solo dejamos Logout */}
               <li>
                 <button onClick={handleLogout} className="logout-btn">Logout</button>
               </li>

@@ -16,3 +16,17 @@ html, body, #root {
   padding: 0 16px; /* espacio a los lados */
   box-sizing: border-box;
 }
+
+/* Ajuste solo para SuperAdmin con sidebar */
+.with-super-sidebar {
+  padding-left: 64px;
+  transition: padding-left 0.2s ease;
+}
+
+/* En móvil anulamos el padding porque la sidebar desaparece */
+@media (max-width: 900px) {
+  .with-super-sidebar {
+    padding-left: 0 !important;
+  }
+}
+

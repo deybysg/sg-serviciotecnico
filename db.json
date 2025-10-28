@@ -7,6 +7,13 @@
       "role": "admin"
     },
     {
+      "id": "root",
+      "username": "superadmin",
+      "password": "1234",
+      "role": "superadmin",
+      "isProtected": true
+    },
+    {
       "id": "2",
       "username": "juan",
       "password": "11",
@@ -69,6 +76,12 @@
     {
       "id": "8c65",
       "username": "julian",
+      "password": "1",
+      "role": "user"
+    },
+    {
+      "id": "550b",
+      "username": "betti",
       "password": "1",
       "role": "user"
     }
@@ -493,7 +506,7 @@
       "id": "gabi",
       "username": "gabi",
       "items": [],
-      "updatedAt": "2025-10-28T18:49:32.908Z"
+      "updatedAt": "2025-10-28T23:34:22.536Z"
     },
     {
       "id": "ggg",
@@ -522,13 +535,31 @@
       "id": "admin",
       "username": "admin",
       "items": [],
-      "updatedAt": "2025-10-28T19:00:30.172Z"
+      "updatedAt": "2025-10-28T23:34:34.177Z"
     },
     {
       "id": "deyby",
       "username": "deyby",
       "items": [],
       "updatedAt": "2025-10-23T19:20:34.501Z"
+    },
+    {
+      "id": "superadmin",
+      "username": "superadmin",
+      "items": [],
+      "updatedAt": "2025-10-28T23:34:51.293Z"
+    },
+    {
+      "id": "superadmin",
+      "username": "superadmin",
+      "items": [],
+      "updatedAt": "2025-10-28T19:20:21.520Z"
+    },
+    {
+      "id": "betti",
+      "username": "betti",
+      "items": [],
+      "updatedAt": "2025-10-28T23:01:07.391Z"
     }
   ],
   "productos": [
@@ -592,7 +623,7 @@
       "categoria": "celulares",
       "descripcion": "Celular gama alta, pantalla AMOLED 6.8 pulgadas, 256GB, 5G.",
       "precio": 1200000,
-      "stock": 7,
+      "stock": 6,
       "imagen": "https://acdn-us.mitiendanube.com/stores/001/555/911/products/s24-ultra-black-10a6f31ec5abe2356717102614310530-1024-1024.webp"
     },
     {
@@ -785,6 +816,24 @@
           "categoria": "computadoras",
           "cantidad": 1,
           "subtotal": 650000
+        }
+      ]
+    },
+    {
+      "id": "mhb67jg0lig8i32nws",
+      "username": "betti",
+      "fechaCompra": "2025-10-28T23:01:07.248Z",
+      "totalVenta": 1200000,
+      "metodoPago": "Simulado (Offline)",
+      "estado": "Completado",
+      "productosComprados": [
+        {
+          "id": "7",
+          "nombre": "S24 Ultra",
+          "precioUnitario": 1200000,
+          "categoria": "celulares",
+          "cantidad": 1,
+          "subtotal": 1200000
         }
       ]
     }

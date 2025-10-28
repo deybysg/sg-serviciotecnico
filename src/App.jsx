@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import SuperSidebar from "./components/SuperSidebar";
 
 // Páginas públicas
 import Home from "./pages/Home";
@@ -24,15 +25,19 @@ import { CartProvider } from "./context/CartContext";
 import PrivateRoute from "./components/PrivateRoute";
 import MisComprasModal from "./pages/MisComprasModal";
 import ComprobanteVenta from "./pages/ComprobanteVenta";
+import UsuariosAdmin from "./admin/UsuariosAdmin";
+import { useAuth } from "./context/AuthContext";
 
 
-function App() {
-  return (
-    <AuthProvider>
-      <CartProvider> {/* ⬅️ ENVUELVE EL ROUTER AQUÍ */}
-        <Router>
-          <Navbar />
-          <Routes>
+function AppBody() {
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role === 'superadmin';
+
+    return (
+        <>
+            {isSuperAdmin && <SuperSidebar />}
+            <div style={{ marginLeft: isSuperAdmin ? 64 : 0 }}>
+                <Routes>
             {/* Rutas públicas */}
             <Route path="/" element={<Home />} />
             <Route path="/productos" element={<Productos />} />
@@ -47,18 +52,18 @@ function App() {
                      <Route
             path="/miscomprasmodal"
             element={
-              <PrivateRoute role="user">
+              <PrivateRoute roles={["user","admin","superadmin"]}>
                 <MisComprasModal />
               </PrivateRoute>
             }
           /> 
-            *
+            
 
           {/* Rutas privadas para ADMIN (MANTENIDAS) */}
             <Route
             path="/admin/paneltrabajos"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <Paneltrabajos />
               </PrivateRoute>
             }
@@ -66,7 +71,7 @@ function App() {
           <Route
             path="/admin/clientes"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <ClientesAdmin />
               </PrivateRoute>
             }
@@ -74,7 +79,7 @@ function App() {
           <Route
             path="/admin/productosAdmin"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <ProductosAdmin />
               </PrivateRoute>
             }
@@ -82,7 +87,7 @@ function App() {
           <Route
             path="/admin/servicios"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <ServiciosAdmin />
               </PrivateRoute>
             }
@@ -90,7 +95,7 @@ function App() {
           <Route
             path="/admin/estadisticas"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <EstadisticasAdmin />
               </PrivateRoute>
             }
@@ -98,7 +103,7 @@ function App() {
           <Route
             path="/admin/historial"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <HistorialAdmin />
               </PrivateRoute>
             }
@@ -106,11 +111,21 @@ function App() {
          <Route
             path="/admin/historialventas"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute roles={["admin","superadmin"]}>
                 <HistorialDeVentas />
               </PrivateRoute>
             }
           />
+
+                    {/* Solo SUPERADMIN */}
+                    <Route
+                        path="/admin/usuarios"
+                        element={
+                            <PrivateRoute roles={["superadmin"]}>
+                                <UsuariosAdmin />
+                            </PrivateRoute>
+                        }
+                    />
 
         {/* Ruta para ver comprobante de venta (abre en nueva pestaña desde MisCompras) */}
                     <Route
@@ -124,8 +139,20 @@ function App() {
 
                     {/* 404 */}
                     <Route path="*" element={<NotFound />} />
-        </Routes>
-        </Router>
+                </Routes>
+            </div>
+        </>
+    );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <CartProvider> {/* ⬅️ ENVUELVE EL ROUTER AQUÍ */}
+        <Router>
+          <Navbar />
+                    <AppBody />
+                </Router>
       </CartProvider>
     </AuthProvider>
   );
