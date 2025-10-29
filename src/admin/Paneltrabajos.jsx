@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Swal from "sweetalert2";
 import ModalDetalles from "./ModalDetalles";
-import { useNavigate } from 'react-router-dom'; // 👈 1. Importar useNavigate
+import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 import './Paneltrabajos.css';
-
-const API_URL = "http://localhost:3001";
 
 const ESTADO_OPTIONS = [
   { value: "pendiente", label: "Pendiente" },
@@ -19,8 +18,18 @@ const getEstadoLabel = (value) => {
 };
 
 const getClienteName = (clienteId, clientes) => {
-  return clientes.find(c => c.id === clienteId)?.nombreCompleto || "Cliente Desconocido";
+  // Si clienteId es un objeto (viene populado del backend)
+  if (typeof clienteId === 'object' && clienteId !== null) {
+    return clienteId.nombreCompleto || "Cliente Desconocido";
+  }
+  
+  // Si es un ID, buscar en el array de clientes
+  const cliente = clientes.find(c => String(c._id || c.id) === String(clienteId));
+  return cliente?.nombreCompleto || "Cliente Desconocido";
 };
+
+// Helper para mostrar IDs cortos en la UI (últimos 8 caracteres)
+const shortId = (id, length = 8) => String(id || "").slice(-length).toUpperCase();
 
 const PanelTrabajo = () => {
   const [servicios, setServicios] = useState([]);
@@ -33,30 +42,28 @@ const PanelTrabajo = () => {
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
 
-  const cargarDatos = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [serviciosRes, clientesRes] = await Promise.all([
-        fetch(`${API_URL}/servicios`),
-        fetch(`${API_URL}/clientes`),
-      ]);
+  const cargarDatos = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [serviciosData, clientesData] = await Promise.all([
+        api.get('/servicios'),
+        api.get('/clientes'),
+      ]);
 
-      const [serviciosData, clientesData] = await Promise.all([
-        serviciosRes.json(),
-        clientesRes.json(),
-      ]);
-
-      setServicios(serviciosData);
-      setClientes(clientesData);
-    } catch (error) {
-      console.error("Error al cargar datos del panel:", error);
-      Swal.fire("Error", "No se pudieron cargar los servicios o clientes.", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
+      setServicios(serviciosData);
+      setClientes(clientesData);
+    } catch (error) {
+      console.error("Error al cargar datos del panel:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error", 
+        text: error.message || "No se pudieron cargar los servicios o clientes.",
+        confirmButtonColor: '#3b82f6'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);  useEffect(() => {
     cargarDatos();
   }, [cargarDatos]);
 
@@ -94,13 +101,17 @@ const PanelTrabajo = () => {
   }, [serviciosActivos]);
 
   // Lógica de filtrado (se mantiene)
-  const serviciosFiltrados = serviciosOrdenados.filter((s) => {
-    const query = searchQuery.toLowerCase();
-    const clienteNombre = getClienteName(s.clienteId, clientes).toLowerCase();
-    const coincideBusqueda =
-      s.id.toString().includes(query) || clienteNombre.includes(query);
+  const serviciosFiltrados = serviciosOrdenados.filter((s) => {
+    const query = searchQuery.toLowerCase();
+    // Manejar tanto cliente populado como clienteId
+    const clienteData = s.cliente || s.clienteId;
+    const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
+    const servicioId = String(s._id || s.id);
+    const servicioIdCorto = shortId(servicioId).toLowerCase();
+    const coincideBusqueda =
+      servicioId.includes(query) || servicioIdCorto.includes(query) || clienteNombre.includes(query);
 
-    let coincideFiltro = true;
+    let coincideFiltro = true;
     if (filtroEstado !== "todos") {
       switch (filtroEstado) {
         case "pendiente":
@@ -128,65 +139,114 @@ const PanelTrabajo = () => {
     setModalOpen(true);
   };
 
+  const handleCopyId = async (id) => {
+    try {
+      await navigator.clipboard.writeText(String(id));
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      Toast.fire({ icon: 'success', title: 'ID copiado al portapapeles' });
+    } catch (e) {
+      console.error('No se pudo copiar el ID', e);
+    }
+  };
+
   const handleGuardarEdicion = async (idServicio, datosEditados) => {
     try {
-      const res = await fetch(`${API_URL}/servicios/${idServicio}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datosEditados),
-      });
-      if (!res.ok) throw new Error("Error al guardar la edición");
+      await api.put(`/servicios/${idServicio}`, datosEditados);
 
-      Swal.fire("Actualizado", `Servicio ${idServicio} editado.`, "success");
+      // Toast notification
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      Toast.fire({
+        icon: 'success',
+        title: '✅ Servicio actualizado exitosamente'
+      });
+      
       cargarDatos();
       setModalOpen(false);
     } catch (error) {
       console.error("Error al guardar edición:", error);
-      Swal.fire("Error", "No se pudo guardar la edición.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo guardar la edición.",
+        confirmButtonColor: '#3b82f6'
+      });
     }
   };
 
   // 🚨 Función de Entrega modificada para redirigir 🚨
-  const handleEntregarServicio = async (idServicio) => {
-    const confirm = await Swal.fire({
-      title: "¿Confirmar Entrega?",
-      text: "El servicio se marcará como 'Entregado' y se moverá al Historial.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Sí, Entregar",
-      cancelButtonText: "Cancelar",
-    });
+  const handleEntregarServicio = async (idServicio) => {
+    const confirm = await Swal.fire({
+      title: "¿Confirmar Entrega?",
+      text: "El servicio se marcará como 'Entregado' y se moverá al Historial.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: "Sí, Entregar",
+      cancelButtonText: "Cancelar",
+    });
 
-    if (!confirm.isConfirmed) return;
+    if (!confirm.isConfirmed) return;
 
-    const fechaSalida = new Date().toISOString();
-    const datosActualizados = {
-      fechaSalida,
-      estado: "entregado", // 👈 Esto lo elimina del panel porque ya no es "activo"
-    };
+    const fechaSalida = new Date().toISOString();
+    const datosActualizados = {
+      fechaSalida,
+      estado: "entregado",
+    };
 
-    try {
-      const res = await fetch(`${API_URL}/servicios/${idServicio}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datosActualizados),
-      });
+    try {
+      await api.put(`/servicios/${idServicio}`, datosActualizados);
 
-      if (!res.ok) throw new Error("Error en la petición al servidor.");
+      // Toast notification
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
 
-      Swal.fire("¡Entregado!", `El servicio ${idServicio} fue entregado.`, "success");
-      cargarDatos();
+      Toast.fire({
+        icon: 'success',
+        title: '✅ ¡Servicio entregado exitosamente!'
+      });
       
-      // 👈 3. Redirigir al historial después del éxito
-      // navigate('/historial'); 
+      cargarDatos();
       
-    } catch (error) {
-      console.error("Error al completar la entrega:", error);
-      Swal.fire("Error", "No se pudo completar la entrega.", "error");
-    }
-  };
-
-  if (isLoading) return <div className="panel-loading">Cargando Panel de Trabajo...</div>;
+      // Redirigir al historial después del éxito (opcional)
+      // navigate('/admin/historial'); 
+      
+    } catch (error) {
+      console.error("Error al completar la entrega:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo completar la entrega.",
+        confirmButtonColor: '#3b82f6'
+      });
+    }
+  };  if (isLoading) return <div className="panel-loading">Cargando Panel de Trabajo...</div>;
 
   return (
     <div className="panel-trabajo-container">
@@ -239,52 +299,58 @@ const PanelTrabajo = () => {
         {serviciosFiltrados.length === 0 ? (
           <p className="mensaje-vacio">🎉 ¡No hay trabajos con el filtro/búsqueda actual! 🎉</p>
         ) : (
-          serviciosFiltrados.map((servicio) => {
-            const clienteNombre = getClienteName(servicio.clienteId, clientes);
-            const estadoLabel = getEstadoLabel(servicio.estado);
-            const esPrioridad =
-              servicio.estado === "terminado" ||
-              servicio.estado === "revisionTerminada";
+          serviciosFiltrados.map((servicio) => {
+            // Manejar tanto cliente populado como clienteId
+            const clienteData = servicio.cliente || servicio.clienteId;
+            const clienteNombre = getClienteName(clienteData, clientes);
+            const estadoLabel = getEstadoLabel(servicio.estado);
+            const esPrioridad =
+              servicio.estado === "terminado" ||
+              servicio.estado === "revisionTerminada";
+            const servicioId = servicio._id || servicio.id;
 
-            return (
-              <div
-                key={servicio.id}
-                className={`tarjeta-servicio ${esPrioridad ? "prioridad-entrega" : ""}`}
-              >
-                <div className="info-resumen">
-                  <p>
-                    <strong>ID:</strong> {servicio.id},{" "}
-                    <strong>Cliente:</strong> {clienteNombre},{" "}
-                    <strong>Estado:</strong>{" "}
-                    <span className={`estado-badge estado-${servicio.estado}`}>
-                      {estadoLabel}
-                    </span>
-                  </p>
-                </div>
+            return (
+              <div
+                key={servicioId}
+                className={`tarjeta-servicio ${esPrioridad ? "prioridad-entrega" : ""}`}
+              >
+                <div className="info-resumen">
+                  <p>
+                    <strong>ID:</strong> {shortId(servicioId)}{' '}
+                    <span
+                      title="Copiar ID completo"
+                      onClick={() => handleCopyId(servicioId)}
+                      style={{ cursor: 'pointer', marginLeft: 6 }}
+                    >📋</span>,{' '}
+                    <strong>Cliente:</strong> {clienteNombre},{" "}
+                    <strong>Estado:</strong>{" "}
+                    <span className={`estado-badge estado-${servicio.estado}`}>
+                      {estadoLabel}
+                    </span>
+                  </p>
+                </div>
 
-                <div className="acciones">
-                  <button
-                    className="btn-detalles"
-                    onClick={() => handleVerDetalles(servicio)}
-                    title="Ver y Editar Detalles"
-                  >
-                    ☰
-                  </button>
-                  <button
-                    className="btn-entregar"
-                    onClick={() => handleEntregarServicio(servicio.id)}
-                    title="Marcar como Entregado"
-                  >
-                    ✅
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      <ModalDetalles
+                <div className="acciones">
+                  <button
+                    className="btn-detalles"
+                    onClick={() => handleVerDetalles(servicio)}
+                    title="Ver y Editar Detalles"
+                  >
+                    ☰
+                  </button>
+                  <button
+                    className="btn-entregar"
+                    onClick={() => handleEntregarServicio(servicioId)}
+                    title="Marcar como Entregado"
+                  >
+                    ✅
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>      <ModalDetalles
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         servicio={servicioSeleccionado}

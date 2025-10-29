@@ -1,35 +1,39 @@
 import { useEffect, useState } from "react";
 import ProductoCard from "../components/ProductoCard";
-import { useAuth } from "../context/AuthContext"; // ⬅️ NUEVO IMPORT: Para saber si el usuario está logueado
+import { useAuth } from "../context/AuthContext";
+import { api } from "../services/api";
 import "./Productos.css";
 import "../components/HamburguesaMenu.css";
 
 const DEFAULT_CATEGORIES = ["todos", "celulares", "computadoras", "accesorios"];
 
 function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
-  // ⬅️ OBTENEMOS EL ESTADO DE AUTENTICACIÓN
-  const { user } = useAuth(); 
-  const isLoggedIn = !!user; // true si 'user' existe
+  const { user } = useAuth(); 
+  const isLoggedIn = !!user;
 
-  const [productos, setProductos] = useState([]);
-  const [categoria, setCategoria] = useState(categoriasDisponibles[0] || "todos");
-  const [showFiltroMovil, setShowFiltroMovil] = useState(false);
+  const [productos, setProductos] = useState([]);
+  const [categoria, setCategoria] = useState(categoriasDisponibles[0] || "todos");
+  const [showFiltroMovil, setShowFiltroMovil] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    fetch("http://localhost:3001/productos")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!mounted) return;
-        setProductos(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => console.error("Error cargando productos:", err));
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Cerrar el filtro móvil si se redimensiona la ventana a escritorio
+  useEffect(() => {
+    let mounted = true;
+    
+    const fetchProductos = async () => {
+      try {
+        const data = await api.get('/productos');
+        if (!mounted) return;
+        setProductos(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error cargando productos:", err);
+      }
+    };
+    
+    fetchProductos();
+    
+    return () => {
+      mounted = false;
+    };
+  }, []);  // Cerrar el filtro móvil si se redimensiona la ventana a escritorio
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth > 900 && showFiltroMovil) {

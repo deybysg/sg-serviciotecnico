@@ -21,6 +21,9 @@ const calcularTotal = (items) => {
     return { subtotal, iva: 0, total: subtotal };
 };
 
+// Helper: ID corto para mostrar en la UI
+const shortId = (id, length = 8) => String(id || "").slice(-length).toUpperCase();
+
 const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
     const [editData, setEditData] = useState(null);
 
@@ -29,6 +32,13 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
         if (servicio) {
             // Clonación profunda de los datos para no modificar el estado original
             const clonedData = JSON.parse(JSON.stringify(servicio));
+            
+            // Si cliente viene populado, extraer solo el ID
+            if (clonedData.cliente && typeof clonedData.cliente === 'object') {
+                clonedData.clienteId = clonedData.cliente._id || clonedData.cliente.id;
+            } else if (clonedData.cliente) {
+                clonedData.clienteId = clonedData.cliente;
+            }
             
             // Convertir 0 a "" para que el input se vea vacío
             clonedData.presupuesto.items = clonedData.presupuesto.items.map(item => ({
@@ -95,10 +105,16 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
             dataToSave.fechaSalida = new Date().toISOString(); 
         }
         
-        onSave(servicio.id, dataToSave); 
+        // Enviar cliente (el backend espera 'cliente', no 'clienteId')
+        if (dataToSave.clienteId) {
+            dataToSave.cliente = dataToSave.clienteId;
+            delete dataToSave.clienteId;
+        }
+        
+        onSave(servicio._id || servicio.id, dataToSave); 
     };
 
-    const clienteActual = clientes.find(c => c.id === editData.clienteId) || {};
+    const clienteActual = clientes.find(c => String(c._id || c.id) === String(editData.clienteId)) || {};
     
     // Formatear las fechas para el input[type=date]
     const formatToDateInput = (dateString) => {
@@ -106,9 +122,43 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
     };
 
     return (
-        <div className="modal-backdrop">
-            <div className="modal-content">
-                <h3>Editar Servicio ID: {editData.id}</h3>
+        <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
+                <button 
+                    type="button" 
+                    onClick={onClose} 
+                    style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1rem',
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '1.8rem',
+                        cursor: 'pointer',
+                        color: '#64748b',
+                        lineHeight: 1,
+                        padding: '0.25rem',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                        e.currentTarget.style.background = '#f1f5f9';
+                        e.currentTarget.style.color = '#dc2626';
+                    }}
+                    onMouseOut={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#64748b';
+                    }}
+                    aria-label="Cerrar modal"
+                >
+                    &times;
+                </button>
+                <h3>Editar Servicio ID: {shortId(editData._id || editData.id)}</h3>
                 <form onSubmit={handleSubmit} className="modal-form">
                     
                     <fieldset>
@@ -116,7 +166,7 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
                         <label>Cliente:</label>
                         <select name="clienteId" value={editData.clienteId} onChange={handleGeneralChange}>
                             {clientes.map(c => (
-                                <option key={c.id} value={c.id}>{c.nombreCompleto}</option>
+                                <option key={c._id || c.id} value={c._id || c.id}>{c.nombreCompleto}</option>
                             ))}
                         </select>
                         

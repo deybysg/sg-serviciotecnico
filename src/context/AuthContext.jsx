@@ -1,103 +1,145 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-// Importa Swal si lo usas también en el contexto para notificaciones
-// import Swal from "sweetalert2"; 
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+
 export const AuthProvider = ({ children }) => {
-    // 💡 Nuevo estado: isLoading para evitar renderizar la app antes de chequear localStorage
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // 🔄 PASO CLAVE 1: Efecto para Rehidratar la Sesión (al cargar la página)
+    // 🔄 Verificar token y rehidratar sesión al cargar la página
     useEffect(() => {
-        const storedUser = localStorage.getItem('currentUser');
-        
-        if (storedUser) {
-            try {
-                const userObject = JSON.parse(storedUser);
-                // Si encontramos datos válidos, rehidratamos el estado
-                setUser(userObject);
-            } catch (error) {
-                console.error("Error al leer el usuario de localStorage:", error);
-                localStorage.removeItem('currentUser'); // Limpiar datos corruptos
+        const verifyToken = async () => {
+            const token = localStorage.getItem('token');
+            
+            if (token) {
+                try {
+                    // Verificar el token con el backend
+                    const res = await fetch(`${API_URL}/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        // El backend puede responder con el objeto usuario directo o envuelto en { user }
+                        const resolvedUser = data?.user ?? data;
+                        setUser(resolvedUser);
+                        // Actualizar también el storage para mantener consistencia
+                        localStorage.setItem('currentUser', JSON.stringify(resolvedUser));
+                    } else {
+                        // Token inválido o expirado
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('currentUser');
+                        setUser(null);
+                    }
+                } catch (error) {
+                    console.error("Error al verificar token:", error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
             }
-        }
-        
-        // La verificación inicial de sesión ha terminado
-        setIsLoading(false); 
+            
+            setIsLoading(false);
+        };
+
+        verifyToken();
     }, []);
     
     // --- LÓGICA DE SESIÓN ---
 
-    // 💾 PASO CLAVE 2: Modificar LOGIN (Guardar en localStorage)
+    // 💾 LOGIN con JWT
     const login = useCallback(async (username, password) => {
         try {
-            const res = await fetch(`http://localhost:3001/Usuarios?username=${username}`);
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
             const data = await res.json();
 
-            if (data.length === 0) return { ok: false, message: "Usuario no encontrado" };
+            if (!res.ok) {
+                return { ok: false, message: data.message || data.mensaje || "Error al iniciar sesión" };
+            }
 
-            const found = data[0];
-            if (found.password !== password) return { ok: false, message: "Contraseña incorrecta" };
-
-            // Objeto simplificado para el estado y localStorage
-            const userToStore = { username: found.username, role: found.role };
+            // Guardar token y usuario
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('currentUser', JSON.stringify(data.user));
             
-            // GUARDAR EN LOCALSTORAGE
-            localStorage.setItem('currentUser', JSON.stringify(userToStore)); 
-
-            setUser(userToStore);
-            return { ok: true, user: found }; // Devolvemos 'found' para tener todos los datos
+            setUser(data.user);
+            return { ok: true, user: data.user };
         } catch (err) {
-            return { ok: false, message: "Error de conexión" };
+            console.error("Error en login:", err);
+            return { ok: false, message: "Error de conexión con el servidor" };
         }
     }, []);
 
-    // REGISTRO (No necesita cambios de localStorage, ya que el setUser lo maneja)
+    // REGISTRO con JWT
     const register = useCallback(async (username, password) => {
         try {
-            const resCheck = await fetch(`http://localhost:3001/Usuarios?username=${username}`);
-            const dataCheck = await resCheck.json();
-            if (dataCheck.length > 0) return { ok: false, message: "Usuario ya existe" };
-
-            const newUser = { username, password, role: "user" };
-            const res = await fetch(`http://localhost:3001/Usuarios`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newUser)
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role: 'user' })
             });
+
             const data = await res.json();
-            
-            // Objeto simplificado para el estado y localStorage
-            const userToStore = { username: data.username, role: data.role };
 
-            // Opcional: Si quieres que el usuario quede logueado inmediatamente
-            localStorage.setItem('currentUser', JSON.stringify(userToStore)); 
+            if (!res.ok) {
+                return { ok: false, message: data.message || data.mensaje || "Error al registrar usuario" };
+            }
 
-            setUser(userToStore);
-            return { ok: true, user: data };
+            // Guardar token y usuario (auto-login después de registro)
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+            setUser(data.user);
+            return { ok: true, user: data.user };
         } catch (err) {
-            return { ok: false, message: "Error de conexión" };
+            console.error("Error en register:", err);
+            return { ok: false, message: "Error de conexión con el servidor" };
         }
     }, []);
 
-    // 🧹 PASO CLAVE 3: Modificar LOGOUT (Limpiar localStorage)
+    // 🧹 LOGOUT (limpiar token)
     const logout = useCallback(() => {
         setUser(null);
-        // ELIMINAR DE LOCALSTORAGE
-        localStorage.removeItem('currentUser'); 
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
     }, []);
 
+    // Helper para obtener el token (útil para otros componentes)
+    const getToken = useCallback(() => {
+        return localStorage.getItem('token');
+    }, []);
 
     // Muestra un indicador de carga mientras verifica la sesión
     if (isLoading) {
-        return <div>Cargando sesión...</div>; 
+        return <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh',
+            fontSize: '1.2rem'
+        }}>
+            🔐 Verificando sesión...
+        </div>; 
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, isLoggedIn: !!user }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            login, 
+            logout, 
+            register, 
+            getToken,
+            isLoggedIn: !!user 
+        }}>
             {children}
         </AuthContext.Provider>
     );

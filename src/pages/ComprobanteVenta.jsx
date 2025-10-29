@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import '../pages/ComprobanteVenta.css';
 
 function ComprobanteVenta() {
@@ -13,21 +14,20 @@ function ComprobanteVenta() {
   useEffect(() => {
     const fetchVenta = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/ventas?id=${encodeURIComponent(id)}`);
-        const data = await res.json();
-        if (!data || data.length === 0) {
-          setVenta(null);
+        const v = await api.get(`/ventas/${id}`);
+        
+        // Permitir si es dueño o si es admin/superadmin
+        const ventaUserId = v.usuario?._id || v.usuario?.id || v.usuario;
+        const currentUserId = user?._id || user?.id;
+        
+        if (user && (user.role === 'admin' || user.role === 'superadmin' || String(currentUserId) === String(ventaUserId))) {
+          setVenta(v);
         } else {
-          const v = data[0];
-          // Permitir si es dueño o si es admin/superadmin
-          if (user && (user.role === 'admin' || user.role === 'superadmin' || user.username === v.username)) {
-            setVenta(v);
-          } else {
-            setForbidden(true);
-          }
+          setForbidden(true);
         }
       } catch (err) {
         console.error('Error cargando venta:', err);
+        setVenta(null);
       } finally {
         setLoading(false);
       }
@@ -62,7 +62,7 @@ function ComprobanteVenta() {
             </div>
           </div>
           <div className="comprobante-meta">
-            <div><strong>Venta:</strong> <span className="meta-value">{venta.id}</span></div>
+            <div><strong>Venta:</strong> <span className="meta-value">{venta._id || venta.id}</span></div>
             <div><strong>Fecha:</strong> <span className="meta-value">{formatFecha(venta.fechaCompra)}</span></div>
             <div><strong>Estado:</strong> <span className={`badge estado-${(venta.estado||'').toLowerCase().replace(/\s+/g,'-')}`}>{venta.estado || '—'}</span></div>
           </div>

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { api } from "../services/api";
+import { shortId } from "../utils/id";
 import "./clientes.css";
 import Swal from "sweetalert2";
 
@@ -66,9 +68,10 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
 
     // Función auxiliar para renderizar el detalle de cada servicio
     const renderServicioDetalle = (s) => {
+    const servicioId = s._id || s.id;
         return (
-            <div key={s.id} className="servicio-item-modal">
-                <h4 className="servicio-titulo-modal">Servicio ID: {s.id} ({s.tipoServicio || 'N/A'})</h4>
+            <div key={servicioId} className="servicio-item-modal">
+        <h4 className="servicio-titulo-modal">Servicio ID: {shortId(servicioId, 6)} ({s.tipoServicio || 'N/A'})</h4>
                 
                 <p>
                     <strong>Estado:</strong> 
@@ -176,27 +179,53 @@ function Clientes() {
 
     // Cargar clientes al inicio
     useEffect(() => {
-        fetch("http://localhost:3001/clientes")
-            .then((res) => res.json())
-            .then((data) => setClientes(data));
+        const loadClientes = async () => {
+            try {
+                const data = await api.get('/clientes');
+                setClientes(data);
+            } catch (error) {
+                console.error("Error al cargar clientes:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.message || "No se pudieron cargar los clientes.",
+                });
+            }
+        };
+        loadClientes();
     }, []);
     
     // Función para obtener detalles de los servicios
-    const fetchServiciosDetalle = async (idsServicios) => {
-        if (!idsServicios || idsServicios.length === 0) {
+    const fetchServiciosDetalle = async (serviciosRealizados) => {
+        if (!serviciosRealizados || serviciosRealizados.length === 0) {
             setServiciosDetalle([]);
             return;
         }
 
+        // El backend ya devuelve los servicios populados en el array serviciosRealizados
+        // Si son objetos completos, los usamos directamente
+        if (typeof serviciosRealizados[0] === 'object' && serviciosRealizados[0]._id) {
+            // Ya están populados, ordenar por fecha de entrada más reciente primero
+            const serviciosOrdenados = [...serviciosRealizados]
+                .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
+            setServiciosDetalle(serviciosOrdenados);
+            return;
+        }
+
+        // Si solo son IDs (fallback), traer todos y filtrar
         try {
-            // TRAEMOS TODOS LOS SERVICIOS Y FILTRAMOS EN EL FRONT (para JSON Server)
-            const res = await fetch("http://localhost:3001/servicios");
-            const todosLosServicios = await res.json();
+            const todosLosServicios = await api.get('/servicios');
             
-            // Filtramos los servicios que corresponden a los IDs del cliente
+            // Convertir IDs a strings para comparar
+            const idsStrings = serviciosRealizados.map(id => String(id));
+            
+            // Filtrar servicios que corresponden a los IDs del cliente
             const serviciosFiltrados = todosLosServicios
-                .filter(servicio => idsServicios.includes(servicio.id))
-                // Opcional: Ordenar por fecha de entrada más reciente primero
+                .filter(servicio => {
+                    const servicioId = String(servicio._id || servicio.id);
+                    return idsStrings.includes(servicioId);
+                })
+                // Ordenar por fecha de entrada más reciente primero
                 .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada)); 
             
             setServiciosDetalle(serviciosFiltrados);
@@ -206,7 +235,7 @@ function Clientes() {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "No se pudieron cargar los detalles de los servicios.",
+                text: error.message || "No se pudieron cargar los detalles de los servicios.",
             });
         }
     };
@@ -237,43 +266,50 @@ function Clientes() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        let method = "POST";
-        let url = "http://localhost:3001/clientes";
         let successMessage = "Cliente agregado correctamente. ";
 
-        if (editId) {
-            method = "PUT";
-            url = `http://localhost:3001/clientes/${editId}`;
-            successMessage = "Cliente editado correctamente. ";
-        }
-
         try {
-            const res = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editId ? formData : {...formData, serviciosRealizados: []}),
-            });
-
-            if (!res.ok) throw new Error("Error en la operación del servidor.");
-
+            let result;
+            
             if (editId) {
+                // PUT /clientes/:id (requiere auth)
+                result = await api.put(`/clientes/${editId}`, formData);
+                successMessage = "Cliente editado correctamente. ";
+                
+                // Actualizar en la lista local con el resultado del servidor
                 setClientes(
                     clientes.map((c) =>
-                        c.id === editId ? { ...formData, id: editId } : c
+                        String(c._id || c.id) === String(editId) ? result : c
                     )
                 );
                 setEditId(null);
             } else {
-                const newCliente = await res.json();
-                setClientes([...clientes, newCliente]);
+                // POST /clientes (requiere auth)
+                result = await api.post('/clientes', {
+                    ...formData, 
+                    serviciosRealizados: []
+                });
+                
+                // Agregar a la lista local
+                setClientes([...clientes, result]);
             }
 
-            Swal.fire({
-                icon: "success",
-                title: "¡Éxito!",
-                text: successMessage,
-                timer: 2500,
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
                 showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: editId ? '✅ Cliente editado exitosamente' : '✅ Cliente agregado exitosamente'
             });
 
             setFormData({ nombreCompleto: "", celular: "", correo: "", direccion: "", serviciosRealizados: [] });
@@ -281,7 +317,8 @@ function Clientes() {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "No se pudo realizar la operación: " + error.message,
+                text: error.message || "No se pudo realizar la operación.",
+                confirmButtonColor: '#3b82f6'
             });
         }
     };
@@ -300,31 +337,50 @@ function Clientes() {
 
         if (result.isConfirmed) {
             try {
-                await fetch(`http://localhost:3001/clientes/${id}`, {
-                    method: "DELETE",
-                });
-                setClientes(clientes.filter((c) => c.id !== id));
+                // DELETE /clientes/:id (requiere auth)
+                await api.delete(`/clientes/${id}`);
+                
+                // Actualizar lista local - convertir a String para comparación
+                setClientes(clientes.filter((c) => String(c._id || c.id) !== String(id)));
 
-                Swal.fire({
-                    icon: "success",
-                    title: "Eliminado",
-                    text: "Cliente eliminado correctamente.",
-                    timer: 2000,
+                // Toast notification
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
                     showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '🗑️ Cliente eliminado exitosamente'
                 });
             } catch (error) {
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: "No se pudo eliminar el cliente.",
+                    text: error.message || "No se pudo eliminar el cliente.",
+                    confirmButtonColor: '#3b82f6'
                 });
             }
         }
     };
 
     const handleEdit = (cliente) => {
-        setFormData(cliente); 
-        setEditId(cliente.id);
+        // Solo extraer los campos editables del formulario
+        setFormData({
+            nombreCompleto: cliente.nombreCompleto,
+            celular: cliente.celular,
+            correo: cliente.correo,
+            direccion: cliente.direccion,
+            serviciosRealizados: cliente.serviciosRealizados || []
+        }); 
+        setEditId(cliente._id || cliente.id);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -406,7 +462,7 @@ function Clientes() {
                                 <p className="no-clientes">No hay clientes que coincidan</p>
                             ) : (
                                 filteredClientes.map((c) => (
-                                    <div key={c.id} className="cliente-card">
+                                    <div key={c._id || c.id} className="cliente-card">
                                         {/* Información principal */}
                                         <div className="cliente-info">
                                             <h4>{c.nombreCompleto}</h4>
@@ -441,7 +497,7 @@ function Clientes() {
                                             </button>
                                             <button
                                                 className="btn-delete"
-                                                onClick={() => handleDelete(c.id)}
+                                                onClick={() => handleDelete(c._id || c.id)}
                                             >
                                                 Eliminar
                                             </button>

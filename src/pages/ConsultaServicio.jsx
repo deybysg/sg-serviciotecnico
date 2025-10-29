@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
+import { shortId, toIdString } from '../utils/id';
 import Swal from 'sweetalert2';
 import './ConsultaServicio.css'; 
 
@@ -64,7 +66,6 @@ function ConsultaServicio() {
     const fetchServicio = useCallback(async (serviceId) => {
         if (!serviceId) return;
         
-        // Evitamos mostrar el loader en cada polling, solo al inicio o al buscar
         const isInitialFetch = !servicio; 
 
         if (isInitialFetch) {
@@ -75,30 +76,47 @@ function ConsultaServicio() {
         }
 
         try {
-            // 1. Petición al servicio
-            const resServicio = await fetch(`http://localhost:3001/servicios/${serviceId}`);
-            if (!resServicio.ok) throw new Error("Servicio no encontrado.");
-            const dataServicio = await resServicio.json();
+            const candidate = String(serviceId).trim();
+            const isFullObjectId = /^[a-fA-F0-9]{24}$/.test(candidate);
+
+            let dataServicio;
+            if (isFullObjectId) {
+                // 1.a Búsqueda directa por ID completo
+                dataServicio = await api.get(`/servicios/${candidate}`);
+            } else {
+                // 1.b Búsqueda por ID corto (últimos N, por defecto 6)
+                const lista = await api.get('/servicios');
+                const match = (lista || []).find(s => shortId(s._id || s.id, 6).toUpperCase() === candidate.toUpperCase());
+                if (!match) throw new Error('No se encontró un servicio con ese ID.');
+                dataServicio = match;
+            }
+
             setServicio(dataServicio);
 
-            // 2. Petición al cliente asociado
-            const resCliente = await fetch(`http://localhost:3001/clientes/${dataServicio.clienteId}`);
-            if (resCliente.ok) {
-                const dataCliente = await resCliente.json();
+            // 2. Cliente viene populado o es un ID
+            if (dataServicio.cliente) {
+                if (typeof dataServicio.cliente === 'object') {
+                    setCliente(dataServicio.cliente);
+                } else {
+                    const dataCliente = await api.get(`/clientes/${dataServicio.cliente}`);
+                    setCliente(dataCliente);
+                }
+            } else if (dataServicio.clienteId) {
+                const dataCliente = await api.get(`/clientes/${dataServicio.clienteId}`);
                 setCliente(dataCliente);
             }
             
         } catch (err) {
             if (isInitialFetch) {
-                setError("No se pudo encontrar el servicio con el ID proporcionado.");
-                Swal.fire("Error", "ID de servicio no válido.", "error");
+                setError("No se pudo encontrar el servicio con el ID proporcionado (acepta ID completo o ID corto de 6 caracteres).");
+                Swal.fire("Sin resultados", "Verificá el ID (completo o corto de 6 caracteres).", "warning");
             }
         } finally {
              if (isInitialFetch) {
                 setLoading(false);
             }
         }
-    }, [servicio]); // Dependencia del servicio para manejar la optimización del loader
+    }, [servicio]);
 
     // 1. useEffect inicial: Carga el servicio si viene en la URL
     useEffect(() => {
@@ -116,7 +134,8 @@ function ConsultaServicio() {
             // Intervalo de 15 segundos (15000 ms)
             const intervalId = setInterval(() => {
                 // Usamos el ID del servicio actual para la búsqueda
-                fetchServicio(servicio.id);
+                const sid = servicio._id || servicio.id;
+                fetchServicio(sid);
             }, 10000); 
 
             // Función de limpieza: CLAVE para evitar fugas de memoria
@@ -305,7 +324,7 @@ function ConsultaServicio() {
                         <div className="details-box">
                             <p><strong>Cliente:</strong> {cliente?.nombreCompleto || 'N/A'}</p>
                             <p><strong>Equipo:</strong> {servicio.marcaProducto} ({servicio.tipoServicio})</p>
-                            <p><strong>N° de Orden:</strong> SG-{servicio.id}</p>
+                            <p><strong>N° de Orden:</strong> SG-{shortId(toIdString(servicio._id || servicio.id), 6)}</p>
                             <p><strong>Estado Actual:</strong> <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span></p>
                             <p><strong>Fecha Ingreso:</strong> {new Date(servicio.fechaEntrada).toLocaleDateString()}</p>
                             {/* Presupuesto Total en la vista principal */}
@@ -331,7 +350,7 @@ function ConsultaServicio() {
             {showPresupuestoModal && servicio && (
                 <div className="modal-overlay" onClick={() => setShowPresupuestoModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Detalle del Presupuesto (ID: {servicio.id})</h3>
+                        <h3>Detalle del Presupuesto (ID: {shortId(toIdString(servicio._id || servicio.id), 6)})</h3>
                         
                         {servicio.presupuesto?.items?.length > 0 && (
                             <div className="toggle-budget-details">

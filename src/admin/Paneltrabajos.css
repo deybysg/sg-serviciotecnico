@@ -145,22 +145,25 @@
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: white;
+  color: white !important; /* Forzar texto blanco sobre cualquier override */
   margin-left: 6px;
 }
 
 .estado-pendiente {
-  background-color: var(--color-peligro);
+  color: white !important;
+  background-color: #dc2626 !important; /* Rojo fuerte */
 }
 .estado-enRevision {
-  background-color: var(--color-advertencia);
+  background-color: #f59e0b !important; /* Naranja/Amarillo */
 }
-.estado-revisionTerminada,
+.estado-revisionTerminada{
+  background-color: #0ea5e9 !important; /* Azul */
+}
 .estado-terminado {
-  background-color: #ea580c;
+  background-color: #ea580c !important; /* Naranja oscuro */
 }
 .estado-entregado {
-  background-color: var(--color-exito);
+  background-color: #16a34a !important; /* Verde */
 }
 
 /* --- Botones de acción --- */

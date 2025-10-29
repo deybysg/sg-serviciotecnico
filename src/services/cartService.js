@@ -1,40 +1,55 @@
-import axios from 'axios';
+import { api } from './api';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const api = axios.create({ baseURL: API });
-
+/**
+ * Obtener el carrito de un usuario
+ */
 export async function getCartByUsername(username) {
-  const res = await api.get('/carts', { params: { username } });
-  return res.data && res.data.length ? res.data[0] : null;
+  try {
+    // El backend usará el usuario autenticado; el username se ignora salvo admin
+    const cart = await api.get(`/carts`);
+    return cart || null;
+  } catch (error) {
+    console.error('Error al obtener carrito:', error);
+    return null;
+  }
 }
 
-export async function createCart(cart) {
-  const res = await api.post('/carts', cart);
-  return res.data;
-}
-
-export async function updateCart(id, partial) {
-  const res = await api.patch(`/carts/${id}`, partial);
-  return res.data;
-}
-
+/**
+ * Guardar o actualizar el carrito
+ */
 export async function upsertCartByUsername(username, items) {
   if (!username) {
-    // for guests, we won't persist to server
+    // Para invitados, no persistimos en el servidor
     return null;
   }
 
-  const existing = await getCartByUsername(username);
-  const payload = {
-    username,
-    items,
-    updatedAt: new Date().toISOString()
-  };
+  try {
+    const payload = {
+      // el backend tomará el username del token
+      items,
+      updatedAt: new Date().toISOString()
+    };
 
-  if (existing) {
-    return updateCart(existing.id, payload);
-  } else {
-    // use username as id to make easier querying
-    return createCart({ id: username, ...payload });
+    const cart = await api.put('/carts', payload);
+    return cart;
+  } catch (error) {
+    console.error('Error al guardar carrito:', error);
+    throw error;
+  }
+}
+
+/**
+ * Limpiar el carrito del usuario
+ */
+export async function clearCart(username) {
+  if (!username) return null;
+
+  try {
+    // mejor usar endpoint autenticado (sin param)
+    await api.patch(`/carts/limpiar`, {});
+    return true;
+  } catch (error) {
+    console.error('Error al limpiar carrito:', error);
+    throw error;
   }
 }

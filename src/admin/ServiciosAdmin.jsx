@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { api } from "../services/api";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { QRCodeSVG } from "qrcode.react";
@@ -6,6 +7,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf"; 
 import ComprobantePDF from "./ComprobantePDF"; 
 import "./serviciosAdmin.css";
+import { shortId, toIdString } from "../utils/id";
 
 const TIPO_SERVICIO_OPTIONS = [
     { value: "celulares", label: "Celulares" },
@@ -55,21 +57,29 @@ function ServiciosAdmin() {
 
     // Carga inicial de clientes y servicios
     useEffect(() => {
-        fetch("http://localhost:3001/clientes")
-            .then((res) => res.json())
-            .then((data) => {
-                const options = data.map((c) => ({
-                    value: c.id,
+        const loadData = async () => {
+            try {
+                // Cargar clientes
+                const clientesData = await api.get('/clientes');
+                const options = clientesData.map((c) => ({
+                    value: c._id || c.id,
                     label: c.nombreCompleto,
                 }));
                 setClientes(options);
-            })
-            .catch(console.error);
 
-        fetch("http://localhost:3001/servicios")
-            .then((res) => res.json())
-            .then((data) => setServicios(data))
-            .catch(console.error);
+                // Cargar servicios
+                const serviciosData = await api.get('/servicios');
+                setServicios(serviciosData);
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.message || "No se pudieron cargar los datos.",
+                });
+            }
+        };
+        loadData();
     }, []);
 
     // Helper para calcular totales del presupuesto
@@ -121,7 +131,8 @@ function ServiciosAdmin() {
                     // ** SOLUCIÓN AL NOMBRE DEL ARCHIVO: Usar el nombre del cliente **
                     // Eliminamos caracteres especiales/espacios para un nombre de archivo limpio
                     const nombreClienteLimpio = serviceToPrint.clienteNombre.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
-                    pdf.save(`Servicio_${serviceToPrint.id}_${nombreClienteLimpio}.pdf`);
+                    const sid = toIdString(serviceToPrint._id || serviceToPrint.id);
+                    pdf.save(`Servicio_${sid}_${nombreClienteLimpio}.pdf`);
 
                     Swal.fire('PDF Generado', 'El comprobante ha sido descargado.', 'success');
                 } catch (error) {
@@ -197,38 +208,39 @@ function ServiciosAdmin() {
         const clienteId = dataToSend.clienteId; 
 
         try {
-            // 1. CREAR EL SERVICIO
-            const resServicio = await fetch("http://localhost:3001/servicios", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend),
-            });
-            if (!resServicio.ok) throw new Error("Error al crear servicio");
-            const nuevoServicio = await resServicio.json();
+            // El backend maneja automáticamente la relación cliente-servicio
+            const nuevoServicio = await api.post('/servicios', dataToSend);
             
-            // 2. OBTENER Y ACTUALIZAR EL CLIENTE
-            const resCliente = await fetch(`http://localhost:3001/clientes/${clienteId}`);
-            if (!resCliente.ok) throw new Error("Error al obtener datos del cliente");
-            const clienteActual = await resCliente.json();
-            const nuevosServiciosRealizados = [
-                ...(clienteActual.serviciosRealizados || []),
-                nuevoServicio.id
-            ];
-            await fetch(`http://localhost:3001/clientes/${clienteId}`, {
-                method: "PATCH", 
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ serviciosRealizados: nuevosServiciosRealizados }),
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: '✅ Servicio creado y asociado al cliente'
             });
             
-            // 3. ACTUALIZAR ESTADOS LOCALES Y NOTIFICAR
-            Swal.fire("Servicio creado", `ID ${nuevoServicio.id} registrado y asociado al cliente.`, "success");
             setServicios((prev) => [...prev, nuevoServicio]);
             setFormData(initialState);
             setClienteSeleccionado(null);
             
         } catch (err) {
-            console.error("Error en la creación o vinculación del servicio:", err);
-            Swal.fire("Error", "No se pudo completar la operación: " + err.message, "error");
+            console.error("Error en la creación del servicio:", err);
+            Swal.fire({
+                icon: "error", 
+                title: "Error", 
+                text: err.message || "No se pudo completar la operación.",
+                confirmButtonColor: '#3b82f6'
+            });
         }
     };
 
@@ -236,7 +248,7 @@ function ServiciosAdmin() {
     // Edición y eliminación
     // ----------------------------------------
     const handleEditClick = (serviceId) => {
-        const serviceToEdit = servicios.find(s => s.id === serviceId);
+        const serviceToEdit = servicios.find(s => (s._id || s.id) === serviceId);
         if (serviceToEdit) {
             setEditId(serviceId); 
             const clonedData = JSON.parse(JSON.stringify(serviceToEdit));
@@ -303,23 +315,40 @@ function ServiciosAdmin() {
         } 
         
         try {
-            const res = await fetch(`http://localhost:3001/servicios/${dataToSave.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSave),
-            });
-            if (!res.ok) throw new Error("Error al guardar cambios");
-            const updated = await res.json();
+            // PUT /servicios/:id (requiere auth)
+            const updated = await api.put(`/servicios/${dataToSave._id || dataToSave.id}`, dataToSave);
             
             setServicios(prevServicios => prevServicios.map(s => 
-                s.id === updated.id ? updated : s
+                (s._id || s.id) === (updated._id || updated.id) ? updated : s
             ));
             
             setEditId(null); 
             setEditData(null);
-            Swal.fire("Actualizado", `Servicio ${updated.id} guardado.`, "success");
+            
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: '✅ Servicio actualizado exitosamente'
+            });
         } catch (err) {
-            Swal.fire("Error", err.message, "error");
+            Swal.fire({
+                icon: "error",
+                title: "Error", 
+                text: err.message || "No se pudieron guardar los cambios.",
+                confirmButtonColor: '#3b82f6'
+            });
         }
     };
 
@@ -329,39 +358,44 @@ function ServiciosAdmin() {
             text: "Esta acción no se puede deshacer. También se desvinculará del cliente.",
             icon: "warning",
             showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#64748b',
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
         });
         if (!confirm.isConfirmed) return;
 
         try {
-            const servicioAEliminar = servicios.find(s => s.id === id);
+            // El backend maneja automáticamente la desvinculación del cliente
+            await api.delete(`/servicios/${id}`);
+
+            setServicios((prev) => prev.filter((s) => (s._id || s.id) !== id));
             
-            // --- LÓGICA DE DESVINCULACIÓN DEL CLIENTE ---
-            if (servicioAEliminar) {
-                const clienteId = servicioAEliminar.clienteId;
-                const resCliente = await fetch(`http://localhost:3001/clientes/${clienteId}`);
-                const clienteActual = await resCliente.json();
-                const nuevosServiciosRealizados = (clienteActual.serviciosRealizados || []).filter(
-                    servicioId => servicioId !== id
-                );
-                await fetch(`http://localhost:3001/clientes/${clienteId}`, {
-                    method: "PATCH", 
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ serviciosRealizados: nuevosServiciosRealizados }),
-                });
-            }
-            // --- FIN LÓGICA DE DESVINCULACIÓN ---
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
 
-            // 4. Eliminar el servicio de la DB
-            const res = await fetch(`http://localhost:3001/servicios/${id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Error al eliminar servicio");
-
-            setServicios((prev) => prev.filter((s) => s.id !== id));
-            Swal.fire("Eliminado", "El servicio fue eliminado correctamente.", "success");
+            Toast.fire({
+                icon: 'success',
+                title: '🗑️ Servicio eliminado exitosamente'
+            });
         } catch (err) {
-            console.error("Error al eliminar o desvincular:", err);
-            Swal.fire("Error", err.message, "error");
+            console.error("Error al eliminar:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error", 
+                text: err.message || "No se pudo eliminar el servicio.",
+                confirmButtonColor: '#3b82f6'
+            });
         }
     };
 
@@ -372,15 +406,23 @@ function ServiciosAdmin() {
     const serviciosFiltrados = servicios.filter((s) => {
         const query = searchQuery.toLowerCase();
         const cliente = clientes.find(c => c.value === s.clienteId)?.label || "";
+        const servicioId = (s._id || s.id).toString();
+        const servicioIdCorto = shortId(servicioId, 6).toLowerCase();
         return (
-            s.id.toString().includes(query) ||
+            servicioId.includes(query) ||
+            servicioIdCorto.includes(query) ||
             s.marcaProducto.toLowerCase().includes(query) ||
             s.tipoServicio.toLowerCase().includes(query) ||
             cliente.toLowerCase().includes(query)
         );
     });
 
-    const serviciosOrdenados = [...serviciosFiltrados].sort((a, b) => b.id - a.id);
+    const serviciosOrdenados = [...serviciosFiltrados].sort((a, b) => {
+        // Ordena por fecha de entrada más reciente primero
+        const fa = a.fechaEntrada ? new Date(a.fechaEntrada) : new Date(0);
+        const fb = b.fechaEntrada ? new Date(b.fechaEntrada) : new Date(0);
+        return fb - fa;
+    });
 
     return (
         <div className="servicios-full">
@@ -465,17 +507,37 @@ function ServiciosAdmin() {
                             {serviciosOrdenados.map((s) => {
                                 const cliente = clientes.find(c => c.value === s.clienteId);
                                 const clienteNombre = cliente?.label || "Cliente desconocido";
-                                const isEditing = editId === s.id; 
-                                const isBudgetOpen = showBudgetId === s.id; 
-             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${s.id}`;
+                                const servicioId = s._id || s.id;
+                                const isEditing = editId === servicioId; 
+                                const isBudgetOpen = showBudgetId === servicioId; 
+             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioId}`;
 
                                 return (
                                     <div 
-                                        key={s.id} 
+                                        key={servicioId} 
                                         className={`servicio-card ${isEditing ? 'editando' : ''}`} 
                                     >
                                         <div className="qr-info-header">
-                                            <h4>ID: {s.id}</h4>
+                                            <h4>
+                                                ID: {shortId(servicioId, 6)}{' '}
+                                                <span
+                                                    title="Copiar ID completo"
+                                                    onClick={async () => {
+                                                        try {
+                                                            await navigator.clipboard.writeText(String(servicioId));
+                                                            const Toast = Swal.mixin({
+                                                                toast: true,
+                                                                position: 'top-end',
+                                                                showConfirmButton: false,
+                                                                timer: 2000,
+                                                                timerProgressBar: true,
+                                                            });
+                                                            Toast.fire({ icon: 'success', title: 'ID copiado al portapapeles' });
+                                                        } catch {}
+                                                    }}
+                                                    style={{ cursor: 'pointer', marginLeft: 6 }}
+                                                >📋</span>
+                                            </h4>
                                             <div style={{ position: 'relative', display: 'inline-block' }}>
                                                 <QRCodeSVG value={qrUrl} size={80} level="H" />
                                                 <img 
@@ -585,7 +647,7 @@ function ServiciosAdmin() {
                                                 {/* Botón de Presupuesto Desplegable */}
                                                 <button 
                                                      className="btn-toggle-presupuesto"
-                                                     onClick={() => toggleBudget(s.id)} 
+                                                     onClick={() => toggleBudget(servicioId)} 
                                                 >
                                                      <span className="resumen-total">
                                                          Total Presupuesto: <strong>${s.presupuesto.total.toFixed(2)}</strong>
@@ -604,8 +666,8 @@ function ServiciosAdmin() {
                                                  )}
                                                 
                                                 <div className="acciones-servicio">
-                                                     <button onClick={() => handleEditClick(s.id)} className="btn-edit-servicio">Editar</button>
-                                                     <button onClick={() => handleDeleteServicio(s.id)} className="btn-delete-servicio">Eliminar</button>
+                                                     <button onClick={() => handleEditClick(servicioId)} className="btn-edit-servicio">Editar</button>
+                                                     <button onClick={() => handleDeleteServicio(servicioId)} className="btn-delete-servicio">Eliminar</button>
                                                      {/* NUEVO: Botón para generar PDF, pasa el nombre del cliente */}
                                                      <button onClick={() => generarComprobante({ ...s, clienteNombre })} className="btn-pdf-servicio">PDF 📄</button>
                                                  </div>

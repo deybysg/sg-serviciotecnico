@@ -1,5 +1,6 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { shortId, toIdString } from '../utils/id';
 
 // Se asume que este componente estará en el mismo directorio que ServiciosAdmin.jsx
 
@@ -24,6 +25,8 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const filasVacias = presupuestoCero ? Array(3).fill({ descripcion: '_________________________', costo: 0 }) : [];
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
+    const sid = toIdString(service._id || service.id);
+
     return (
         <div style={styles.comprobanteContainer}>
             
@@ -33,7 +36,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 <div style={styles.qrCode}>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                         <QRCodeSVG 
-                            value={`http://192.168.1.22:5173/seguimiento/${service.id}`} 
+                            value={`http://192.168.1.22:5173/seguimiento/${sid}`} 
                             size={85} 
                             level="H"
                             bgColor="#ffffff"
@@ -60,7 +63,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 <div style={styles.headerInfo}>
                     <h1 style={styles.title}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
                     <p style={styles.subtitle}>SG SERVICIO TECNICO</p>
-                    <p style={styles.headerDetail}>ID de Servicio: <span style={styles.highlight}>{service.id}</span> | **Fecha Ingreso:** <span style={styles.highlight}>{formatDate(service.fechaEntrada)}</span></p>
+                    <p style={styles.headerDetail}>ID de Servicio: <span style={styles.highlight}>{shortId(sid, 6)}</span> | <strong>Fecha Ingreso:</strong> <span style={styles.highlight}>{formatDate(service.fechaEntrada)}</span></p>
                 </div>
             </div>
 

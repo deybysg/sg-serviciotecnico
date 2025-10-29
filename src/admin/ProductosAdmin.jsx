@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { api } from "../services/api";
+import { shortId } from "../utils/id";
+import Swal from "sweetalert2";
 import "./ProductosAdmin.css"; 
 
-
-const API_URL = "http://localhost:3001/productos";
 const CATEGORIAS_VALIDAS = ["celulares", "computadoras", "accesorios", "otros"];
 const UMBRAL_STOCK_BAJO = 5; // Constante para el umbral de stock bajo o crítico
 
@@ -36,7 +37,7 @@ function AlertaStockModal({ productosAAlertar, onClose }) {
                         <li className="stock-alerta-grupo-titulo">🚨 Productos AGOTADOS ({productosAgotados.length})</li>
                     )}
                     {productosAgotados.map((prod) => (
-                        <li key={prod.id} className="stock-alerta-item stock-alerta-item--cero">
+                                                <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--cero">
                             <span className="stock-alerta-item-nombre">
                                 {prod.nombre} 
                                 <span className="stock-alerta-categoria">({prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)})</span>
@@ -51,7 +52,7 @@ function AlertaStockModal({ productosAAlertar, onClose }) {
                         <li className="stock-alerta-grupo-titulo">⚠️ Productos BAJO Stock ({productosCasiAgotados.length})</li>
                     )}
                     {productosCasiAgotados.map((prod) => (
-                        <li key={prod.id} className="stock-alerta-item stock-alerta-item--bajo">
+                                                <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--bajo">
                             <span className="stock-alerta-item-nombre">
                                 {prod.nombre}
                                 <span className="stock-alerta-categoria">({prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)})</span>
@@ -72,17 +73,15 @@ function AlertaStockModal({ productosAAlertar, onClose }) {
 // Este componente no se modifica
 // =================================================================
 function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
-    const [formData, setFormData] = useState({
-        id: productoInicial?.id || "",
-        nombre: productoInicial?.nombre || "",
-        categoria: productoInicial?.categoria || CATEGORIAS_VALIDAS[0],
-        descripcion: productoInicial?.descripcion || "",
-        precio: productoInicial?.precio || 0,
-        stock: productoInicial?.stock || 0,
-        imagen: productoInicial?.imagen || "",
-    });
-
-    const [useFileMode, setUseFileMode] = useState(false);
+    const [formData, setFormData] = useState({
+        _id: productoInicial?._id || productoInicial?.id || "",
+        nombre: productoInicial?.nombre || "",
+        categoria: productoInicial?.categoria || CATEGORIAS_VALIDAS[0],
+        descripcion: productoInicial?.descripcion || "",
+        precio: productoInicial?.precio || 0,
+        stock: productoInicial?.stock || 0,
+        imagen: productoInicial?.imagen || "",
+    });    const [useFileMode, setUseFileMode] = useState(false);
     const [localFile, setLocalFile] = useState(null);
 
     const isEditing = !!productoInicial;
@@ -308,25 +307,20 @@ function ProductosAdmin() {
     const alertaTexto = getAlertaTexto();
 
 
-    // Función para obtener los datos de la API
-    const fetchProductos = useCallback(() => {
-        setLoading(true);
-        fetch(API_URL)
-            .then((res) => {
-                if (!res.ok) throw new Error("Fallo al cargar los productos");
-                return res.json();
-            })
-            .then((data) => {
-                setProductos(Array.isArray(data) ? data : []); 
-                setLoading(false);
-            })
-            .catch((err) => {
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []); 
-
-    useEffect(() => {
+    // Función para obtener los datos de la API
+    const fetchProductos = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // GET /productos es público (no requiere auth)
+            const data = await api.get('/productos', false);
+            setProductos(Array.isArray(data) ? data : []); 
+        } catch (err) {
+            setError(err.message || "Error al cargar productos");
+        } finally {
+            setLoading(false);
+        }
+    }, []);    useEffect(() => {
         fetchProductos();
     }, [fetchProductos]); 
     
@@ -356,52 +350,103 @@ function ProductosAdmin() {
         setShowModal(true);
     };
 
-    const handleGuardar = async (producto) => {
-        const isEditing = !!productoSeleccionado;
-        const url = isEditing ? `${API_URL}/${producto.id}` : API_URL;
-        const method = isEditing ? "PUT" : "POST";
+    const handleGuardar = async (producto) => {
+        const isEditing = !!productoSeleccionado;
 
-        if (!isEditing) {
-            // Generación simple de ID, asumiendo json-server
-            producto.id = crypto.randomUUID().slice(0, 4); 
-        }
+        try {
+            let resultado;
+            
+            if (isEditing) {
+                // PUT /productos/:id (requiere auth)
+                const id = producto._id || producto.id;
+                // No enviar _id ni id en el body
+                const { _id, id: oldId, ...productoData } = producto;
+                resultado = await api.put(`/productos/${id}`, productoData);
+            } else {
+                // POST /productos (requiere auth)
+                // No necesitamos generar ID, MongoDB lo hace automáticamente
+                const { _id, id, ...productoData } = producto;
+                resultado = await api.post('/productos', productoData);
+            }
+            
+            setShowModal(false); 
+            fetchProductos(); // Recargar la lista
+            
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
 
-        try {
-            const res = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(producto),
-            });
+            Toast.fire({
+                icon: 'success',
+                title: isEditing ? '✅ Producto actualizado exitosamente' : '✅ Producto creado exitosamente'
+            });
+            
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || `Error al ${isEditing ? "guardar los cambios" : "crear el producto"}.`,
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+    };    const handleEliminar = async (id, nombre) => {
+        const result = await Swal.fire({
+            title: '¿Está seguro?',
+            text: `Se eliminará el producto: ${nombre}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
 
-            if (!res.ok) throw new Error(`Fallo al ${isEditing ? "actualizar" : "crear"} producto.`);
-            
-            setShowModal(false); 
-            fetchProductos(); // Recargar la lista
-            
-        } catch (err) {
-            console.error(err);
-            alert(`Error al ${isEditing ? "guardar los cambios" : "crear el producto"}.`);
-        }
-    };
+        if (!result.isConfirmed) return;
 
-    const handleEliminar = async (id, nombre) => {
-        if (!window.confirm(`¿Está seguro de eliminar el producto: ${nombre}?`)) return;
+        try {
+            // DELETE /productos/:id (requiere auth)
+            await api.delete(`/productos/${id}`);
+            
+            // Actualizar la lista localmente - convertir a String para comparación
+            setProductos((prev) => prev.filter((p) => String(p._id || p.id) !== String(id)));
+            
+            // Toast notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
 
-        try {
-            const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-
-            if (!res.ok) throw new Error("Fallo al eliminar el producto.");
-            
-            setProductos((prev) => prev.filter((p) => p.id !== id));
-            
-            alert(`Producto "${nombre}" eliminado con éxito.`);
-        } catch (err) {
-            console.error(err);
-            alert("Error al eliminar el producto.");
-        }
-    };
-
-
+            Toast.fire({
+                icon: 'success',
+                title: `🗑️ Producto "${nombre}" eliminado exitosamente`
+            });
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || "Error al eliminar el producto.",
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+    };
     if (loading) return <div className="admin-producto-loading">Cargando productos...</div>;
     if (error) return <div className="admin-producto-error">Error: {error}</div>;
 
@@ -465,8 +510,10 @@ function ProductosAdmin() {
                             </tr>
                         ) : (
                             productosFiltrados.map((producto) => (
-                                <tr key={producto.id} className={producto.stock <= UMBRAL_STOCK_BAJO ? 'fila-stock-bajo' : ''}>
-                                    <td className="admin-producto-id">{producto.id}</td>
+                                <tr key={producto._id || producto.id} className={producto.stock <= UMBRAL_STOCK_BAJO ? 'fila-stock-bajo' : ''}>
+                                                    <td className="admin-producto-id">
+                                                        {shortId(producto._id || producto.id, 6)}
+                                                    </td>
                                     <td>{producto.nombre}</td>
                                     <td>{producto.categoria.charAt(0).toUpperCase() + producto.categoria.slice(1)}</td>
                                     <td className="admin-producto-precio">${producto.precio.toLocaleString('es-AR')}</td>
@@ -483,7 +530,7 @@ function ProductosAdmin() {
                                         </button>
                                         <button 
                                             className="admin-producto-btn-eliminar" 
-                                            onClick={() => handleEliminar(producto.id, producto.nombre)}>
+                                                                                        onClick={() => handleEliminar(producto._id || producto.id, producto.nombre)}>
                                                 Eliminar
                                         </button>
                                     </td>

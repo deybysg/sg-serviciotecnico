@@ -3,34 +3,25 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext'; 
+import { api } from '../services/api';
 import { FaPlus, FaMinus, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import '../pages/Carrito.css'; 
 
-// 💡 NECESITAS ESTO: Importa una función de tu Contexto de Compras/Ventas 
-//    para registrar la compra y la actualización de stock.
-//    (Asegúrate de que esta función exista en tu CartContext o crea un SalesContext)
+/**
+ * Función para registrar la compra en el backend y actualizar stock
+ */
 const simulatePurchaseAndSave = async (userId, username, items, total, updateStock) => {
-    // 🚨 Esta es la función clave a implementar en tu CartContext o SalesContext.
-    // Simula:
-    // 1. await updateStock(); 
-    // 2. Registra la compra en tu DB (por ejemplo, en un endpoint POST /ventas).
-    // 3. Vacía el carrito local.
-    
-    // Por ahora, solo usaremos la función updateStockOnPurchase que ya tenías
-    // y la combinaremos con un registro simple en el backend/json-server.
-    
-    // 1. Simular registro de la compra en el historial (backend/json-server)
+    // 1. Preparar datos de la venta
     const nuevaVenta = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2), // ID simple
-        usuarioId: userId,
+        usuario: userId,
         username: username,
         fechaCompra: new Date().toISOString(),
         totalVenta: total,
-        metodoPago: 'Simulado (Offline)',
+        metodoPago: 'Efectivo',
         estado: 'Completado',
         productosComprados: items.map(item => ({
-            id: item.id,
+            producto: item._id || item.id,
             nombre: item.nombre,
             precioUnitario: item.precio,
             categoria: item.categoria,
@@ -39,22 +30,13 @@ const simulatePurchaseAndSave = async (userId, username, items, total, updateSto
         }))
     };
     
-    // 🚨 Llama a tu endpoint de backend para registrar la venta (Mis Compras / Historial de Ventas)
-    // Asumiendo que tienes un endpoint para registrar ventas:
-    const salesResponse = await fetch('http://localhost:3001/ventas', { // 🚨 Ajusta esta URL si usas otro puerto/ruta
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevaVenta)
-    });
-    
-    if (!salesResponse.ok) {
-        throw new Error('Error al guardar la venta en el historial.');
-    }
+    // 2. Registrar la venta en el backend
+    const ventaCreada = await api.post('/ventas', nuevaVenta);
 
-    // 2. Actualizar el stock
+    // 3. Actualizar el stock de productos
     await updateStock();
 
-    return salesResponse.json();
+    return ventaCreada;
 };
 
 /**
@@ -119,7 +101,7 @@ function Carrito({ isOpen, onClose }) {
 
                     // 3. 🚨 LLAMADA A LA FUNCIÓN DE SIMULACIÓN Y REGISTRO 🚨
                     await simulatePurchaseAndSave(
-                        user.id, 
+                        user._id || user.id, 
                         user.username, 
                         cartItems, 
                         totalAmount, 
@@ -127,11 +109,11 @@ function Carrito({ isOpen, onClose }) {
                     );
                     
                     // 4. Vaciar el carrito después de la simulación y registro exitoso
-                    clearCart();
+                    // (updateStockOnPurchase ya lo vacía)
                     
                     Swal.fire(
-                        '¡Compra Exitosa (Simulada)!',
-                        'Tu pedido fue registrado en "Mis Compras" y el stock fue actualizado.',
+                        '¡Compra Exitosa!',
+                        'Tu pedido fue registrado en "Mis Compras" y el stock actualizado.',
                         'success'
                     );
                     onClose(); 

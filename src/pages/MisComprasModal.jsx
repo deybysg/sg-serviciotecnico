@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import Swal from 'sweetalert2';
 import { FaBoxes, FaCalendarAlt, FaDollarSign, FaFilePdf, FaReceipt, FaMapMarkerAlt } from 'react-icons/fa';
 import './MisComprasModal.css';
@@ -85,7 +86,7 @@ function MisComprasModal({ isOpen, onClose }) {
                             <div className="compra-actions">
                                 <button
                                     className="btn-comprobante"
-                                    onClick={() => window.open(`${window.location.origin}/comprobante/${compra.id}`, '_blank')}
+                                    onClick={() => window.open(`${window.location.origin}/comprobante/${compra._id || compra.id}`, '_blank')}
                                 >
                                     <FaReceipt /> Ver comprobante
                                 </button>
@@ -104,14 +105,11 @@ function MisComprasModal({ isOpen, onClose }) {
             try {
                 setLoading(true);
                 setError(null);
-                // Usar username porque en db.json las ventas tienen campo `username`
-                const response = await fetch(`http://localhost:3001/ventas?username=${encodeURIComponent(user.username)}&_sort=fechaCompra&_order=desc`);
-
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el historial de compras.');
-                }
                 
-                const data = await response.json();
+                // Usar el endpoint del backend que filtra por usuario
+                const userId = user._id || user.id;
+                const data = await api.get(`/ventas/usuario/${userId}`);
+                
                 setCompras(data);
             } catch (err) {
                 console.error("Error cargando compras:", err);
