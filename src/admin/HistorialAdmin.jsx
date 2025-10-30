@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Swal from "sweetalert2";
 import ServiciosModal from "./HistorialModal";
-import "./HistorialAdmin.css"; 
+import "./HistorialAdmin.css";
+import { api } from "../services/api";
+import { shortId, toIdString } from "../utils/id";
 
-const API_URL = "http://localhost:3001";
 const LOCALE = 'es-AR'; // Localización para las fechas
 const TIME_OPTIONS = { hour12: false }; // Opciones para el formato 24h
 
@@ -20,7 +21,9 @@ const getEstadoLabel = (value) => {
 };
 
 const getClienteName = (clienteId, clientes) => {
-    return clientes.find(c => c.id === clienteId)?.nombreCompleto || "Cliente Desconocido";
+    if (!clienteId) return "Cliente Desconocido";
+    // clientes normalizados con id = (_id || id)
+    return clientes.find(c => (c.id === clienteId))?.nombreCompleto || "Cliente Desconocido";
 };
 
 // --- Componente Principal ---
@@ -34,31 +37,43 @@ const HistorialAdmin = () => {
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [serviciosDeCliente, setServiciosDeCliente] = useState([]);
 
-    const cargarDatos = useCallback(async () => {
-        setIsLoading(true);
-        try {
-          const [clientesRes, serviciosRes] = await Promise.all([
-            fetch(`${API_URL}/clientes`),
-            fetch(`${API_URL}/servicios`),
-          ]);
-    
-          const clientesData = await clientesRes.json();
-          const serviciosData = await serviciosRes.json();
-    
-          const historial = serviciosData.filter(
-            (s) => s.estado === "entregado" && s.fechaSalida
-          );
-          
-          setServiciosEntregados(historial);
-          setClientes(clientesData);
-          
-        } catch (error) {
-          console.error("Error al cargar historial:", error);
-          Swal.fire("Error", "No se pudo cargar el historial de servicios.", "error");
-        } finally {
-          setIsLoading(false);
-        }
-    }, []);
+        const cargarDatos = useCallback(async () => {
+                setIsLoading(true);
+                try {
+                    // Consumimos backend real con JWT
+                    const [clientesRaw, serviciosRaw] = await Promise.all([
+                        api.get('/clientes'),
+                        api.get('/servicios')
+                    ]);
+
+                    // Normalizar clientes y servicios para tolerar _id/id y clienteId/cliente
+                    const clientesData = (clientesRaw || []).map(c => ({
+                        ...c,
+                        id: c._id || c.id
+                    }));
+
+                    const serviciosData = (serviciosRaw || []).map(s => ({
+                        ...s,
+                        id: s._id || s.id,
+                        // Unificar referencia de cliente siempre como string (evitar objeto completo)
+                        clienteId: s.clienteId || (s.cliente && (s.cliente._id || s.cliente.id)) || null
+                    }));
+
+                    // Solo los entregados con fecha de salida
+                    const historial = serviciosData.filter(
+                        (s) => s.estado === "entregado" && s.fechaSalida
+                    );
+
+                    setServiciosEntregados(historial);
+                    setClientes(clientesData);
+
+                } catch (error) {
+                    console.error("Error al cargar historial:", error);
+                    Swal.fire("Error", error?.message || "No se pudo cargar el historial de servicios.", "error");
+                } finally {
+                    setIsLoading(false);
+                }
+        }, []);
 
     useEffect(() => {
         cargarDatos();
@@ -84,7 +99,28 @@ const HistorialAdmin = () => {
 
             const filteredServices = serviciosEntregados.filter((s) => {
                 const clienteNombre = getClienteName(s.clienteId, clientes).toLowerCase();
-                return clienteNombre.includes(query) || s.id.toString().includes(query);
+                const fullServiceId = s.id ? String(s.id) : "";
+                const serviceIdLower = fullServiceId.toLowerCase();
+                const serviceShortLower = shortId(fullServiceId, 6).toLowerCase();
+
+                const clienteFullId = s.clienteId ? String(s.clienteId) : "";
+                const clienteIdLower = clienteFullId.toLowerCase();
+                const clienteShortLower = shortId(clienteFullId, 6).toLowerCase();
+
+                const q = query.replace(/[#\s]/g, "").toLowerCase();
+
+                return (
+                    // Por nombre de cliente
+                    clienteNombre.includes(q) ||
+                    // Por ID de servicio
+                    serviceIdLower.includes(q) ||
+                    serviceShortLower.includes(q) ||
+                    (q.length <= 6 && serviceIdLower.endsWith(q)) ||
+                    // Por ID de cliente
+                    clienteIdLower.includes(q) ||
+                    clienteShortLower.includes(q) ||
+                    (q.length <= 6 && clienteIdLower.endsWith(q))
+                );
             });
 
             filteredServices.forEach(servicio => {
@@ -117,7 +153,7 @@ const HistorialAdmin = () => {
     };
 
     const handleVerDetallesDeServicio = (servicio) => {
-        const cliente = clientes.find(c => c.id === servicio.clienteId);
+    const cliente = clientes.find(c => c.id === servicio.clienteId);
         
         setClienteSeleccionado(cliente); 
         setServiciosDeCliente([servicio]); 
@@ -139,7 +175,7 @@ const HistorialAdmin = () => {
             <div className="historial-buscador">
                 <input
                     type="text"
-                    placeholder="Buscar por cliente o ID de servicio para agrupar..."
+                    placeholder="Buscar por cliente o ID (corto o completo) para agrupar..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -187,14 +223,14 @@ const HistorialAdmin = () => {
                                     key={servicio.id} 
                                     className="servicio-historial-row" 
                                 >
-                                    <p className="col-id">#{servicio.id}</p>
+                                    <p className="col-id">#{shortId(toIdString(servicio.id), 6)}</p>
                                     <p className="col-cliente">{clienteNombre}</p>
                                     <p className="col-tipo">{servicio.tipoServicio || 'N/A'}</p>
                                     <p className="col-entrada">
-                                        {fechaEntrada.toLocaleDateString()} {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        {fechaEntrada.toLocaleDateString(LOCALE)} {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
                                     </p>
                                     <p className="col-salida">
-                                        {fechaSalida ? `${fechaSalida.toLocaleDateString()} ${fechaSalida.toLocaleTimeString(LOCALE, TIME_OPTIONS)}` : 'N/A'}
+                                        {fechaSalida ? `${fechaSalida.toLocaleDateString(LOCALE)} ${fechaSalida.toLocaleTimeString(LOCALE, TIME_OPTIONS)}` : 'N/A'}
                                     </p>
                                     <div className="col-acciones">
                                         <button 
@@ -221,13 +257,13 @@ const HistorialAdmin = () => {
                                     key={cliente.id} 
                                     className="cliente-historial-row"
                                 >
-                                    <p className="col-id">{cliente.id}</p>
+                                    <p className="col-id">{shortId(toIdString(cliente.id), 6)}</p>
                                     <p className="col-nombre">{cliente.nombreCompleto}</p>
                                     <p className="col-count">
                                         <span className="badge-servicios-historial">{serviciosCount}</span>
                                     </p>
                                     <p className="col-entrada">
-                                        {fechaEntrada.toLocaleDateString()} a las {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        {fechaEntrada.toLocaleDateString(LOCALE)} a las {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
                                     </p>
                                     <div className="col-acciones">
                                         <button 

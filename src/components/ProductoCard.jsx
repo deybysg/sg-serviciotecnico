@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useCart } from "../context/CartContext"; 
+import useCartStore from "../store/cartStore"; 
 import Swal from "sweetalert2"; 
 
 function ProductoCard({ producto, isLoggedIn = true }) {
   const [modalOpen, setModalOpen] = useState(false);
-  const { addToCart } = useCart(); 
+  const addToCart = useCartStore(state => state.addToCart); 
 
   const handleAddToCart = () => {
     if (producto.stock > 0) {

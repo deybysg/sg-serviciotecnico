@@ -5,20 +5,38 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
 import { useState, useEffect } from 'react'; 
-import { useCart } from '../context/CartContext'; 
+import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
 import './Navbar.css';
 
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { totalItems } = useCart(); 
+  const totalItems = useCartStore(state => state.getTotalItems()); 
   const [isCartOpen, setIsCartOpen] = useState(false); 
 
   useEffect(() => {
     document.body.dataset.role = user?.role || 'guest';
     return () => { delete document.body.dataset.role; };
   }, [user]);
+
+  // Escuchar evento global de reseteo de carritos (solo útil para superadmin)
+  useEffect(() => {
+    const handler = () => {
+      if (user?.role === 'superadmin') {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Todos los carritos fueron limpiados',
+          timer: 1800,
+          showConfirmButton: false
+        });
+      }
+    };
+    window.addEventListener('CARTS_RESET_OK', handler);
+    return () => window.removeEventListener('CARTS_RESET_OK', handler);
+  }, [user?.role]);
 
   const handleLogout = () => {
     Swal.fire({

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Swal from "sweetalert2";
 import HistorialDeVentasModal from "./HistorialDeVentasModal"; 
-import "./HistorialDeVentas.css"; 
+import "./HistorialDeVentas.css";
+import { api } from "../services/api";
+import { shortId, toIdString } from "../utils/id";
 
-// Ajusta esta URL a la ruta de tu base de datos o endpoint de ventas (ej: JSON-Server)
-const API_VENTAS_URL = "http://localhost:3001/ventas"; 
 const LOCALE = 'es-AR'; 
 const TIME_OPTIONS = { hour: '2-digit', minute: '2-digit', hour12: false }; 
 
@@ -29,27 +29,30 @@ const HistorialDeVentas = () => {
     const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
     const [ventasDeUsuario, setVentasDeUsuario] = useState([]);
 
-    // FUNCIÓN CORREGIDA: Realiza el fetch a la URL de la DB
+    // FUNCIÓN CORREGIDA: Realiza el fetch a la API backend con JWT
     const cargarDatos = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Llama a tu endpoint REAL donde se guardan las ventas (db.json)
-            const response = await fetch(API_VENTAS_URL); 
+            // Backend real con JWT: ventas + usuarios para filtrar huérfanas
+            const [ventasRaw, usuariosRaw] = await Promise.all([
+                api.get('/ventas'),
+                api.get('/usuarios')
+            ]);
             
-            if (!response.ok) {
-                throw new Error("Error al obtener las ventas");
-            }
+            // Normalizar _id a id
+            const ventasData = (ventasRaw || []).map(v => ({
+                ...v,
+                id: v._id || v.id
+            }));
+            // Filtrar ventas cuyos usuarios aún existen (evita mostrar historiales de usuarios eliminados)
+            const usernamesSet = new Set((usuariosRaw || []).map(u => u.username));
+            const filtradas = ventasData.filter(v => usernamesSet.has(v.username));
 
-            const data = await response.json(); 
-            
-            // Asume que tu endpoint /ventas devuelve un array, o un objeto con la clave 'ventas'
-            const ventasData = Array.isArray(data) ? data : data.ventas || [];
-
-            setVentas(ventasData); 
+            setVentas(filtradas); 
             
         } catch (error) {
             console.error("Error al cargar historial de ventas:", error);
-            Swal.fire("Error", "No se pudo cargar el historial de ventas. Revisa tu servidor.", "error");
+            Swal.fire("Error", error?.message || "No se pudo cargar el historial de ventas.", "error");
             setVentas([]);
         } finally {
             setIsLoading(false);
@@ -82,8 +85,18 @@ const HistorialDeVentas = () => {
             const ventasMap = new Map();
 
             const filteredVentas = ventasOrdenadas.filter((v) => {
-                // Filtra por username o por ID de venta
-                return v.username.toLowerCase().includes(query) || v.id.toString().includes(query);
+                const username = v.username ? v.username.toLowerCase() : "";
+                const fullVentaId = v.id ? String(v.id) : "";
+                const ventaIdLower = fullVentaId.toLowerCase();
+                const ventaShortLower = shortId(fullVentaId, 6).toLowerCase();
+                const q = query.replace(/[#\s]/g, "").toLowerCase();
+
+                return (
+                    username.includes(q) ||
+                    ventaIdLower.includes(q) ||
+                    ventaShortLower.includes(q) ||
+                    (q.length <= 6 && ventaIdLower.endsWith(q))
+                );
             });
 
             filteredVentas.forEach(venta => {
@@ -140,7 +153,7 @@ const HistorialDeVentas = () => {
             <div className="ventas-historial-buscador">
                 <input
                     type="text"
-                    placeholder="Buscar por ID de venta o nombre de usuario para agrupar..."
+                    placeholder="Buscar por ID (corto o completo) o nombre de usuario..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="ventas-historial-input"
@@ -188,8 +201,8 @@ const HistorialDeVentas = () => {
                                     key={venta.id} 
                                     className="venta-historial-row" 
                                 >
-                                    {/* Mostrar ID corto para ahorrar espacio */}
-                                    <p className="col-id">#{venta.id.substring(0, 8)}...</p> 
+                                    {/* Mostrar ID corto con shortId */}
+                                    <p className="col-id">#{shortId(toIdString(venta.id), 6)}</p> 
                                     <p className="col-usuario">{venta.username}</p>
                                     <p className="col-fecha">
                                         {fecha.toLocaleDateString(LOCALE)} {fecha.toLocaleTimeString(LOCALE, TIME_OPTIONS)}

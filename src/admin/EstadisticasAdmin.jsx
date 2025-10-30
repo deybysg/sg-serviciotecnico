@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Swal from 'sweetalert2';
 import { FaMoneyBillWave, FaShoppingCart, FaBoxOpen } from 'react-icons/fa'; 
-import './EstadisticasAdmin.css'; // Asegúrate de que este archivo CSS existe
+import './EstadisticasAdmin.css';
+import { api } from '../services/api';
+import { useRef } from 'react';
+import { shortId, toIdString } from '../utils/id';
 
 // =================================================================
 // 1. CONSTANTES Y FUNCIONES DE UTILIDAD
@@ -24,8 +27,6 @@ const CATEGORY_COLORS = {
 
 const getCategoryColor = (cat) => CATEGORY_COLORS[cat.toLowerCase()] || '#3498db';
 
-const API_SERVICIOS_URL = 'http://localhost:3001/servicios';
-const API_VENTAS_URL = 'http://localhost:3001/ventas'; // URL para las ventas
 const LOCALE = 'es-AR';
 
 
@@ -621,33 +622,58 @@ function EstadisticasAdmin() {
 
     // --- Estados para Ventas ---
     const [allSales, setAllSales] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [filterYearVentas, setFilterYearVentas] = useState('Todos');
     const [filterMonthVentas, setFilterMonthVentas] = useState('Todos');
     const [loadingSales, setLoadingSales] = useState(true);
     const [errorSales, setErrorSales] = useState(null);
     const [selectedMonthSalesData, setSelectedMonthSalesData] = useState(null);
 
-    // --- Fetch de Datos ---
-    const fetchAllData = useCallback(async (url, setter, errorSetter, loadingSetter, dataType) => {
+    // --- Fetch de Datos con Backend Real y JWT ---
+    const fetchAllData = useCallback(async (endpoint, setter, errorSetter, loadingSetter, dataType) => {
         loadingSetter(true);
         errorSetter(null);
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error al cargar ${dataType}: ${response.statusText}`);
-            const data = await response.json();
-            const finalData = Array.isArray(data) ? data : data[dataType] || [];
-            setter(finalData);
+            const data = await api.get(endpoint);
+            
+            // Normalizar _id a id
+            const normalizedData = (Array.isArray(data) ? data : []).map(item => ({
+                ...item,
+                id: item._id || item.id
+            }));
+            
+            setter(normalizedData);
         } catch (err) {
             console.error(`Fallo al obtener datos de ${dataType}:`, err);
-            errorSetter(`No se pudieron cargar ${dataType}. Revise la API.`);
+            errorSetter(`No se pudieron cargar ${dataType}. ${err.message || 'Revise la API.'}`);
+            
+            // Toast de error
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: `Error al cargar ${dataType}`,
+                showConfirmButton: false,
+                timer: 3000
+            });
         } finally {
             loadingSetter(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchAllData(API_SERVICIOS_URL, setAllServices, setErrorServices, setLoadingServices, 'servicios');
-        fetchAllData(API_VENTAS_URL, setAllSales, setErrorSales, setLoadingSales, 'ventas');
+        fetchAllData('/servicios', setAllServices, setErrorServices, setLoadingServices, 'servicios');
+        fetchAllData('/ventas', setAllSales, setErrorSales, setLoadingSales, 'ventas');
+        // Cargar usuarios para filtrar ventas huérfanas
+        (async () => {
+            try {
+                const users = await api.get('/usuarios');
+                setAllUsers(Array.isArray(users) ? users : []);
+            } catch (e) {
+                // Silenciar: si falla, se muestran todas las ventas
+                setAllUsers([]);
+            }
+        })();
     }, [fetchAllData]);
 
     // --- Lógica de Filtros (Comunes para Servicios) ---
@@ -672,12 +698,15 @@ function EstadisticasAdmin() {
     }, [allServices, filterYearServicios]);
 
     // --- Lógica de Filtros (Comunes para Ventas) ---
+    const existingUsernames = useMemo(() => new Set(allUsers.map(u => u.username)), [allUsers]);
+    const filteredAllSales = useMemo(() => allSales.filter(v => existingUsernames.size ? existingUsernames.has(v.username) : true), [allSales, existingUsernames]);
+
     const { availableYears: availableYearsVentas, availableMonths: availableMonthsVentas } = useMemo(() => {
-        const years = new Set(allSales.map(s => s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString()).filter(Boolean));
+        const years = new Set(filteredAllSales.map(s => s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString()).filter(Boolean));
         const availableYears = ['Todos', ...Array.from(years).sort((a,b) => b - a)];
 
         const months = new Set(
-            allSales
+            filteredAllSales
                 .filter(s => s.fechaCompra && new Date(s.fechaCompra).getFullYear().toString() === filterYearVentas)
                 .map(s => (new Date(s.fechaCompra).getMonth() + 1).toString().padStart(2, '0'))
                 .filter(Boolean)
@@ -690,7 +719,7 @@ function EstadisticasAdmin() {
             }))];
             
         return { availableYears, availableMonths };
-    }, [allSales, filterYearVentas]);
+    }, [filteredAllSales, filterYearVentas]);
 
     // --- Cálculo de Estadísticas ---
     const statsServicios = useMemo(() => {
@@ -699,9 +728,9 @@ function EstadisticasAdmin() {
     }, [allServices, filterYearServicios, filterMonthServicios]);
     
     const statsVentas = useMemo(() => {
-        if (!allSales.length) return null;
-        return analyzeSalesData(allSales, filterYearVentas, filterMonthVentas);
-    }, [allSales, filterYearVentas, filterMonthVentas]);
+        if (!filteredAllSales.length) return null;
+        return analyzeSalesData(filteredAllSales, filterYearVentas, filterMonthVentas);
+    }, [filteredAllSales, filterYearVentas, filterMonthVentas]);
 
     
     const maxRevenueServicios = useMemo(() => {
@@ -870,28 +899,35 @@ const MonthlySalesDetailModal = ({ data, onClose }) => {
                         <table className="monthly-service-detail-table">
                             <thead>
                                 <tr>
-                                    <th>ID/Fecha</th>
-                                    <th>Usuario</th>
-                                    <th>Productos</th>
-                                    <th className="monthly-text-right">Total</th>
+                                    <th className="col-idfecha">ID/Fecha</th>
+                                    <th className="col-usuario">Usuario</th>
+                                    <th className="col-productos">Productos</th>
+                                    <th className="col-total monthly-text-right">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.details.map((venta) => (
                                     <tr key={venta.id}>
-                                        <td>
-                                            <span className="monthly-service-id">{venta.id.substring(0, 6)}...</span>
+                                        <td className="col-idfecha">
+                                            <span className="monthly-service-id">#{shortId(toIdString(venta.id), 6)}</span>
+                                            <span className="copy-id" title="Copiar ID"
+                                                onClick={async () => {
+                                                    try {
+                                                        await navigator.clipboard.writeText(String(venta.id));
+                                                        Swal.fire({ toast:true, position:'top-end', icon:'success', title:'ID copiado', showConfirmButton:false, timer:1400 });
+                                                    } catch {}
+                                                }}>📋</span>
                                             <span className="monthly-service-date"> ({new Date(venta.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
-                                        <td>{venta.username}</td>
-                                        <td className="productos-list-modal">
+                                        <td className="col-usuario">{venta.username}</td>
+                                        <td className="col-productos productos-list-modal">
                                             {venta.productosComprados.map((p, idx) => (
                                                 <span key={idx} className="producto-badge">
                                                     {p.nombre} ({p.cantidad})
                                                 </span>
                                             ))}
                                         </td>
-                                        <td className="monthly-text-right">{formatCurrency(venta.total)}</td>
+                                        <td className="col-total monthly-text-right">{formatCurrency(venta.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>

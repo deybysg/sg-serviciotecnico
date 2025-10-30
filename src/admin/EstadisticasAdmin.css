@@ -416,8 +416,8 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     padding: 30px;
-    width: 90%;
-    max-width: 800px;
+    width: 95%;
+    max-width: 980px;
     box-shadow: var(--shadow-dark);
     transform: scale(0.95);
     opacity: 0;
@@ -470,7 +470,7 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
 }
 
 .monthly-modal-list-container {
-    max-height: 400px;
+    max-height: 60vh;
     overflow-y: auto;
     scrollbar-color: var(--primary-color) var(--hover-bg); 
     scrollbar-width: thin;
@@ -496,6 +496,17 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     letter-spacing: 0.5px;
     position: sticky;
     top: 0;
+}
+
+/* Anchos de columnas para mejor lectura */
+.monthly-service-detail-table .col-idfecha { width: 26%; white-space: nowrap; }
+.monthly-service-detail-table .col-usuario { width: 18%; }
+.monthly-service-detail-table .col-productos { width: auto; }
+.monthly-service-detail-table .col-total { width: 16%; }
+
+/* Zebra rows sutiles */
+.monthly-service-detail-table tbody tr:nth-child(odd) {
+    background-color: rgba(255,255,255,0.02);
 }
 
 .monthly-service-detail-table tbody tr:hover {
@@ -526,6 +537,14 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
 }
 .monthly-service-id { font-weight: 600; color: var(--text-color); }
 .monthly-service-date { font-size: 0.8em; color: var(--text-muted); }
+
+/* Botón copiar ID */
+.copy-id {
+    margin-left: 6px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+.copy-id:hover { opacity: 1; }
 
 .monthly-no-data-message-modal {
     text-align: center;
@@ -714,10 +733,10 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     .monthly-service-detail-table th:nth-child(3), .monthly-service-detail-table td:nth-child(3) {
         display: none; 
     }
-    .monthly-service-detail-modal {
-        max-width: 98%;
-        padding: 15px;
-    }
+    .monthly-service-detail-modal { max-width: 98%; padding: 15px; }
+    .monthly-service-detail-table .col-idfecha { width: auto; }
+    .monthly-service-detail-table .col-usuario { width: auto; }
+    .monthly-service-detail-table .col-total { width: auto; }
 }
 
 @media (max-width: 480px) {

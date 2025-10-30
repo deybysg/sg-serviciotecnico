@@ -1,5 +1,6 @@
 import React from 'react';
-import './HistorialDeVentas.css'; // O un archivo CSS para tu modal
+import './HistorialDeVentas.css';
+import { shortId, toIdString } from "../utils/id";
 
 const LOCALE = 'es-AR';
 const TIME_OPTIONS = { hour: '2-digit', minute: '2-digit', hour12: false };
@@ -18,7 +19,7 @@ const VentasModal = ({ isOpen, onClose, venta, ventasDeUsuario }) => {
     // Determina si estamos viendo una sola venta o el historial completo
     const isSingleSale = venta !== null && ventasDeUsuario.length === 1;
     const title = isSingleSale 
-        ? `Detalles de Venta #${venta.id.substring(0, 8)}` 
+        ? `Detalles de Venta #${shortId(toIdString(venta.id), 6)}` 
         : `Historial Completo de ${ventasDeUsuario[0]?.username || 'Usuario'}`;
 
     return (
@@ -31,7 +32,7 @@ const VentasModal = ({ isOpen, onClose, venta, ventasDeUsuario }) => {
                     const fecha = new Date(v.fechaCompra);
                     return (
                         <div key={v.id} className="venta-detalle-card">
-                            <h4 className="venta-card-id">Venta ID: #{v.id}</h4>
+                            <h4 className="venta-card-id">Venta ID: #{shortId(toIdString(v.id), 6)}</h4>
                             <p><strong>Usuario:</strong> {v.username}</p>
                             <p><strong>Fecha:</strong> {fecha.toLocaleDateString(LOCALE)} {fecha.toLocaleTimeString(LOCALE, TIME_OPTIONS)}</p>
                             <p><strong>Método:</strong> {v.metodoPago}</p>

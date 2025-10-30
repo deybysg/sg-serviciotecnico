@@ -193,8 +193,11 @@ function ServiciosAdmin() {
         }
         
         const dataToSend = {
-            ...formData,
-            // (1) GUARDA HORA (Final): Asegura que el valor final enviado a la DB es el momento de la creación
+            cliente: formData.clienteId, // Backend espera "cliente", no "clienteId"
+            marcaProducto: formData.marcaProducto,
+            tipoServicio: formData.tipoServicio,
+            detalles: formData.detalles,
+            estado: formData.estado,
             fechaEntrada: new Date().toISOString(), 
             presupuesto: {
                 ...formData.presupuesto,
@@ -204,8 +207,6 @@ function ServiciosAdmin() {
                 }))
             }
         };
-
-        const clienteId = dataToSend.clienteId; 
 
         try {
             // El backend maneja automáticamente la relación cliente-servicio
@@ -545,7 +546,7 @@ function ServiciosAdmin() {
                                                     alt="Logo"
                                                     style={{
                                                         position: 'absolute',
-                                                        top: '50%',
+                                                        top: '47%',
                                                         left: '50%',
                                                         transform: 'translate(-50%, -50%)',
                                                         width: '26px',

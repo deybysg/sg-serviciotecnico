@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './UsuariosAdmin.css';
-
-const API = 'http://localhost:3001/Usuarios';
+import { api } from '../services/api';
+import Swal from 'sweetalert2';
 
 export default function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
@@ -11,15 +11,26 @@ export default function UsuariosAdmin() {
   const [form, setForm] = useState({ username: '', password: '', role: 'user' });
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ username: '', role: 'user', password: '' });
+  const [saving, setSaving] = useState(false);
+
+  const toast = (icon, title) => Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon,
+    title,
+    showConfirmButton: false,
+    timer: 1800
+  });
 
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const res = await fetch(API);
-      const data = await res.json();
+      // Backend real (JWT) -> /api/usuarios (requiere admin/superadmin)
+      const data = await api.get('/usuarios');
       setUsuarios(data);
     } catch (e) {
       setError('No se pudieron cargar los usuarios');
+      toast('error', 'No se pudieron cargar los usuarios');
     } finally {
       setLoading(false);
     }
@@ -39,6 +50,12 @@ export default function UsuariosAdmin() {
 
     if (!form.username.trim() || !form.password) {
       setError('Usuario y contraseña son obligatorios');
+      toast('warning', 'Usuario y contraseña son obligatorios');
+      return;
+    }
+    if (form.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      toast('warning', 'La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -55,21 +72,21 @@ export default function UsuariosAdmin() {
     };
 
     try {
-      const res = await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error('Error creando usuario');
+      setSaving(true);
+      await api.post('/usuarios', payload);
       setForm({ username: '', password: '', role: 'user' });
+      toast('success', 'Usuario creado');
       fetchUsuarios();
     } catch (e) {
       setError('No se pudo crear el usuario');
+      toast('error', e?.message || 'No se pudo crear el usuario');
+    } finally {
+      setSaving(false);
     }
   };
 
   const startEdit = (u) => {
-    setEditingId(u.id);
+    setEditingId(u._id || u.id);
     setEditForm({ username: u.username, role: u.role, password: '' });
   };
 
@@ -80,10 +97,17 @@ export default function UsuariosAdmin() {
 
   const handleUpdate = async (id) => {
     setError(null);
-    const user = usuarios.find(u => u.id === id);
+    const user = usuarios.find(u => (u._id || u.id) === id);
     if (!user) return;
     if (protectedUsernames.has(user.username)) {
       setError('No se puede editar al superadmin');
+      toast('info', 'El SuperAdmin no puede editarse');
+      return;
+    }
+
+    if (editForm.password && editForm.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      toast('warning', 'La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -95,22 +119,23 @@ export default function UsuariosAdmin() {
     if (editForm.password) payload.password = editForm.password;
 
     try {
-      const res = await fetch(`${API}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error('Error actualizando usuario');
+      setSaving(true);
+      // Backend usa PUT /usuarios/:id
+      await api.put(`/usuarios/${id}`, payload);
       cancelEdit();
+      toast('success', 'Usuario actualizado');
       fetchUsuarios();
     } catch (e) {
       setError('No se pudo actualizar el usuario');
+      toast('error',  'No se pudo actualizar usuario existente');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
     setError(null);
-    const user = usuarios.find(u => u.id === id);
+    const user = usuarios.find(u => (u._id || u.id) === id);
     if (!user) return;
 
     if (protectedUsernames.has(user.username)) {
@@ -118,15 +143,26 @@ export default function UsuariosAdmin() {
       return;
     }
 
-    const ok = window.confirm(`¿Eliminar usuario "${user.username}"?`);
-    if (!ok) return;
+    const ask = await Swal.fire({
+      title: `¿Eliminar usuario "${user.username}"?`,
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    if (!ask.isConfirmed) return;
 
     try {
-      const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Error eliminando usuario');
+      setSaving(true);
+      await api.delete(`/usuarios/${id}`);
+      toast('success', 'Usuario eliminado');
       fetchUsuarios();
     } catch (e) {
       setError('No se pudo eliminar el usuario');
+      toast('error', e?.message || 'No se pudo eliminar');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -159,7 +195,7 @@ export default function UsuariosAdmin() {
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
-          <button type="submit">Crear</button>
+          <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear'}</button>
         </form>
       </section>
 
@@ -180,9 +216,9 @@ export default function UsuariosAdmin() {
             </thead>
             <tbody>
               {usuarios.map(u => (
-                <tr key={u.id}>
+                <tr key={u._id || u.id}>
                   <td>
-                    {editingId === u.id ? (
+                    {editingId === (u._id || u.id) ? (
                       <input
                         type="text"
                         value={editForm.username}
@@ -193,7 +229,7 @@ export default function UsuariosAdmin() {
                     )}
                   </td>
                   <td>
-                    {editingId === u.id ? (
+                    {editingId === (u._id || u.id) ? (
                       <select
                         value={editForm.role}
                         onChange={e => setEditForm({ ...editForm, role: e.target.value })}
@@ -207,15 +243,15 @@ export default function UsuariosAdmin() {
                     )}
                   </td>
                   <td className="acciones">
-                    {editingId === u.id ? (
+                    {editingId === (u._id || u.id) ? (
                       <>
-                        <button className="btn" onClick={() => handleUpdate(u.id)} disabled={protectedUsernames.has(u.username)}>Guardar</button>
+                        <button className="btn" onClick={() => handleUpdate(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>Guardar</button>
                         <button className="btn secondary" onClick={cancelEdit}>Cancelar</button>
                       </>
                     ) : (
                       <>
                         <button className="btn" onClick={() => startEdit(u)} disabled={protectedUsernames.has(u.username)}>Editar</button>
-                        <button className="btn danger" onClick={() => handleDelete(u.id)} disabled={protectedUsernames.has(u.username)}>Eliminar</button>
+                        <button className="btn danger" onClick={() => handleDelete(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>Eliminar</button>
                       </>
                     )}
                   </td>

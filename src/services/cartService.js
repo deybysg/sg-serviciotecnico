@@ -42,10 +42,8 @@ export async function upsertCartByUsername(username, items) {
  * Limpiar el carrito del usuario
  */
 export async function clearCart(username) {
-  if (!username) return null;
-
+  // Requiere sesión; el backend toma el usuario del token
   try {
-    // mejor usar endpoint autenticado (sin param)
     await api.patch(`/carts/limpiar`, {});
     return true;
   } catch (error) {

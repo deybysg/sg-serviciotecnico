@@ -1,7 +1,7 @@
 // src/components/Carrito.jsx
 
 import React from 'react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/cartStore';
 import { useAuth } from '../context/AuthContext'; 
 import { api } from '../services/api';
 import { FaPlus, FaMinus, FaTrashAlt } from 'react-icons/fa';
@@ -45,17 +45,16 @@ const simulatePurchaseAndSave = async (userId, username, items, total, updateSto
 function Carrito({ isOpen, onClose }) {
     // 💡 CAMBIO 1: Obtener el usuario del AuthContext
     const { user } = useAuth(); 
-    const { 
-        cartItems, 
-        totalAmount, 
-        totalItems, 
-        // 👇 Usamos clearCart y updateStockOnPurchase, que son necesarios para la simulación
-        addToCart, 
-        removeFromCart, 
-        removeItemTotally, 
-        clearCart,
-        updateStockOnPurchase 
-    } = useCart();
+    
+    // Obtener estado y acciones del store de Zustand
+    const cartItems = useCartStore(state => state.cartItems);
+    const totalAmount = useCartStore(state => state.getTotalAmount());
+    const totalItems = useCartStore(state => state.getTotalItems());
+    const addToCart = useCartStore(state => state.addToCart);
+    const removeFromCart = useCartStore(state => state.removeFromCart);
+    const removeItemTotally = useCartStore(state => state.removeItemTotally);
+    const clearCart = useCartStore(state => state.clearCart);
+    const updateStockOnPurchase = useCartStore(state => state.updateStockOnPurchase);
 
     // 💡 Obtiene el username o 'Invitado' si no hay usuario logueado
     const displayUsername = user?.username || 'Invitado'; 

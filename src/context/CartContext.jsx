@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuth } from './AuthContext';
 import { getCartByUsername, upsertCartByUsername } from '../services/cartService';
 import { api } from '../services/api';
+import { toIdString } from '../utils/id';
 
 const GUEST_KEY = 'SG_cart_guest';
 const CART_EXPIRY_HOURS = 24; // Tiempo de expiración del carrito en horas
@@ -22,7 +23,7 @@ export function useCart() {
 }
 
 // ----------------------------------------------------
-// Funciones auxiliares para manejo de timestamp
+// Funciones auxiliares (solo para invitados)
 // ----------------------------------------------------
 const isCartExpired = (timestamp) => {
     if (!timestamp) return true;
@@ -31,41 +32,33 @@ const isCartExpired = (timestamp) => {
     return (now - timestamp) > expiryTime;
 };
 
-const loadCartFromStorage = (key) => {
+const loadGuestCart = () => {
     try {
-        const stored = localStorage.getItem(key);
+        const stored = localStorage.getItem(GUEST_KEY);
         if (!stored) return { items: [], timestamp: null };
-        
+
         const parsed = JSON.parse(stored);
-        
-        // Si es formato antiguo (array directo), convertir
         if (Array.isArray(parsed)) {
             return { items: parsed, timestamp: new Date().getTime() };
         }
-        
-        // Si es formato nuevo con timestamp
+
         if (parsed.timestamp && isCartExpired(parsed.timestamp)) {
-            // Carrito expirado, limpiar y devolver vacío
-            localStorage.removeItem(key);
+            localStorage.removeItem(GUEST_KEY);
             return { items: [], timestamp: null };
         }
-        
         return parsed;
     } catch (error) {
-        console.error("Error al cargar carrito desde localStorage:", error);
+        console.error('Error al cargar carrito guest desde localStorage:', error);
         return { items: [], timestamp: null };
     }
 };
 
-const saveCartToStorage = (key, items) => {
+const saveGuestCart = (items) => {
     try {
-        const data = {
-            items,
-            timestamp: new Date().getTime()
-        };
-        localStorage.setItem(key, JSON.stringify(data));
+        const data = { items, timestamp: new Date().getTime() };
+        localStorage.setItem(GUEST_KEY, JSON.stringify(data));
     } catch (error) {
-        console.error("Error al guardar carrito en localStorage:", error);
+        console.error('Error al guardar carrito guest en localStorage:', error);
     }
 };
 
@@ -75,41 +68,10 @@ const saveCartToStorage = (key, items) => {
 export function CartProvider({ children }) {
     const { user } = useAuth();
 
-    // 1. Inicializar el carrito desde localStorage según el usuario actual
-    const [cartItems, setCartItems] = useState(() => {
-        // Intentar cargar del usuario si hay sesión activa (rehidratación)
-        const storedUser = localStorage.getItem('currentUser');
-        console.log('🔵 [CartContext INIT] storedUser:', storedUser);
-        if (storedUser) {
-            try {
-                const parsedUser = JSON.parse(storedUser);
-                if (parsedUser && parsedUser.username) {
-                    const userKey = `SG_cart_${parsedUser.username}`;
-                    console.log('🔵 [CartContext INIT] Cargando carrito de:', userKey);
-                    const cartData = loadCartFromStorage(userKey);
-                    console.log('🔵 [CartContext INIT] Items cargados:', cartData.items.length);
-                    return cartData.items;
-                }
-            } catch (e) {
-                console.error("Error cargando usuario almacenado:", e);
-            }
-        }
-        // Fallback: cargar guest
-        console.log('🔵 [CartContext INIT] Cargando guest');
-        const cartData = loadCartFromStorage(GUEST_KEY);
-        return cartData.items;
-    });
+    // 1. Estado inicial vacío; se sincroniza luego según usuario/guest
+    const [cartItems, setCartItems] = useState([]);
 
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-    const getStorageKey = (usr) => (usr && usr.username ? `SG_cart_${usr.username}` : GUEST_KEY);
-
-    // 2. Guardar el carrito en localStorage por contexto (guest o usuario) con timestamp
-    useEffect(() => {
-        const key = getStorageKey(user);
-        console.log('💾 [CartContext SAVE] Guardando en:', key, 'Items:', cartItems.length, 'User:', user?.username);
-        saveCartToStorage(key, cartItems);
-    }, [cartItems, user]);
 
     // 2b. Cargar carrito específico del usuario cuando cambia de usuario (login/logout)
     useEffect(() => {
@@ -119,50 +81,40 @@ export function CartProvider({ children }) {
             console.log('🔄 [CartContext SYNC] Iniciando sync. User:', user?.username, 'isInitialLoad:', isInitialLoad);
             try {
                 if (user && user.username) {
-                    // Primero cargar el carrito local específico del usuario
-                    const userKey = getStorageKey(user);
-                    console.log('🔄 [CartContext SYNC] Cargando localStorage de:', userKey);
-                    const localUserCart = loadCartFromStorage(userKey);
-                    console.log('🔄 [CartContext SYNC] Items locales:', localUserCart.items.length);
-                    
-                    // obtener carrito del servidor
+                    // obtener carrito del servidor (única fuente)
                     console.log('🔄 [CartContext SYNC] Consultando servidor...');
                     const serverCart = await getCartByUsername(user.username);
                     if (!mounted) return;
 
                     console.log('🔄 [CartContext SYNC] Items servidor:', serverCart?.items?.length || 0);
 
-                    // Priorizar el que tenga más items (merge inteligente)
-                    if (serverCart && serverCart.items && serverCart.items.length > 0) {
-                        // Si el servidor tiene items, usarlos
-                        console.log('✅ [CartContext SYNC] Usando items del servidor');
+                    // Seguridad: validar que el carrito devuelto coincide con el usuario actual
+                    const sid = serverCart?._id || serverCart?.username;
+                    if (serverCart && sid && toIdString(sid) !== toIdString(user.username)) {
+                        console.warn('🛡️ [CartContext SYNC] Mismatch de usuario en carrito del servidor. Esperado:', user.username, 'Recibido:', sid, '→ Se fuerza carrito vacío del usuario actual.');
+                        await upsertCartByUsername(user.username, []);
+                        setCartItems([]);
+                        return;
+                    }
+
+                    if (serverCart && Array.isArray(serverCart.items)) {
+                        console.log('✅ [CartContext SYNC] Aplicando carrito del servidor');
                         setCartItems(serverCart.items);
-                        saveCartToStorage(getStorageKey(user), serverCart.items);
-                    } else if (localUserCart.items && localUserCart.items.length > 0) {
-                        // Si el servidor está vacío pero hay items locales del usuario, usar esos
-                        console.log('✅ [CartContext SYNC] Usando items locales y subiendo al servidor');
-                        setCartItems(localUserCart.items);
-                        // Y sincronizar al servidor
-                        await upsertCartByUsername(user.username, localUserCart.items);
                     } else {
-                        // Ambos vacíos, dejar vacío
-                        console.log('✅ [CartContext SYNC] Ambos vacíos, limpiando carrito');
+                        console.log('✅ [CartContext SYNC] Servidor sin carrito/items');
                         setCartItems([]);
                     }
                 } else {
-                    // logout -> cargar guest
+                    // logout -> cargar guest desde localStorage
                     console.log('🔄 [CartContext SYNC] Sin usuario, cargando guest');
-                    const guestCart = loadCartFromStorage(GUEST_KEY);
+                    const guestCart = loadGuestCart();
                     setCartItems(guestCart.items);
                 }
             } catch (err) {
                 console.error('❌ [CartContext SYNC] Error sincronizando con servidor:', err);
-                // En caso de error, cargar desde localStorage del usuario actual
-                const key = getStorageKey(user);
-                const fallbackCart = loadCartFromStorage(key);
                 if (mounted) {
-                    console.log('⚠️ [CartContext SYNC] Usando fallback local');
-                    setCartItems(fallbackCart.items);
+                    // En error con usuario logueado, mostrar vacío (no usar localStorage)
+                    setCartItems([]);
                 }
             } finally {
                 if (mounted) {
@@ -179,19 +131,38 @@ export function CartProvider({ children }) {
         return () => { mounted = false; };
     }, [user, isInitialLoad]);
 
-    // 2c. Cuando cambia el usuario (login/logout), marcar para recargar
+    // 2c. Cambio de usuario (login/logout): limpiar memoria siempre para evitar mezcla o "flicker"
+    // Guardamos el último username autenticado para detectar cambios reales entre usuarios logueados
+    const lastAuthUsernameRef = useRef(null);
     useEffect(() => {
-        // Cuando cambia el usuario, permitir que se recargue el carrito
-        console.log('👤 [CartContext USER CHANGE] Usuario cambió a:', user?.username);
-        setIsInitialLoad(true);
-    }, [user?.username]); // Solo cuando cambia el username
+        const current = user?.username || null;
+        const prevAuth = lastAuthUsernameRef.current;
+        console.log('👤 [CartContext USER CHANGE] prevAuth:', prevAuth, 'current:', current);
 
-    // 2d. Si hay usuario logueado, asegurarse de no dejar restos de carrito guest
+        // Limpiar inmediatamente al loguear, desloguear o cambiar de usuario para evitar que se vean items anteriores
+        if (current !== prevAuth) {
+            setCartItems([]);
+        }
+
+        // Forzar recarga desde backend o guest según corresponda
+        setIsInitialLoad(true);
+
+        // Solo actualizamos el "último usuario autenticado" cuando hay un usuario (evita perder referencia al desloguear)
+        if (current) {
+            lastAuthUsernameRef.current = current;
+        }
+    }, [user?.username]);
+
+    // 2d. Guardar guest en localStorage solo si no hay usuario; si hay usuario, limpiar guest para evitar confusiones
     useEffect(() => {
-        if (user && user.username) {
+        if (!user || !user.username) {
+            if (!isInitialLoad) {
+                saveGuestCart(cartItems);
+            }
+        } else {
             try { localStorage.removeItem(GUEST_KEY); } catch {}
         }
-    }, [user]);
+    }, [cartItems, user, isInitialLoad]);
 
     // 3. Cálculos de totales (memoizados para rendimiento)
     const { totalAmount, totalItems } = useMemo(() => {
@@ -208,9 +179,12 @@ export function CartProvider({ children }) {
     /**
      * Agrega un producto o incrementa su cantidad.
      */
+    const getProductId = (p) => toIdString(p?.id ?? p?._id);
+
     const addToCart = (productToAdd) => {
         setCartItems(prevItems => {
-            const existingItem = prevItems.find(item => item.id === productToAdd.id);
+            const pid = getProductId(productToAdd);
+            const existingItem = prevItems.find(item => toIdString(item.id) === pid);
             
             if (existingItem) {
                 // Verificar si hay stock disponible para sumar 1 más
@@ -221,7 +195,7 @@ export function CartProvider({ children }) {
 
                 // Incrementar la cantidad
                 const updatedItems = prevItems.map(item => 
-                    item.id === productToAdd.id 
+                    toIdString(item.id) === pid 
                         ? { ...item, cantidad: item.cantidad + 1 }
                         : item
                 );
@@ -236,7 +210,7 @@ export function CartProvider({ children }) {
                 return updatedItems;
             } else {
                 // Agregar nuevo ítem
-                const newItem = { ...productToAdd, cantidad: 1 };
+                const newItem = { ...productToAdd, id: pid, cantidad: 1 };
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -255,20 +229,20 @@ export function CartProvider({ children }) {
      */
     const removeFromCart = (productId) => {
         setCartItems(prevItems => {
-            const existingItem = prevItems.find(item => item.id === productId);
+            const existingItem = prevItems.find(item => toIdString(item.id) === toIdString(productId));
 
             if (!existingItem) return prevItems; // Evitar errores si no existe
 
             if (existingItem.cantidad > 1) {
                 // Decrementar la cantidad
                 return prevItems.map(item => 
-                    item.id === productId 
+                    toIdString(item.id) === toIdString(productId) 
                         ? { ...item, cantidad: item.cantidad - 1 }
                         : item
                 );
             } else {
                 // Eliminar el producto si la cantidad es 1
-                return prevItems.filter(item => item.id !== productId);
+                return prevItems.filter(item => toIdString(item.id) !== toIdString(productId));
             }
         });
     };
@@ -287,8 +261,8 @@ export function CartProvider({ children }) {
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if (result.isConfirmed) {
-                 setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+          if (result.isConfirmed) {
+              setCartItems(prevItems => prevItems.filter(item => toIdString(item.id) !== toIdString(productId)));
                  Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -314,17 +288,26 @@ export function CartProvider({ children }) {
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Sí, vaciar',
             cancelButtonText: 'Cancelar'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setCartItems([]);
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'info',
-                    title: 'Carrito vaciado',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                try {
+                    // Vaciar también en el servidor si hay sesión
+                    if (user && user.username) {
+                        await import('../services/cartService').then(m => m.clearCart(user.username));
+                    }
+                    setCartItems([]);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'info',
+                        title: 'Carrito vaciado',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } catch (err) {
+                    console.warn('No se pudo vaciar en servidor, se vacía localmente', err);
+                    setCartItems([]);
+                }
             }
         });
     };
@@ -358,26 +341,19 @@ export function CartProvider({ children }) {
         }
     };
 
-    // 4. Valores del Contexto
-    // Persistir en server cada vez que cambie el carrito y hay usuario
+    // 4. Persistir al servidor al cambiar items cuando hay usuario (sin localStorage)
     useEffect(() => {
-        let mounted = true;
         async function persist() {
             try {
-                if (user && user.username && cartItems.length >= 0) {
-                    console.log('☁️ [CartContext PERSIST] Guardando en servidor. User:', user.username, 'Items:', cartItems.length);
-                    await upsertCartByUsername(user.username, cartItems);
-                    // también guardar copia local por usuario con timestamp
-                    saveCartToStorage(getStorageKey(user), cartItems);
-                    console.log('✅ [CartContext PERSIST] Guardado exitoso');
-                }
+                if (!user || !user.username || isInitialLoad) return;
+                await upsertCartByUsername(user.username, cartItems);
+                console.log('✅ [CartContext PERSIST] Guardado en servidor');
             } catch (err) {
-                console.warn('⚠️ [CartContext PERSIST] No se pudo persistir carrito en server, se mantiene localmente', err);
+                console.warn('⚠️ [CartContext PERSIST] Error guardando en servidor:', err);
             }
         }
         persist();
-        return () => { mounted = false; };
-    }, [cartItems, user]);
+    }, [cartItems, user, isInitialLoad]);
 
     const contextValue = useMemo(() => ({
         cartItems,

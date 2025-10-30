@@ -1,4 +1,5 @@
 import React from 'react';
+import { shortId, toIdString } from "../utils/id";
 // Asume que los estilos se cargan via HistorialAdmin.jsx
 
 const LOCALE = 'es-AR'; // Localización para las fechas
@@ -51,12 +52,12 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
             const fecha = dateOnly.toLocaleDateString(LOCALE);
             const hora = date.toLocaleTimeString(LOCALE, TIME_OPTIONS);
 
-            return `${fecha} a las ${hora}`;
+                        return `${fecha} a las ${hora}`;
         };
         
-        return (
-            <div key={s.id} className="servicio-item-modal">
-                <h4 className="servicio-titulo-modal">Servicio ID: {s.id} ({s.tipoServicio || 'N/A'})</h4>
+                return (
+			<div key={s.id} className="servicio-item-modal">
+				<h4 className="servicio-titulo-modal">Servicio ID: {shortId(toIdString(s.id), 6)} ({s.tipoServicio || 'N/A'})</h4>
                 
                 <p>
                     <strong>Estado:</strong> 
@@ -103,8 +104,8 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
                     ) : (
                         <p className="presupuesto-item-line">No se especificaron ítems en el presupuesto.</p>
                     )}
-                    
-                </div>
+
+                    </div>
             </div>
         );
     };
@@ -114,9 +115,9 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <button className="modal-close-btn" onClick={onClose}>&times;</button>
                 
-                <h3 className="modal-titulo">
-                    {isSingleService ? `Detalle de Servicio #${servicios[0].id}` : `Historial Completo de ${cliente.nombreCompleto}`}
-                </h3>
+                <h3 className="modal-titulo">
+                    {isSingleService ? `Detalle de Servicio #${shortId(toIdString(servicios[0].id), 6)}` : `Historial Completo de ${cliente.nombreCompleto}`}
+                </h3>
                 
                 <div className="modal-body">
                     {!isSingleService && (

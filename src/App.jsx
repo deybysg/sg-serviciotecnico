@@ -21,7 +21,7 @@ import Paneltrabajos from "./admin/Paneltrabajos";
 import HistorialDeVentas from "./admin/HistorialDeVentas";
 
 import { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext"; 
+import { CartProvider } from "./context/CartProvider"; 
 import PrivateRoute from "./components/PrivateRoute";
 import MisComprasModal from "./pages/MisComprasModal";
 import ComprobanteVenta from "./pages/ComprobanteVenta";
