@@ -25,7 +25,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const filasVacias = presupuestoCero ? Array(3).fill({ descripcion: '_________________________', costo: 0 }) : [];
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
-    const sid = toIdString(service._id || service.id);
+    const servicioNumero = service.servicioNumero || 'N/A';
 
     return (
         <div style={styles.comprobanteContainer}>
@@ -36,7 +36,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 <div style={styles.qrCode}>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                         <QRCodeSVG 
-                            value={`http://192.168.1.22:5173/seguimiento/${sid}`} 
+                            value={`http://192.168.1.22:5173/seguimiento/${servicioNumero}`} 
                             size={85} 
                             level="H"
                             bgColor="#ffffff"
@@ -63,7 +63,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 <div style={styles.headerInfo}>
                     <h1 style={styles.title}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
                     <p style={styles.subtitle}>SG SERVICIO TECNICO</p>
-                    <p style={styles.headerDetail}>ID de Servicio: <span style={styles.highlight}>{shortId(sid, 6)}</span> | <strong>Fecha Ingreso:</strong> <span style={styles.highlight}>{formatDate(service.fechaEntrada)}</span></p>
+                    <p style={styles.headerDetail}>N° de Orden: <span style={styles.highlight}>{servicioNumero}</span> | <strong>Fecha Ingreso:</strong> <span style={styles.highlight}>{formatDate(service.fechaEntrada)}</span></p>
                 </div>
             </div>
 

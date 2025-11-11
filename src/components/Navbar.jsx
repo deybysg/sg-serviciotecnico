@@ -4,6 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
+import { TbInfoSmall } from "react-icons/tb";
+import { GrInfo } from "react-icons/gr";
+import { RiInformation2Fill } from "react-icons/ri";
+import { BsInfoCircleFill } from "react-icons/bs";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
@@ -102,7 +106,7 @@ function Navbar() {
               <li><NavLink to="/" end>Inicio</NavLink></li>
               <li><NavLink to="/productos">Productos</NavLink></li>
               <li><NavLink to="/login">Login</NavLink></li>
-              <li><NavLink to="/servicios">Ayuda</NavLink></li>
+              <li><NavLink to="/servicios">Info <BsInfoCircleFill /></NavLink></li>
             </>
           )}
 

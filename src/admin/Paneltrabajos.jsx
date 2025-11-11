@@ -106,10 +106,9 @@ const PanelTrabajo = () => {
     // Manejar tanto cliente populado como clienteId
     const clienteData = s.cliente || s.clienteId;
     const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
-    const servicioId = String(s._id || s.id);
-    const servicioIdCorto = shortId(servicioId).toLowerCase();
+    const servicioNumero = String(s.servicioNumero || '');
     const coincideBusqueda =
-      servicioId.includes(query) || servicioIdCorto.includes(query) || clienteNombre.includes(query);
+      servicioNumero.includes(query) || clienteNombre.includes(query);
 
     let coincideFiltro = true;
     if (filtroEstado !== "todos") {
@@ -316,12 +315,7 @@ const PanelTrabajo = () => {
               >
                 <div className="info-resumen">
                   <p>
-                    <strong>ID:</strong> {shortId(servicioId)}{' '}
-                    <span
-                      title="Copiar ID completo"
-                      onClick={() => handleCopyId(servicioId)}
-                      style={{ cursor: 'pointer', marginLeft: 6 }}
-                    >📋</span>,{' '}
+                    <strong>N° Orden:</strong> {servicio.servicioNumero || 'N/A'},{' '}
                     <strong>Cliente:</strong> {clienteNombre},{" "}
                     <strong>Estado:</strong>{" "}
                     <span className={`estado-badge estado-${servicio.estado}`}>

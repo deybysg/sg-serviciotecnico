@@ -35,12 +35,17 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
 
         // Manejar errores HTTP
         if (!response.ok) {
-            // Si es 401, el token expiró o es inválido
+            // Si es 401, y la solicitud requería auth, redirigimos al login.
+            // Si NO requería auth (página pública), NO redirigimos: solo lanzamos error.
             if (response.status === 401) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('currentUser');
-                window.location.href = '/login'; // Redirigir al login
-                throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                if (requiresAuth) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    window.location.href = '/login'; // Redirigir al login
+                    throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                } else {
+                    throw new Error('No autorizado (recurso público)');
+                }
             }
 
             // Si es 403, no tiene permisos

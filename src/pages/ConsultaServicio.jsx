@@ -77,39 +77,27 @@ function ConsultaServicio() {
 
         try {
             const candidate = String(serviceId).trim();
-            const isFullObjectId = /^[a-fA-F0-9]{24}$/.test(candidate);
-
-            let dataServicio;
-            if (isFullObjectId) {
-                // 1.a Búsqueda directa por ID completo
-                dataServicio = await api.get(`/servicios/${candidate}`);
-            } else {
-                // 1.b Búsqueda por ID corto (últimos N, por defecto 6)
-                const lista = await api.get('/servicios');
-                const match = (lista || []).find(s => shortId(s._id || s.id, 6).toUpperCase() === candidate.toUpperCase());
-                if (!match) throw new Error('No se encontró un servicio con ese ID.');
-                dataServicio = match;
-            }
-
-            setServicio(dataServicio);
-
-            // 2. Cliente viene populado o es un ID
-            if (dataServicio.cliente) {
-                if (typeof dataServicio.cliente === 'object') {
+            
+            // Si es un número de 3-5 dígitos, buscar por servicioNumero directamente
+            if (/^\d{3,5}$/.test(candidate)) {
+                // Consulta pública: no requiere autenticación
+                const dataServicio = await api.get(`/seguimiento/${candidate}`, false);
+                setServicio(dataServicio);
+                
+                // Cargar cliente desde respuesta (ruta pública ya devuelve cliente básico)
+                if (dataServicio.cliente && typeof dataServicio.cliente === 'object') {
                     setCliente(dataServicio.cliente);
                 } else {
-                    const dataCliente = await api.get(`/clientes/${dataServicio.cliente}`);
-                    setCliente(dataCliente);
+                    setCliente(null);
                 }
-            } else if (dataServicio.clienteId) {
-                const dataCliente = await api.get(`/clientes/${dataServicio.clienteId}`);
-                setCliente(dataCliente);
+            } else {
+                throw new Error('Ingrese un número de servicio válido (3-5 dígitos).');
             }
             
         } catch (err) {
             if (isInitialFetch) {
-                setError("No se pudo encontrar el servicio con el ID proporcionado (acepta ID completo o ID corto de 6 caracteres).");
-                Swal.fire("Sin resultados", "Verificá el ID (completo o corto de 6 caracteres).", "warning");
+                setError("No se pudo encontrar el servicio con el número proporcionado. Ingrese un número de 3 a 5 dígitos.");
+                Swal.fire("Sin resultados", "Verificá el número de servicio (3-5 dígitos).", "warning");
             }
         } finally {
              if (isInitialFetch) {
@@ -133,9 +121,11 @@ function ConsultaServicio() {
             
             // Intervalo de 15 segundos (15000 ms)
             const intervalId = setInterval(() => {
-                // Usamos el ID del servicio actual para la búsqueda
-                const sid = servicio._id || servicio.id;
-                fetchServicio(sid);
+                    // Usamos el número de servicio para la búsqueda
+                    const sid = servicio.servicioNumero;
+                    if (sid) {
+                        fetchServicio(sid);
+                    }
             }, 10000); 
 
             // Función de limpieza: CLAVE para evitar fugas de memoria
@@ -163,7 +153,13 @@ function ConsultaServicio() {
         
         const finalId = searchId.trim();
         if (!finalId) {
-            Swal.fire("Atención", "Ingrese un ID de servicio.", "warning");
+            Swal.fire("Atención", "Ingrese un número de servicio.", "warning");
+            return;
+        }
+
+        // Validar que sea un número de 3-5 dígitos
+        if (!/^\d{3,5}$/.test(finalId)) {
+            Swal.fire("Atención", "Ingrese un número válido de 3 a 5 dígitos.", "warning");
             return;
         }
 
@@ -253,7 +249,7 @@ function ConsultaServicio() {
                     <form onSubmit={handleSearch} className="search-form">
                         <input
                             type="text"
-                            placeholder="Ingresa el ID de tu servicio"
+                            placeholder="Ingresa el número de tu servicio (ej: 100)"
                             value={searchId}
                             onChange={(e) => setSearchId(e.target.value)}
                             className="search-input"
@@ -324,7 +320,7 @@ function ConsultaServicio() {
                         <div className="details-box">
                             <p><strong>Cliente:</strong> {cliente?.nombreCompleto || 'N/A'}</p>
                             <p><strong>Equipo:</strong> {servicio.marcaProducto} ({servicio.tipoServicio})</p>
-                            <p><strong>N° de Orden:</strong> SG-{shortId(toIdString(servicio._id || servicio.id), 6)}</p>
+                            <p><strong>N° de Orden:</strong> {servicio.servicioNumero || 'N/A'}</p>
                             <p><strong>Estado Actual:</strong> <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span></p>
                             <p><strong>Fecha Ingreso:</strong> {new Date(servicio.fechaEntrada).toLocaleDateString()}</p>
                             {/* Presupuesto Total en la vista principal */}
@@ -350,7 +346,7 @@ function ConsultaServicio() {
             {showPresupuestoModal && servicio && (
                 <div className="modal-overlay" onClick={() => setShowPresupuestoModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Detalle del Presupuesto (ID: {shortId(toIdString(servicio._id || servicio.id), 6)})</h3>
+                        <h3>Detalle del Presupuesto (Orden N°: {servicio.servicioNumero || 'N/A'})</h3>
                         
                         {servicio.presupuesto?.items?.length > 0 && (
                             <div className="toggle-budget-details">

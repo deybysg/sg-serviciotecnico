@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 
 function Home() {
-  const alertaActiva = false;
+  const alertaActiva = true;
   const mensajeAlerta =
     "Hoy no estamos atendiendo por viaje, disculpen las molestias.";
 

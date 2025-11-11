@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { GoDownload } from "react-icons/go";
 import { api } from "../services/api";
 import Swal from "sweetalert2";
 import Select from "react-select";
@@ -251,13 +252,17 @@ function ServiciosAdmin() {
     const handleEditClick = (serviceId) => {
         const serviceToEdit = servicios.find(s => (s._id || s.id) === serviceId);
         if (serviceToEdit) {
-            setEditId(serviceId); 
+            setEditId(serviceId);
             const clonedData = JSON.parse(JSON.stringify(serviceToEdit));
+            // Extraer el ID del cliente si es un objeto poblado
+            if (clonedData.cliente && typeof clonedData.cliente === 'object') {
+                clonedData.cliente = clonedData.cliente._id;
+            }
             clonedData.presupuesto.items = clonedData.presupuesto.items.map(item => ({
                 ...item,
                 costo: item.costo === 0 ? "" : item.costo
             }));
-            setEditData(clonedData); 
+            setEditData(clonedData);
             setShowBudgetId(null);
         }
     };
@@ -406,15 +411,14 @@ function ServiciosAdmin() {
     // ----------------------------------------
     const serviciosFiltrados = servicios.filter((s) => {
         const query = searchQuery.toLowerCase();
-        const cliente = clientes.find(c => c.value === s.clienteId)?.label || "";
-        const servicioId = (s._id || s.id).toString();
-        const servicioIdCorto = shortId(servicioId, 6).toLowerCase();
+        const clienteId = typeof s.cliente === 'object' ? s.cliente._id : s.cliente;
+        const clienteNombre = typeof s.cliente === 'object' ? s.cliente.nombreCompleto : (clientes.find(c => c.value === clienteId)?.label || "");
+        const servicioNumero = s.servicioNumero ? s.servicioNumero.toString() : "";
         return (
-            servicioId.includes(query) ||
-            servicioIdCorto.includes(query) ||
+            servicioNumero.includes(query) ||
             s.marcaProducto.toLowerCase().includes(query) ||
             s.tipoServicio.toLowerCase().includes(query) ||
-            cliente.toLowerCase().includes(query)
+            clienteNombre.toLowerCase().includes(query)
         );
     });
 
@@ -494,7 +498,7 @@ function ServiciosAdmin() {
                     <div className="buscador-servicios">
                         <input
                             type="text"
-                            placeholder="Buscar por ID, cliente, marca o tipo..."
+                            placeholder="Buscar por N° Orden, cliente, marca o tipo..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -506,12 +510,15 @@ function ServiciosAdmin() {
                     <div className="servicios-lista-wrapper">
                         <div className="servicios-lista-cards">
                             {serviciosOrdenados.map((s) => {
-                                const cliente = clientes.find(c => c.value === s.clienteId);
-                                const clienteNombre = cliente?.label || "Cliente desconocido";
+                                // El backend puede enviar cliente como objeto poblado o como ID
+                                const clienteId = typeof s.cliente === 'object' ? s.cliente._id : s.cliente;
+                                const clienteObj = clientes.find(c => c.value === clienteId);
+                                const clienteNombre = typeof s.cliente === 'object' ? s.cliente.nombreCompleto : (clienteObj?.label || "Cliente desconocido");
                                 const servicioId = s._id || s.id;
+                                const servicioNumero = s.servicioNumero || 'N/A';
                                 const isEditing = editId === servicioId; 
                                 const isBudgetOpen = showBudgetId === servicioId; 
-             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioId}`;
+             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
 
                                 return (
                                     <div 
@@ -520,12 +527,12 @@ function ServiciosAdmin() {
                                     >
                                         <div className="qr-info-header">
                                             <h4>
-                                                ID: {shortId(servicioId, 6)}{' '}
+                                                N° Orden: {servicioNumero}{' '}
                                                 <span
-                                                    title="Copiar ID completo"
+                                                    title="Copiar número de orden"
                                                     onClick={async () => {
                                                         try {
-                                                            await navigator.clipboard.writeText(String(servicioId));
+                                                            await navigator.clipboard.writeText(String(servicioNumero));
                                                             const Toast = Swal.mixin({
                                                                 toast: true,
                                                                 position: 'top-end',
@@ -533,7 +540,7 @@ function ServiciosAdmin() {
                                                                 timer: 2000,
                                                                 timerProgressBar: true,
                                                             });
-                                                            Toast.fire({ icon: 'success', title: 'ID copiado al portapapeles' });
+                                                            Toast.fire({ icon: 'success', title: 'Número copiado al portapapeles' });
                                                         } catch {}
                                                     }}
                                                     style={{ cursor: 'pointer', marginLeft: 6 }}
@@ -563,7 +570,7 @@ function ServiciosAdmin() {
                                             <>
                                                 {/* MODO EDICIÓN */}
                                                 <label>Cliente:</label>
-                                                <select name="clienteId" value={editData.clienteId} onChange={handleEditChange}>
+                                                <select name="cliente" value={editData.cliente} onChange={handleEditChange}>
                                                     {clientes.map(c => (
                                                          <option key={c.value} value={c.value}>{c.label}</option>
                                                      ))}
@@ -670,7 +677,7 @@ function ServiciosAdmin() {
                                                      <button onClick={() => handleEditClick(servicioId)} className="btn-edit-servicio">Editar</button>
                                                      <button onClick={() => handleDeleteServicio(servicioId)} className="btn-delete-servicio">Eliminar</button>
                                                      {/* NUEVO: Botón para generar PDF, pasa el nombre del cliente */}
-                                                     <button onClick={() => generarComprobante({ ...s, clienteNombre })} className="btn-pdf-servicio">PDF 📄</button>
+                                                     <button onClick={() => generarComprobante({ ...s, clienteNombre })} className="btn-pdf-servicio"> <GoDownload /></button>
                                                  </div>
                                             </>
                                         )}
