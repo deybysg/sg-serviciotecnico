@@ -1,0 +1,109 @@
+.sidebar-toggle {
+  position: fixed;
+  top: 1.2rem;
+  left: 1.2rem;
+  z-index: 1200;
+  background: #145a6a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sidebar-toggle:hover {
+  background: #1bffff;
+  color: #145a6a;
+}
+
+.sidebar-menu-sg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 290px;
+  height: 100vh;
+  background: #145a6a;
+  color: #fff;
+  box-shadow: 2px 0 16px rgba(44,62,80,0.18);
+  z-index: 1300;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(.4,1.4,.6,1);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.sidebar-menu-sg.open {
+  transform: translateX(0);
+}
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem 0.7rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 1px solid #1bffff44;
+}
+.sidebar-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.2rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.sidebar-close:hover {
+  background: #1bffff;
+  color: #145a6a;
+}
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-size: 1.15rem;
+  color: #fff;
+  text-decoration: none;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #1bffff44;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-link:hover {
+  background: #1bffff;
+  color: #145a6a;
+}
+.sidebar-icon {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44,62,80,0.18);
+  z-index: 1250;
+}
+@media (max-width: 600px) {
+  .sidebar-menu-sg {
+    width: 98vw;
+    min-width: 180px;
+  }
+  .sidebar-header {
+    font-size: 1.1rem;
+    padding: 1rem 1rem 0.5rem 1rem;
+  }
+  .sidebar-link {
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+  }
+}

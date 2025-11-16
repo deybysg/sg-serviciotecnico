@@ -1,0 +1,80 @@
+/* Barra lateral para SuperAdmin */
+.super-sidebar {
+  position: fixed;
+  top: 64px; /* altura aproximada del Navbar */
+  left: 0;
+  bottom: 0;
+  width: 64px; /* colapsada */
+  background: #0f172a; /* slate-900 */
+  border-right: 1px solid rgba(255,255,255,0.08);
+  z-index: 900; /* por debajo del navbar (1000) */
+  transition: width 0.2s ease;
+  overflow: hidden;
+}
+
+.super-sidebar:hover {
+  width: 240px; /* expandida al hover */
+}
+
+.super-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 8px;
+  gap: 6px;
+}
+
+.super-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e2e8f0;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.super-sidebar__item:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #fff;
+}
+
+.super-sidebar__item.active {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
+.super-sidebar__icon {
+  display: inline-flex;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.super-sidebar__label {
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Cuando la barra está expandida por hover, mostramos el texto */
+.super-sidebar:hover .super-sidebar__label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.super-sidebar__divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 8px 6px;
+}
+
+@media (max-width: 900px) {
+  .super-sidebar {
+    display: none; /* oculto en móvil */
+  }
+}

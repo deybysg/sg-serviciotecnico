@@ -8,9 +8,9 @@ export default function UsuariosAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [form, setForm] = useState({ username: '', password: '', role: 'user' });
+  const [form, setForm] = useState({ username: '', password: '', email: '', role: 'user' });
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ username: '', role: 'user', password: '' });
+  const [editForm, setEditForm] = useState({ username: '', role: 'user', email: '', password: '' });
   const [saving, setSaving] = useState(false);
 
   const toast = (icon, title) => Swal.fire({
@@ -48,33 +48,65 @@ export default function UsuariosAdmin() {
     e.preventDefault();
     setError(null);
 
-    if (!form.username.trim() || !form.password) {
-      setError('Usuario y contraseña son obligatorios');
-      toast('warning', 'Usuario y contraseña son obligatorios');
+    // ===== VALIDACIONES FRONTEND =====
+    
+    // Validar username no vacío
+    if (!form.username || !form.username.trim()) {
+      setError('El nombre de usuario es obligatorio');
+      toast('warning', 'El nombre de usuario es obligatorio');
       return;
     }
+
+    // Validar longitud mínima del username
+    if (form.username.trim().length < 3) {
+      setError('El nombre de usuario debe tener al menos 3 caracteres');
+      toast('warning', 'El nombre de usuario debe tener al menos 3 caracteres');
+      return;
+    }
+
+    // Validar password no vacío
+    if (!form.password) {
+      setError('La contraseña es obligatoria');
+      toast('warning', 'La contraseña es obligatoria');
+      return;
+    }
+
+    // Validar longitud mínima de password
     if (form.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
       toast('warning', 'La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
+    // Validar formato de email (si se proporciona)
+    if (form.email && form.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) {
+        setError('El email ingresado no es válido');
+        toast('warning', 'El email ingresado no es válido');
+        return;
+      }
+    }
+
+    // Validar que el username no exista (verificación adicional frontend)
     const exists = usuarios.some(u => u.username.toLowerCase() === form.username.trim().toLowerCase());
     if (exists) {
       setError('El username ya existe');
+      toast('warning', 'El username ya existe');
       return;
     }
 
     const payload = {
       username: form.username.trim(),
       password: form.password,
+      email: form.email.trim() || undefined,
       role: form.role
     };
 
     try {
       setSaving(true);
       await api.post('/usuarios', payload);
-      setForm({ username: '', password: '', role: 'user' });
+      setForm({ username: '', password: '', email: '', role: 'user' });
       toast('success', 'Usuario creado');
       fetchUsuarios();
     } catch (e) {
@@ -87,12 +119,12 @@ export default function UsuariosAdmin() {
 
   const startEdit = (u) => {
     setEditingId(u._id || u.id);
-    setEditForm({ username: u.username, role: u.role, password: '' });
+    setEditForm({ username: u.username, role: u.role, email: u.email || '', password: '' });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({ username: '', role: 'user', password: '' });
+    setEditForm({ username: '', role: 'user', email: '', password: '' });
   };
 
   const handleUpdate = async (id) => {
@@ -105,15 +137,43 @@ export default function UsuariosAdmin() {
       return;
     }
 
+    // ===== VALIDACIONES FRONTEND =====
+    
+    // Validar username no vacío
+    if (!editForm.username || !editForm.username.trim()) {
+      setError('El nombre de usuario es obligatorio');
+      toast('warning', 'El nombre de usuario es obligatorio');
+      return;
+    }
+
+    // Validar longitud mínima del username
+    if (editForm.username.trim().length < 3) {
+      setError('El nombre de usuario debe tener al menos 3 caracteres');
+      toast('warning', 'El nombre de usuario debe tener al menos 3 caracteres');
+      return;
+    }
+
+    // Validar password (si se proporciona)
     if (editForm.password && editForm.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
       toast('warning', 'La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
+    // Validar formato de email (si se proporciona)
+    if (editForm.email && editForm.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editForm.email)) {
+        setError('El email ingresado no es válido');
+        toast('warning', 'El email ingresado no es válido');
+        return;
+      }
+    }
+
     const payload = {
       username: editForm.username.trim(),
-      role: editForm.role
+      role: editForm.role,
+      email: editForm.email.trim() || undefined
     };
     // La contraseña es opcional en edición
     if (editForm.password) payload.password = editForm.password;
@@ -183,6 +243,12 @@ export default function UsuariosAdmin() {
             onChange={e => setForm({ ...form, username: e.target.value })}
           />
           <input
+            type="email"
+            placeholder="Email (opcional)"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+          />
+          <input
             type="password"
             placeholder="Contraseña"
             value={form.password}
@@ -210,6 +276,7 @@ export default function UsuariosAdmin() {
             <thead>
               <tr>
                 <th>Username</th>
+                <th>Email</th>
                 <th>Rol</th>
                 <th>Acciones</th>
               </tr>
@@ -226,6 +293,18 @@ export default function UsuariosAdmin() {
                       />
                     ) : (
                       u.username
+                    )}
+                  </td>
+                  <td>
+                    {editingId === (u._id || u.id) ? (
+                      <input
+                        type="email"
+                        placeholder="Email (opcional)"
+                        value={editForm.email}
+                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                      />
+                    ) : (
+                      u.email || <span style={{color: '#999', fontStyle: 'italic'}}>Sin email</span>
                     )}
                   </td>
                   <td>

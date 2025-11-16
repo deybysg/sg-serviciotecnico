@@ -1,0 +1,339 @@
+/* Contenedor principal */
+.home-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Hero principal */
+.hero {
+  width: 100%;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Carrusel dinámico */
+.hero-slider {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+}
+
+/* Botones carrusel */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.prev:hover, .next:hover {
+  background: rgba(0,0,0,0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev { left: 20px; }
+.next { right: 20px; }
+
+/* Overlay encima del carrusel */
+.hero-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  z-index: 5;
+}
+
+.hero-overlay:hover { background: rgba(0,0,0,0.45); }
+
+.hero-content {
+  text-align: center;
+  color: #fff;
+  padding: 2rem;
+  max-width: 700px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+}
+
+.hero-subtitle {
+  color: #ffffff;
+  font-size: 1.8rem;
+  text-shadow: 1px 1px 8px rgb(12, 201, 226);
+  animation: slideUp 1s ease-out;
+}
+
+.scroll-down {
+  margin-top: 2rem;
+  color: #fff;
+  animation: bounce 2s infinite;
+}
+
+/* Sección Servicios Destacados */
+.about-us {
+  padding: 3rem 1rem;
+  text-align: center;
+  background: #111827;
+  
+}
+
+.about-us h2 {
+  font-size: 2.2rem;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.services-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.service-card {
+  background:#162749;
+  border-radius: 20px;
+  color: #fff;
+  padding: 2rem 1rem;
+  flex: 1 1 220px;
+  max-width: 250px;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.25);
+}
+
+.service-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
+
+.service-card h3 { margin-top: 1rem; margin-bottom: 0.5rem; }
+.service-card p { font-size: 0.9rem; line-height: 1.4; }
+
+/* Ubicación */
+.location {
+  background: #0c101a;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.location h2 {
+  font-size: 2rem;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.location p { font-size: 1.1rem; color: #fffdfd; }
+
+/* Redes sociales */
+.socials {
+  background: #111827;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+.socials p { color: #f5f3f3; margin: 0.3rem 0; font-size: 1rem; }
+.socials h2 { color: white; font-size: 2rem; margin-bottom: 1rem; }
+
+.socials .social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+/* Colores oficiales de redes */
+.socials .social-icons a.instagram { color: #E1306C; }
+.socials .social-icons a.whatsapp { color: #25D366; }
+
+.socials .social-icons a:hover { transform: scale(1.3); }
+
+/* Footer */
+.home-footer {
+  background: #0d0d0e;
+  color: #fff;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+/* Banner de alerta tipo modal (mantener tu estilo original) */
+.alert-banner {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff6b6b, #ff4757);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  font-weight: 600;
+  z-index: 999;
+  max-width: 320px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  animation: slideDown 0.5s ease-out;
+}
+
+.alert-banner .icon { font-size: 1.5rem; }
+.alert-banner p { margin: 0; font-size: 0.95rem; line-height: 1.2; }
+.alert-banner .close-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.alert-banner .close-btn:hover { background: rgba(255,255,255,0.4); }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animaciones */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-12px); }
+  60% { transform: translateY(-6px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title { font-size: 2rem; }
+  .hero-subtitle { font-size: 1.4rem; }
+  .services-cards { flex-direction: column; align-items: center; }
+  .service-card { max-width: 90%; }
+  .about-us h2, .location h2, .socials h2 { font-size: 1.6rem; }
+  .about-us p, .location p { font-size: 1rem; }
+}
+
+/* Imagen fija para móviles */
+.mobile-only-slide {
+  display: none; /* se oculta por defecto en desktop */
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+}
+
+/* En móviles mostrar la imagen y ocultar carrusel */
+@media (max-width: 768px) {
+  .hero-slider {
+    display: none; /* oculta el carrusel */
+  }
+  .mobile-only-slide {
+    display: block; /* muestra la imagen móvil */
+  }
+}
+
+/* Flechas de scroll indicando camino */
+.hero-content .scroll-down {
+  display: block; /* apiladas verticalmente */
+  margin: 0.5rem auto; /* centradas y separadas un poco */
+  color: #ffffff;
+  animation: bounce 2s infinite; /* misma animación para ambas */
+  animation-delay: 0s; /* mismo tiempo para ambas */
+}
+
+/* Flecha superior más chica */
+.hero-content .scroll-down:first-child {
+  font-size: 30px;
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+}
+
+/* Flecha inferior más grande */
+.hero-content .scroll-down:last-child {
+  font-size: 45px;
+  opacity: 1;
+}
+
+
+/* Estilo para el correo con emoji */
+.emoji {
+  margin-right: 0.4rem; /* espacio entre emoji y correo */
+  font-size: 1.2rem;    /* opcional: hacer el emoji un poquito más grande */
+}
+
+.email-link {
+  color: #c2c520;
+  text-decoration: underline; /* solo el correo se subraya */
+  font-weight: 600;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.email-link:hover {
+  color: #38bdf8;
+  transform: scale(1.05);
+}
+
+/* Estilo para el teléfono con emoji */
+.phone-link {
+  color: #c2c520;
+  text-decoration: underline; /* solo subraya el número */
+}
+
+.emoji {
+  margin-right: 0.3rem; /* opcional: separa el emoji del texto */
+}

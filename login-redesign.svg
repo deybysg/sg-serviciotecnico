@@ -1,0 +1,234 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradientes -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.05" />
+    </linearGradient>
+    
+    <linearGradient id="buttonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="titleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.2" />
+    </linearGradient>
+    
+    <!-- Filtros -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="glassBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+    </filter>
+    
+    <filter id="softShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Fondo con gradiente -->
+  <rect width="1400" height="900" fill="url(#bgGradient)"/>
+  
+  <!-- Elementos decorativos de fondo -->
+  <!-- Círculo glow superior izquierdo -->
+  <circle cx="200" cy="150" r="180" fill="url(#glowGradient)" opacity="0.15" filter="url(#glow)"/>
+  
+  <!-- Círculo glow inferior derecho -->
+  <circle cx="1200" cy="750" r="200" fill="url(#glowGradient)" opacity="0.1" filter="url(#glow)"/>
+  
+  <!-- Líneas decorativas de fondo -->
+  <line x1="0" y1="300" x2="400" y2="300" stroke="#3b82f6" stroke-width="1" opacity="0.1"/>
+  <line x1="1000" y1="600" x2="1400" y2="600" stroke="#06b6d4" stroke-width="1" opacity="0.1"/>
+  
+  <!-- Grid pattern sutil -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f6" stroke-width="0.5" opacity="0.05"/>
+  </pattern>
+  <rect width="1400" height="900" fill="url(#grid)"/>
+  
+  <!-- Tarjeta de Login con efecto glassmorphism -->
+  <g transform="translate(500, 150)">
+    <!-- Sombra de la tarjeta -->
+    <rect x="5" y="10" width="400" height="580" rx="20" fill="#000000" opacity="0.3" filter="url(#softShadow)"/>
+    
+    <!-- Fondo glassmorphism -->
+    <rect width="400" height="580" rx="20" fill="url(#cardGradient)" filter="url(#glassBlur)"/>
+    
+    <!-- Borde glassmorphism -->
+    <rect width="400" height="580" rx="20" fill="none" stroke="url(#titleGradient)" stroke-width="2" opacity="0.3"/>
+    
+    <!-- Highlight superior -->
+    <rect x="20" y="20" width="360" height="1" fill="#ffffff" opacity="0.4" rx="0.5"/>
+    
+    <!-- Logo/Icono decorativo superior -->
+    <g transform="translate(200, 50)">
+      <circle r="35" fill="url(#buttonGradient)" opacity="0.2" filter="url(#glow)"/>
+      <circle r="28" fill="none" stroke="url(#titleGradient)" stroke-width="2.5"/>
+      <path d="M -8 0 L 8 0 M 0 -8 L 0 8" stroke="url(#titleGradient)" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Título: "Iniciar Sesión" -->
+    <text x="200" y="130" font-family="Inter, sans-serif" font-size="32" font-weight="800" fill="url(#titleGradient)" text-anchor="middle" filter="url(#glow)">
+      Iniciar Sesión
+    </text>
+    
+    <!-- Subtítulo -->
+    <text x="200" y="160" font-family="Inter, sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle">
+      Ingresa tus credenciales para continuar
+    </text>
+    
+    <!-- Input 1: Usuario -->
+    <g transform="translate(50, 200)">
+      <!-- Fondo del input -->
+      <rect width="300" height="50" rx="10" fill="#1e293b" opacity="0.6"/>
+      <rect width="300" height="50" rx="10" fill="none" stroke="#334155" stroke-width="1.5"/>
+      
+      <!-- Icono de usuario -->
+      <g transform="translate(15, 25)">
+        <circle r="8" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <path d="M -5 12 Q 0 8 5 12" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      
+      <!-- Placeholder text -->
+      <text x="45" y="32" font-family="Inter, sans-serif" font-size="14" fill="#64748b">
+        Nombre de usuario
+      </text>
+    </g>
+    
+    <!-- Input 2: Contraseña -->
+    <g transform="translate(50, 270)">
+      <!-- Fondo del input -->
+      <rect width="300" height="50" rx="10" fill="#1e293b" opacity="0.6"/>
+      <rect width="300" height="50" rx="10" fill="none" stroke="#334155" stroke-width="1.5"/>
+      
+      <!-- Icono de candado -->
+      <g transform="translate(15, 25)">
+        <rect x="-5" y="0" width="10" height="8" rx="1" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <path d="M -3 0 L -3 -4 A 3 3 0 0 1 3 -4 L 3 0" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <circle cy="4" r="1.5" fill="#3b82f6"/>
+      </g>
+      
+      <!-- Placeholder text -->
+      <text x="45" y="32" font-family="Inter, sans-serif" font-size="14" fill="#64748b">
+        Contraseña
+      </text>
+      
+      <!-- Icono de ojo -->
+      <g transform="translate(275, 25)">
+        <ellipse rx="8" ry="5" fill="none" stroke="#64748b" stroke-width="1.5"/>
+        <circle r="2.5" fill="#64748b"/>
+      </g>
+    </g>
+    
+    <!-- Checkbox: Recordarme -->
+    <g transform="translate(50, 340)">
+      <rect width="18" height="18" rx="4" fill="none" stroke="#3b82f6" stroke-width="2"/>
+      <path d="M 4 9 L 8 13 L 14 5" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <text x="28" y="14" font-family="Inter, sans-serif" font-size="13" fill="#cbd5e1">
+        Recordarme
+      </text>
+    </g>
+    
+    <!-- Link: ¿Olvidaste tu contraseña? -->
+    <text x="350" y="353" font-family="Inter, sans-serif" font-size="13" fill="#3b82f6" text-anchor="end">
+      ¿Olvidaste tu contraseña?
+    </text>
+    
+    <!-- Botón de Login con gradiente y glow -->
+    <g transform="translate(50, 385)">
+      <!-- Glow del botón -->
+      <rect x="-2" y="-2" width="304" height="54" rx="12" fill="url(#buttonGradient)" opacity="0.4" filter="url(#glow)"/>
+      
+      <!-- Botón principal -->
+      <rect width="300" height="50" rx="10" fill="url(#buttonGradient)"/>
+      
+      <!-- Highlight superior del botón -->
+      <rect x="15" y="5" width="270" height="1" fill="#ffffff" opacity="0.5" rx="0.5"/>
+      
+      <!-- Texto del botón -->
+      <text x="150" y="32" font-family="Inter, sans-serif" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">
+        Entrar
+      </text>
+    </g>
+    
+    <!-- Separador -->
+    <g transform="translate(50, 465)">
+      <line x1="0" y1="0" x2="135" y2="0" stroke="#334155" stroke-width="1"/>
+      <text x="150" y="5" font-family="Inter, sans-serif" font-size="13" fill="#64748b" text-anchor="middle">O</text>
+      <line x1="165" y1="0" x2="300" y2="0" stroke="#334155" stroke-width="1"/>
+    </g>
+    
+    <!-- Botón alternativo: Iniciar con Google -->
+    <g transform="translate(50, 490)">
+      <rect width="300" height="48" rx="10" fill="none" stroke="#334155" stroke-width="1.5"/>
+      
+      <!-- Logo de Google simulado -->
+      <g transform="translate(60, 24)">
+        <circle r="10" fill="#ffffff"/>
+        <path d="M -3 0 L 3 0" stroke="#3b82f6" stroke-width="2"/>
+        <path d="M 0 -3 L 0 3" stroke="#ef4444" stroke-width="2"/>
+      </g>
+      
+      <text x="150" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#e2e8f0" text-anchor="middle">
+        Continuar con Google
+      </text>
+    </g>
+    
+    <!-- Texto de registro -->
+    <text x="200" y="565" font-family="Inter, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">
+      ¿No tienes una cuenta? 
+      <tspan fill="#3b82f6" font-weight="600">Regístrate</tspan>
+    </text>
+  </g>
+  
+  <!-- Elementos decorativos adicionales -->
+  <!-- Partículas flotantes -->
+  <circle cx="450" cy="200" r="3" fill="#3b82f6" opacity="0.3">
+    <animate attributeName="cy" from="200" to="150" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" from="0.3" to="0" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="950" cy="650" r="2" fill="#06b6d4" opacity="0.4">
+    <animate attributeName="cy" from="650" to="600" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" from="0.4" to="0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="520" cy="700" r="2.5" fill="#60a5fa" opacity="0.25">
+    <animate attributeName="cy" from="700" to="650" dur="3.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" from="0.25" to="0" dur="3.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Texto de marca de agua -->
+  <text x="700" y="880" font-family="Inter, sans-serif" font-size="11" fill="#475569" text-anchor="middle" opacity="0.5">
+    Sistema SG © 2025 - Login Premium Design
+  </text>
+</svg>

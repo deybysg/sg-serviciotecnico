@@ -1,0 +1,414 @@
+/* ConsultaServicio.css - Versión Modificada para el Botón Salir */
+:root {
+  --color-primary: #1e88e5;
+  --color-secondary: #00bcd4;
+  --color-text: #333;
+  --color-bg-light: #f4f6f8;
+  --color-border: #ccc;
+  --color-recibido: #ffc107;
+  --color-reparacion: #2196f3;
+  --color-listo: #4caf50;
+  --color-entregado: #795548;
+}
+
+body {
+  background-color: var(--color-bg-light);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* HEADER Y CONTENEDOR PRINCIPAL */
+.consulta-servicio-full {
+  width: 100vw;
+  min-height: 100vh;
+  background-color: #061731;
+  padding: 0;
+}
+
+.mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+}
+
+.settings-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* BOTÓN SALIR */
+.exit-button {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  padding: 6px 12px;
+  border: 2px solid var(--color-primary);
+  border-radius: 6px;
+  background-color: white;
+  transition: background-color 0.2s, color 0.2s;
+  line-height: 1;
+}
+
+.exit-button:hover {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.consulta-servicio-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.title-bold {
+  margin-top: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+/* INPUT DE BÚSQUEDA */
+.search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.search-button {
+  padding: 10px 15px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.search-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* ICONO DE ESTADO PRINCIPAL */
+.status-icon-container {
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.status-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  position: relative;
+  box-shadow: 0 0 0 8px rgba(30,136,229,0.2);
+  transition: background-color 0.3s ease;
+}
+
+.status-icon.recibido-bg {
+  background-color: #ffeb3b;
+  box-shadow: 0 0 0 8px rgba(255,193,7,0.3);
+}
+
+.status-icon.diagnostico-bg {
+  background-color: #e3f2fd;
+  box-shadow: 0 0 0 8px rgba(33,150,243,0.3);
+}
+
+.status-icon.reparacion-bg {
+  background-color: #bbdefb;
+  box-shadow: 0 0 0 8px rgba(33,150,243,0.3);
+}
+
+.status-icon.listo-bg {
+  background-color: #c8e6c9;
+  box-shadow: 0 0 0 8px rgba(76,175,80,0.3);
+}
+
+.status-icon.entregado-bg {
+  background-color: #efebe9;
+  box-shadow: 0 0 0 8px rgba(121,85,72,0.2);
+}
+
+.checkmark-overlay {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  font-size: 1.5rem;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* LÍNEA DE TIEMPO */
+.timeline-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 30px 0;
+  padding: 0 10px;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 80px;
+}
+
+.timeline-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ccc;
+  border: 3px solid #ccc;
+  transition: all 0.5s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.timeline-circle.active {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 5px rgba(0,188,212,0.3);
+}
+
+.timeline-label {
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.timeline-line {
+  flex-grow: 1;
+  height: 3px;
+  background-color: #ccc;
+  margin: 0 10px;
+  transition: background-color 0.5s ease;
+}
+
+.timeline-line.line-active {
+  background-color: var(--color-secondary);
+}
+
+/* LÍNEA DE TIEMPO ANCHA (4 PASOS) */
+.timeline-container.four-steps .timeline-step {
+  min-width: 60px;
+}
+
+@media (max-width: 380px) {
+  .timeline-container.four-steps .timeline-label {
+    font-size: 0.7rem;
+  }
+  .timeline-container.four-steps .timeline-step {
+    min-width: 50px;
+  }
+}
+
+/* DETALLES */
+.details-box {
+  text-align: left;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  color: var(--color-text);
+}
+
+.details-box p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+.current-status-label {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  display: inline-block;
+}
+
+.current-status-label.pendiente { background-color: var(--color-recibido); }
+.current-status-label.enRevision { background-color: #00bcd4; }
+.current-status-label.diagnostico { background-color: #ff9800; }
+.current-status-label.presupuestoPendiente { background-color: #ff5722; }
+.current-status-label.reparacion { background-color: #2196f3; }
+.current-status-label.revisionTerminada { background-color: #009688; }
+.current-status-label.terminado { background-color: var(--color-listo); }
+.current-status-label.entregado { background-color: var(--color-entregado); }
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+/* boton de presupuesto modificado */
+.btn-primary-outline {
+    padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.btn-primary-outline{
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+.btn-primary-outline:hover {
+  background-color: #0d56aa;
+}
+
+
+.btn-primary:hover {
+  background-color: #e5e6df;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.btn-secondary:hover {
+  background-color: #e3f2fd;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.modal-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modal-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+.modal-total {
+  border-top: 2px solid var(--color-primary);
+  padding-top: 10px;
+  margin-top: 15px;
+  font-size: 1.1rem;
+  text-align: right;
+}
+
+.toggle-budget-details {
+  text-align: right;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.toggle-budget-details .btn-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.toggle-budget-details .btn-link:hover {
+  background-color: #e3f2fd;
+}
+
+.budget-summary {
+  text-align: center;
+  font-weight: bold;
+  margin: 15px 0;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+}

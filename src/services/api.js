@@ -33,7 +33,7 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     try {
         const response = await fetch(url, config);
 
-        // Manejar errores HTTP
+    // Manejar errores HTTP
         if (!response.ok) {
             // Si es 401, y la solicitud requería auth, redirigimos al login.
             // Si NO requería auth (página pública), NO redirigimos: solo lanzamos error.
@@ -53,9 +53,19 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
                 throw new Error('No tienes permisos para realizar esta acción.');
             }
 
-            // Otros errores
+            // Otros errores: intentamos extraer un mensaje útil del backend
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Error ${response.status}`);
+            const msg = (
+                errorData.message ||
+                errorData.mensaje ||
+                (Array.isArray(errorData.errors) && errorData.errors[0]?.msg) ||
+                `Error ${response.status}`
+            );
+            const err = new Error(msg);
+            // Opcional: propagar código/status para decisiones en UI
+            err.status = response.status;
+            if (errorData.code) err.code = errorData.code;
+            throw err;
         }
 
         // Parsear respuesta JSON

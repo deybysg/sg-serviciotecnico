@@ -99,30 +99,100 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         setLocalFile(file); 
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (formData.precio <= 0 || formData.stock < 0 || formData.nombre.trim() === "") {
-            alert("Por favor, complete los campos obligatorios correctamente.");
-            return;
-        }
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        // ===== VALIDACIONES FRONTEND =====
+        
+        // Validar nombre no vacío
+        if (!formData.nombre || formData.nombre.trim() === "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nombre requerido',
+                text: 'El nombre del producto es obligatorio',
+                timer: 2000
+            });
+            return;
+        }
 
-        let finalData = { ...formData };
-        
-        if (useFileMode && localFile) {
-            finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Imagen+Local"; 
-        } else if (useFileMode && !localFile && !isEditing) {
-            alert("Debe seleccionar un archivo si eligió la opción de archivo local.");
-            return;
-        }
-        
-        if (!useFileMode && finalData.imagen.trim() === "") {
-            finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Sin+Imagen";
-        }
+        // Validar nombre mínimo 2 caracteres
+        if (formData.nombre.trim().length < 2) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nombre muy corto',
+                text: 'El nombre debe tener al menos 2 caracteres',
+                timer: 2000
+            });
+            return;
+        }
 
-        onGuardar(finalData);
-    };
+        // Validar descripción no vacía
+        if (!formData.descripcion || formData.descripcion.trim().length < 5) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Descripción inválida',
+                text: 'La descripción debe tener al menos 5 caracteres',
+                timer: 2000
+            });
+            return;
+        }
 
-    return (
+        // Validar precio mayor a 0
+        if (!formData.precio || formData.precio <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Precio inválido',
+                text: 'El precio debe ser mayor a 0',
+                timer: 2000
+            });
+            return;
+        }
+
+        // Validar stock no negativo
+        if (formData.stock < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock inválido',
+                text: 'El stock no puede ser negativo',
+                timer: 2000
+            });
+            return;
+        }
+
+        // Validar URL de imagen (si no está en modo archivo)
+        if (!useFileMode && formData.imagen && formData.imagen.trim() !== "") {
+            const urlRegex = /^(https?:\/\/)?([\w\d\-]+\.)+[\w\d]{2,}(\/.*)?$/i;
+            if (!urlRegex.test(formData.imagen)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'URL inválida',
+                    text: 'La URL de la imagen no tiene un formato válido',
+                    timer: 2500
+                });
+                return;
+            }
+        }
+
+        let finalData = { ...formData };
+        
+        if (useFileMode && localFile) {
+            finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Imagen+Local"; 
+        } else if (useFileMode && !localFile && !isEditing) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Archivo requerido',
+                text: 'Debe seleccionar un archivo si eligió la opción de archivo local',
+                timer: 2000
+            });
+            return;
+        }
+        
+        if (!useFileMode && finalData.imagen.trim() === "") {
+            finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Sin+Imagen";
+        }
+
+        onGuardar(finalData);
+    };    return (
         <div className="modal-producto-backdrop">
             <div className="modal-producto-content">
                 <h3 className="modal-producto-title">

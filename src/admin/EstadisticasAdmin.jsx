@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Swal from 'sweetalert2';
-import { FaMoneyBillWave, FaShoppingCart, FaBoxOpen } from 'react-icons/fa'; 
+import { FaMoneyBillWave, FaShoppingCart, FaBoxOpen } from 'react-icons/fa';
 import './EstadisticasAdmin.css';
 import { api } from '../services/api';
 import { useRef } from 'react';
@@ -314,14 +314,14 @@ const EstadisticasServiciosView = ({
 }) => {
     
     if (!stats || (stats.totalRevenue === 0 && stats.activeServicesCount === 0 && stats.deliveredServicesCount === 0)) {
-        return <div className="no-data-message">No hay datos de **Servicios** disponibles para generar estadísticas en el periodo seleccionado.</div>;
+        return <div className="estdash-nodata">No hay datos de Servicios disponibles para generar estadísticas en el periodo seleccionado.</div>;
     }
     
     return (
         <>
             {/* --- FILTROS --- */}
-            <div className="filters-container">
-                <div className="filter-group">
+            <div className="estdash-filters">
+                <div className="estdash-filter-group">
                     <label htmlFor="filterYear">Año:</label>
                     <select
                         id="filterYear"
@@ -336,7 +336,7 @@ const EstadisticasServiciosView = ({
                         ))}
                     </select>
                 </div>
-                <div className="filter-group">
+                <div className="estdash-filter-group">
                     <label htmlFor="filterMonth">Mes:</label>
                     <select
                         id="filterMonth"
@@ -354,56 +354,63 @@ const EstadisticasServiciosView = ({
                         ))}
                     </select>
                 </div>
+                <button
+                    type="button"
+                    className="estdash-apply-btn"
+                    onClick={() => Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Filtros aplicados', showConfirmButton:false, timer:1200 })}
+                >
+                    Aplicar filtros
+                </button>
             </div>
 
             {/* --- Key Metrics Grid --- */}
-            <div className="stats-cards-grid">
+            <div className="estdash-kpi-grid">
                 {/* Tarjetas de Servicios */}
-                <div className="stat-card revenue-card">
-                    <div className="stat-value">{formatCurrency(stats.totalRevenue)}</div>
-                    <div className="stat-label">Ingresos Totales (Servicios Entregados)</div>
-                    <span className="stat-icon">💰</span>
+                <div className="estdash-kpi-card kpi-revenue">
+                    <div className="estdash-kpi-value">{formatCurrency(stats.totalRevenue)}</div>
+                    <div className="estdash-kpi-label">Ingresos Totales (Servicios Entregados)</div>
+                    <span className="estdash-kpi-icon">💰</span>
                 </div>
 
-                <div className="stat-card active-services-card">
-                    <div className="stat-value">{stats.activeServicesCount}</div>
-                    <div className="stat-label">Equipos en Taller (Activos)</div>
-                    <span className="stat-icon">🔧</span>
+                <div className="estdash-kpi-card kpi-active">
+                    <div className="estdash-kpi-value">{stats.activeServicesCount}</div>
+                    <div className="estdash-kpi-label">Equipos en Taller (Activos)</div>
+                    <span className="estdash-kpi-icon">🔧</span>
                 </div>
 
-                <div className="stat-card delivered-card">
-                    <div className="stat-value">{stats.deliveredServicesCount}</div>
-                    <div className="stat-label">Total de Servicios Entregados</div>
-                    <span className="stat-icon">✅</span>
+                <div className="estdash-kpi-card kpi-delivered">
+                    <div className="estdash-kpi-value">{stats.deliveredServicesCount}</div>
+                    <div className="estdash-kpi-label">Total de Servicios Entregados</div>
+                    <span className="estdash-kpi-icon">✅</span>
                 </div>
 
-                <div className="stat-card avg-days-card">
-                    <div className="stat-value">{stats.avgServiceDays} días</div>
-                    <div className="stat-label">Promedio de Días en Servicio</div>
-                    <span className="stat-icon">⏳</span>
+                <div className="estdash-kpi-card kpi-avgdays">
+                    <div className="estdash-kpi-value">{stats.avgServiceDays} días</div>
+                    <div className="estdash-kpi-label">Promedio de Días en Servicio</div>
+                    <span className="estdash-kpi-icon">⏳</span>
                 </div>
             </div>
 
             {/* --- Charts Row --- */}
-            <div className="stats-charts-row">
+            <div className="estdash-charts-row">
 
                 {/* Bloque 1: Gráfico de Barras - Ingresos Mensuales de SERVICIOS */}
-                <div className="chart-block monthly-performance">
+                <div className="estdash-chart chart-services-monthly">
                     <h2>Ingresos por Mes (Servicios)</h2>
-                    <p className="chart-subtitle">Ganancias de servicios entregados por periodo</p>
-                    <div className="bar-chart-container">
+                    <p className="estdash-chart-subtitle">Ganancias de servicios entregados por periodo</p>
+                    <div className="estdash-bar-chart">
                         {stats.monthlySalesData.length === 0 ? (
-                            <p className="no-chart-data">No hay datos de ingresos para el periodo seleccionado.</p>
+                            <p className="estdash-nochart">No hay datos de ingresos para el periodo seleccionado.</p>
                         ) : (
                             stats.monthlySalesData.map((data, index) => (
                                 <div
                                     key={index}
-                                    className="chart-bar service-bar" // Clase específica para diferenciar
+                                    className="estdash-bar bar-service"
                                     style={{ height: `${(data.revenue / maxRevenue) * 90}%` }}
                                     title={`Total: ${formatCurrency(data.revenue)}. Click para ver detalle.`}
                                     onClick={() => setSelectedMonthData(data)}
                                 >
-                                    <span className="bar-value">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
+                                    <span className="bar-val">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
                                     <span className="bar-label">{data.month.toUpperCase()}</span>
                                 </div>
                             ))
@@ -412,20 +419,20 @@ const EstadisticasServiciosView = ({
                 </div>
 
                 {/* Bloque 2: Gráfico de Torta - Distribución por Tipo de Servicio */}
-                <div className="chart-block service-type-distribution">
+                <div className="estdash-chart chart-services-pie">
                     <h2>Distribución por Tipo de Servicio</h2>
-                    <p className="chart-subtitle">Proporción de equipos por categoría</p>
+                    <p className="estdash-chart-subtitle">Proporción de equipos por categoría</p>
                     {stats.totalServicesForPie === 0 ? (
-                                     <p className="no-chart-data">No hay servicios para mostrar en el gráfico de torta.</p>
+                                     <p className="estdash-nochart">No hay servicios para mostrar en el gráfico de torta.</p>
                     ) : (
-                        <div className="pie-chart-container">
-                            <div className="pie-chart">
+                        <div className="estdash-pie-row">
+                            <div className="estdash-pie">
                                 <div
-                                    className="conic-pie-chart"
+                                    className="estdash-pie-fill"
                                     style={{ background: stats.conicGradientCSS }}
                                 ></div>
                             </div>
-                            <div className="pie-legend">
+                            <div className="estdash-legend">
                                 {stats.serviceTypeDistribution.map((data, index) => (
                                     <div key={index} className="legend-item">
                                         <span className="legend-color" style={{ backgroundColor: data.color }}></span>
@@ -461,11 +468,11 @@ const EstadisticasVentasView = ({
     maxRevenue
 }) => {
     
-    if (loading) return <div className="loading-message">Cargando Estadísticas de Ventas...</div>;
-    if (error) return <div className="error-message-full">{error}</div>;
+    if (loading) return <div className="estdash-loading">Cargando Estadísticas de Ventas...</div>;
+    if (error) return <div className="estdash-error">{error}</div>;
 
     if (!salesStats || salesStats.cantidadVentas === 0) {
-        return <div className="no-data-message">No hay datos de **Ventas de Productos** registrados en el periodo seleccionado.</div>;
+        return <div className="estdash-nodata">No hay datos de Ventas de Productos registrados en el periodo seleccionado.</div>;
     }
     
     // Eliminada línea duplicada: const maxSalesRevenue ya viene por props como maxRevenue
@@ -473,8 +480,8 @@ const EstadisticasVentasView = ({
     return (
         <>
             {/* --- FILTROS --- */}
-            <div className="filters-container">
-                <div className="filter-group">
+            <div className="estdash-filters">
+                <div className="estdash-filter-group">
                     <label htmlFor="filterSalesYear">Año:</label>
                     <select
                         id="filterSalesYear"
@@ -489,7 +496,7 @@ const EstadisticasVentasView = ({
                         ))}
                     </select>
                 </div>
-                <div className="filter-group">
+                <div className="estdash-filter-group">
                     <label htmlFor="filterSalesMonth">Mes:</label>
                     <select
                         id="filterSalesMonth"
@@ -507,63 +514,70 @@ const EstadisticasVentasView = ({
                         ))}
                     </select>
                 </div>
+                <button
+                    type="button"
+                    className="estdash-apply-btn"
+                    onClick={() => Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Filtros aplicados', showConfirmButton:false, timer:1200 })}
+                >
+                    Aplicar filtros
+                </button>
             </div>
             
-            <div className="stats-cards-grid sales-grid-override">
+            <div className="estdash-kpi-grid kpi-sales-grid">
                 
                 {/* Tarjeta 1: Total Vendido */}
-                <div className="stat-card sales-card-1">
-                    <FaMoneyBillWave className="stat-icon sales-icon-1" />
+                <div className="estdash-kpi-card kpi-sales-1">
+                    <FaMoneyBillWave className="estdash-kpi-icon sales-icon-1" />
                     <div className="stat-info">
-                        <div className="stat-value">{formatCurrency(salesStats.totalVendido)}</div>
-                        <div className="stat-label">Total Recaudado (Ventas)</div>
+                        <div className="estdash-kpi-value">{formatCurrency(salesStats.totalVendido)}</div>
+                        <div className="estdash-kpi-label">Total Recaudado (Ventas)</div>
                     </div>
                 </div>
                 
                 {/* Tarjeta 2: Cantidad de Ventas */}
-                <div className="stat-card sales-card-2">
-                    <FaShoppingCart className="stat-icon sales-icon-2" />
+                <div className="estdash-kpi-card kpi-sales-2">
+                    <FaShoppingCart className="estdash-kpi-icon sales-icon-2" />
                     <div className="stat-info">
-                        <div className="stat-value">{salesStats.cantidadVentas}</div>
-                        <div className="stat-label">Transacciones de Ventas</div>
+                        <div className="estdash-kpi-value">{salesStats.cantidadVentas}</div>
+                        <div className="estdash-kpi-label">Transacciones de Ventas</div>
                     </div>
                 </div>
 
                 {/* Tarjeta 3: Producto Más Vendido */}
-                <div className="stat-card sales-card-3">
-                    <FaBoxOpen className="stat-icon sales-icon-3" />
+                <div className="estdash-kpi-card kpi-sales-3">
+                    <FaBoxOpen className="estdash-kpi-icon sales-icon-3" />
                     <div className="stat-info">
-                        <div className="stat-value-producto">{salesStats.productoMasVendido}</div>
-                        <div className="stat-label">Producto Líder (Unidades)</div>
+                        <div className="estdash-kpi-producto">{salesStats.productoMasVendido}</div>
+                        <div className="estdash-kpi-label">Producto Líder (Unidades)</div>
                     </div>
                 </div>
                 
-                <div className="stat-card sales-card-4">
-                    <div className="stat-value">{salesStats.cantidadProductosVendidos}</div>
-                    <div className="stat-label">Total de Items Vendidos</div>
-                    <span className="stat-icon">📦</span>
+                <div className="estdash-kpi-card kpi-sales-4">
+                    <div className="estdash-kpi-value">{salesStats.cantidadProductosVendidos}</div>
+                    <div className="estdash-kpi-label">Total de Items Vendidos</div>
+                    <span className="estdash-kpi-icon">📦</span>
                 </div>
             </div>
             
             {/* --- Charts Row (Solo un Bloque de Gráfico) --- */}
-            <div className="stats-charts-row">
+            <div className="estdash-charts-row">
                 {/* Bloque 1: Gráfico de Barras - Ingresos Mensuales de VENTAS */}
-                <div className="chart-block monthly-performance ventas-performance">
+                <div className="estdash-chart chart-sales-monthly">
                     <h2>Ingresos por Mes (Ventas)</h2>
-                    <p className="chart-subtitle">Ganancias de productos vendidos por periodo</p>
-                    <div className="bar-chart-container">
+                    <p className="estdash-chart-subtitle">Ganancias de productos vendidos por periodo</p>
+                    <div className="estdash-bar-chart">
                         {salesStats.monthlySalesData.length === 0 ? (
-                            <p className="no-chart-data">No hay datos de ingresos para el periodo seleccionado.</p>
+                            <p className="estdash-nochart">No hay datos de ingresos para el periodo seleccionado.</p>
                         ) : (
                             salesStats.monthlySalesData.map((data, index) => (
                                 <div
                                     key={index}
-                                    className="chart-bar sales-bar" // Clase específica para ventas
+                                    className="estdash-bar bar-sales"
                                     style={{ height: `${(data.revenue / maxRevenue) * 90}%` }}
                                     title={`Total: ${formatCurrency(data.revenue)}. Click para ver detalle.`}
                                     onClick={() => setSelectedMonthData(data)}
                                 >
-                                    <span className="bar-value">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
+                                    <span className="bar-val">{formatCurrency(data.revenue).replace('$', '').slice(0, -3)}</span>
                                     <span className="bar-label">{data.month.toUpperCase()}</span>
                                 </div>
                             ))
@@ -572,20 +586,20 @@ const EstadisticasVentasView = ({
                 </div>
                 
                 {/* Gráfico de Torta - Distribución por Categoría de Ventas */}
-                <div className="chart-block sales-category-distribution">
+                <div className="estdash-chart chart-sales-pie">
                     <h2>Distribución por Categoría (Ventas)</h2>
-                    <p className="chart-subtitle">Proporción de productos vendidos por categoría</p>
+                    <p className="estdash-chart-subtitle">Proporción de productos vendidos por categoría</p>
                     {salesStats.totalProductos === 0 ? (
-                        <p className="no-chart-data">No hay productos para mostrar en el gráfico de torta.</p>
+                        <p className="estdash-nochart">No hay productos para mostrar en el gráfico de torta.</p>
                     ) : (
-                        <div className="pie-chart-container">
-                            <div className="pie-chart">
+                        <div className="estdash-pie-row">
+                            <div className="estdash-pie">
                                 <div
-                                    className="conic-pie-chart"
+                                    className="estdash-pie-fill"
                                     style={{ background: salesStats.conicGradientCSS }}
                                 ></div>
                             </div>
-                            <div className="pie-legend">
+                            <div className="estdash-legend">
                                 {salesStats.categoryDistribution.map((data, index) => (
                                     <div key={index} className="legend-item">
                                         <span className="legend-color" style={{ backgroundColor: data.color }}></span>
@@ -746,34 +760,34 @@ function EstadisticasAdmin() {
     
     // --- Renderizado de Carga Global ---
     if (loadingServices && loadingSales) {
-        return <div className="loading-message">Cargando todos los datos estadísticos...</div>;
+        return <div className="estdash-loading">Cargando todos los datos estadísticos...</div>;
     }
 
 
     return (
-        <div className="estadisticas-admin-page-custom">
-            <header className="admin-header">
+        <div className="estdash-page" id="estdash-root">
+            <header className="estdash-header">
                 <h1 className="title-bold">📊 Panel de Estadísticas</h1>
                 <p>Resumen de rendimiento del taller y ventas de productos.</p>
             </header>
 
             {/* --- NAVEGACIÓN DE PESTAÑAS (TABS) --- */}
-            <div className="tabs-navigation">
+            <div className="estdash-tabs">
                 <button
-                    className={`tab-button ${viewMode === 'servicios' ? 'active-tab' : ''}`}
+                    className={`estdash-tab-btn ${viewMode === 'servicios' ? 'is-active' : ''}`}
                     onClick={() => setViewMode('servicios')}
                 >
                     Estadísticas de Servicios
                 </button>
                 <button
-                    className={`tab-button ${viewMode === 'ventas' ? 'active-tab' : ''}`}
+                    className={`estdash-tab-btn ${viewMode === 'ventas' ? 'is-active' : ''}`}
                     onClick={() => setViewMode('ventas')}
                 >
                     Estadísticas de Ventas
                 </button>
             </div>
             
-            <div className="content-view">
+            <div className="estdash-content">
                 {viewMode === 'servicios' && (
                     <EstadisticasServiciosView
                         stats={statsServicios}
@@ -830,40 +844,40 @@ function EstadisticasAdmin() {
 
 const MonthlyServiceDetailModal = ({ data, onClose }) => {
     return (
-        <div className="monthly-modal-overlay" onClick={onClose}>
-            <div className="monthly-service-detail-modal" onClick={e => e.stopPropagation()}>
-                <div className="monthly-modal-header">
+        <div className="estdash-modal-overlay" onClick={onClose}>
+            <div className="estdash-modal" onClick={e => e.stopPropagation()}>
+                <div className="estdash-modal-header">
                     <h2>Servicios Entregados en {data.month.toUpperCase()}</h2>
-                    <button className="monthly-close-button" onClick={onClose}>&times;</button>
+                    <button className="estdash-modal-close" onClick={onClose}>&times;</button>
                 </div>
-                <div className="monthly-modal-summary">
+                <div className="estdash-modal-summary">
                     <p>Total Ingresos: <strong>{formatCurrency(data.revenue)}</strong></p>
                     <p>Total Servicios: <strong>{data.details.length}</strong></p>
                 </div>
 
-                <div className="monthly-modal-list-container">
+                <div className="estdash-modal-list">
                     {data.details.length === 0 ? (
-                        <p className="monthly-no-data-message-modal">No se encontraron servicios entregados para este mes.</p>
+                        <p className="modal-nodata">No se encontraron servicios entregados para este mes.</p>
                     ) : (
-                        <table className="monthly-service-detail-table">
+                        <table className="estdash-modal-table">
                             <thead>
                                 <tr>
                                     <th>ID/Fecha</th>
                                     <th>Tipo</th>
                                     <th>Marca</th>
-                                    <th className="monthly-text-right">Precio</th>
+                                    <th className="text-right">Precio</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.details.map((service) => (
                                     <tr key={service.id}>
                                         <td>
-                                            <span className="monthly-service-id">{service.id.substring(0, 4)}...</span>
-                                            <span className="monthly-service-date"> ({new Date(service.fecha).toLocaleDateString(LOCALE)})</span>
+                                            <span className="service-id">{service.id.substring(0, 4)}...</span>
+                                            <span className="service-date"> ({new Date(service.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
-                                        <td><span className={`monthly-service-type-tag tag-${service.tipo.toLowerCase()}`}>{service.tipo}</span></td>
+                                        <td><span className={`service-type-tag tag-${service.tipo.toLowerCase()}`}>{service.tipo}</span></td>
                                         <td>{service.marca}</td>
-                                        <td className="monthly-text-right">{formatCurrency(service.precio)}</td>
+                                        <td className="text-right">{formatCurrency(service.precio)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -881,35 +895,35 @@ const MonthlyServiceDetailModal = ({ data, onClose }) => {
 
 const MonthlySalesDetailModal = ({ data, onClose }) => {
     return (
-        <div className="monthly-modal-overlay" onClick={onClose}>
-            <div className="monthly-service-detail-modal" onClick={e => e.stopPropagation()}>
-                <div className="monthly-modal-header">
+        <div className="estdash-modal-overlay" onClick={onClose}>
+            <div className="estdash-modal" onClick={e => e.stopPropagation()}>
+                <div className="estdash-modal-header">
                     <h2>Ventas Realizadas en {data.month.toUpperCase()}</h2>
-                    <button className="monthly-close-button" onClick={onClose}>&times;</button>
+                    <button className="estdash-modal-close" onClick={onClose}>&times;</button>
                 </div>
-                <div className="monthly-modal-summary">
+                <div className="estdash-modal-summary">
                     <p>Total Ingresos: <strong>{formatCurrency(data.revenue)}</strong></p>
                     <p>Total Ventas: <strong>{data.details.length}</strong></p>
                 </div>
 
-                <div className="monthly-modal-list-container">
+                <div className="estdash-modal-list">
                     {data.details.length === 0 ? (
-                        <p className="monthly-no-data-message-modal">No se encontraron ventas para este mes.</p>
+                        <p className="modal-nodata">No se encontraron ventas para este mes.</p>
                     ) : (
-                        <table className="monthly-service-detail-table">
+                        <table className="estdash-modal-table">
                             <thead>
                                 <tr>
                                     <th className="col-idfecha">ID/Fecha</th>
                                     <th className="col-usuario">Usuario</th>
                                     <th className="col-productos">Productos</th>
-                                    <th className="col-total monthly-text-right">Total</th>
+                                    <th className="col-total text-right">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.details.map((venta) => (
                                     <tr key={venta.id}>
                                         <td className="col-idfecha">
-                                            <span className="monthly-service-id">#{shortId(toIdString(venta.id), 6)}</span>
+                                            <span className="service-id">#{shortId(toIdString(venta.id), 6)}</span>
                                             <span className="copy-id" title="Copiar ID"
                                                 onClick={async () => {
                                                     try {
@@ -917,17 +931,17 @@ const MonthlySalesDetailModal = ({ data, onClose }) => {
                                                         Swal.fire({ toast:true, position:'top-end', icon:'success', title:'ID copiado', showConfirmButton:false, timer:1400 });
                                                     } catch {}
                                                 }}>📋</span>
-                                            <span className="monthly-service-date"> ({new Date(venta.fecha).toLocaleDateString(LOCALE)})</span>
+                                            <span className="service-date"> ({new Date(venta.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
                                         <td className="col-usuario">{venta.username}</td>
-                                        <td className="col-productos productos-list-modal">
+                                        <td className="col-productos productos-list">
                                             {venta.productosComprados.map((p, idx) => (
                                                 <span key={idx} className="producto-badge">
                                                     {p.nombre} ({p.cantidad})
                                                 </span>
                                             ))}
                                         </td>
-                                        <td className="col-total monthly-text-right">{formatCurrency(venta.total)}</td>
+                                        <td className="col-total text-right">{formatCurrency(venta.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>

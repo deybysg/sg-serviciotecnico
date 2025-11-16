@@ -1,0 +1,643 @@
+/* ================================================= */
+/* 1. SECCIÓN PRINCIPAL (Contenedor de alto nivel) */
+/* ================================================= */
+/* Se elimina el 100vw y se centra el contenido */
+.servicios-full {
+    width: 100vw; 
+    min-height: 100vh;
+    background-color: #faf8fc;
+    padding: 60px 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    font-family: 'Arial', sans-serif;
+}
+
+/* 2. CONTENEDOR INTERNO CENTRADO (AHORA MÁS COMPACTO) */
+.servicios-full .servicios-container {
+    width: 100%;
+    /* REDUCCIÓN CLAVE: Reducimos el max-width a 950px */
+    max-width: 950px; 
+    padding: 0 20px;
+    box-sizing: border-box;
+    color: #1e293b;
+}
+
+/* 3. TÍTULO */
+.servicios-full .servicios-container h2 {
+    text-align: center;
+    margin-bottom: 30px; 
+    color: #312e81;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e7ff;
+}
+
+/* -------------------------------------- */
+/* 4. FORMULARIO DE CREACIÓN DE SERVICIO COMPACTO */
+/* -------------------------------------- */
+.servicios-full .servicio-form {
+    max-width: 650px;
+    margin: 0 auto 35px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #ffffff; 
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(49, 46, 129, 0.1); 
+    border: 1px solid #e2e8f0;
+}
+
+/* Secciones internas */
+.servicios-full .seccion-form {
+    border: 1px solid #e2e8f0; 
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.servicios-full .seccion-form legend {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #4f46e5; 
+    padding: 0 10px;
+    margin-left: -10px;
+}
+
+/* Labels */
+.servicios-full .servicio-form label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #312e81;
+    font-size: 0.95rem;
+}
+
+/* Inputs y selects del formulario principal */
+.servicios-full .servicio-form input[type="text"],
+.servicios-full .servicio-form input[type="number"],
+.servicios-full .servicio-form textarea,
+.servicios-full .servicio-form select,
+.servicios-full .servicio-form .react-select__control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: box-shadow 0.3s ease;
+}
+
+.servicios-full .servicio-form input:focus,
+.servicios-full .servicio-form textarea:focus,
+.servicios-full .servicio-form select:focus,
+.servicios-full .servicio-form .react-select__control--is-focused {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px #e0e7ff;
+    outline: none;
+}
+
+/* Presupuesto (Formulario Principal) */
+.servicios-full .presupuesto-section {
+    padding: 10px 0;
+    border-top: 1px dashed #e2e8f0;
+    margin-top: 10px;
+}
+
+.servicios-full .presupuesto-item {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.servicios-full .presupuesto-item input {
+    flex-grow: 1;
+    font-size: 0.95rem;
+    padding: 6px 8px;
+}
+
+.servicios-full .presupuesto-item input[name="costo"] {
+    max-width: 100px;
+    text-align: right;
+}
+
+/* FIX CSS: Selector específico para asegurar el color rojo del botón de remover */
+.servicios-full .presupuesto-item .btn-remove-item { 
+    background-color: #ef4444; /* Rojo */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+    /* CAMBIO CLAVE PARA CENTRADO */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.6rem; /* Ajuste para alinear con inputs */
+}
+
+.servicios-full .presupuesto-item .btn-remove-item:hover {
+    background-color: #dc2626;
+}
+
+.servicios-full .presupuesto-section > button[type="button"] {
+    background: #48bb78; 
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    transition: background-color 0.2s;
+}
+
+.servicios-full .presupuesto-section > button[type="button"]:hover {
+    background-color: #38a169;
+}
+
+.servicios-full .presupuesto-resumen {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #e0e7ff;
+    text-align: right;
+    font-weight: 700;
+    color: #312e81;
+}
+
+.servicios-full .presupuesto-resumen p {
+    margin: 4px 0;
+}
+
+/* -------------------------------------- */
+/* 5. Botones Principales y Toggle */
+/* -------------------------------------- */
+.servicios-full .btn-primary-servicio {
+    padding: 12px 18px;
+    font-size: 1rem;
+    background: #0f172a; 
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    margin-top: 15px;
+}
+
+.servicios-full .btn-primary-servicio:hover {
+    background-color: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.servicios-full .btn-toggle-lista-servicios {
+    display: block;
+    margin: 30px auto;
+    padding: 14px 25px;
+    background: #4f46e5;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79,70,229,0.4);
+    width: 100%;
+    max-width: 650px;
+}
+
+.servicios-full .btn-toggle-lista-servicios:hover {
+    background: #3730a3;
+    box-shadow: 0 6px 20px rgba(55,48,163,0.5);
+}
+
+/* -------------------------------------- */
+/* 6. Buscador y Lista de Servicios */
+/* -------------------------------------- */
+.servicios-full .buscador-servicios {
+    margin: 20px auto 30px auto; 
+    text-align: center;
+    max-width: 650px; 
+}
+
+.servicios-full .buscador-servicios input {
+    padding: 10px 12px;
+    width: 100%;
+    max-width: 600px; 
+    border-radius: 10px;
+    border: 2px solid #cbd5e1;
+    outline: none;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+}
+
+.servicios-full .buscador-servicios input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px #4f46e5;
+}
+
+.servicios-full .servicios-lista-wrapper {
+    margin-top: 20px;
+}
+
+.servicios-full .servicios-lista-cards {
+    /* Cambiamos a una LISTA moderna: una columna full-width con filas separadas */
+    display: block;
+    gap: 12px;
+    margin: 0 auto;
+}
+
+/* Tarjeta Individual de Servicio (MODO NORMAL MÁS COMPACTO) */
+.servicios-full .servicio-card {
+    background: linear-gradient(90deg, #ffffff, #fbfbff);
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+    /* Full blue frame around the card for a professional look */
+    border: 2px solid rgba(37,99,235,0.15);
+    transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.12s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.servicios-full .servicio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgba(37,99,235,0.08);
+    border-color: rgba(37,99,235,0.35);
+}
+
+.servicios-full .qr-info-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 220px;
+    flex: 0 0 220px;
+    margin: 0;
+    padding: 0;
+}
+
+.servicios-full .qr-info-header h4 {
+    color: #4f46e5;
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.servicios-full .servicio-card .servicio-info {
+    flex: 1 1 auto;
+}
+
+/* Grid estilo tabla: etiquetas arriba, valores abajo */
+.servicios-full .servicio-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Empuja .acciones-servicio al borde derecho */
+    gap: 12px;
+    width: 100%;
+}
+
+.servicios-full .servicio-info .card-grid {
+    display: grid;
+    /* Cinco columnas: Cliente, Tipo, Marca, Modelo, Entrada */
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px 14px;
+    align-items: center;
+    width: 100%;
+    flex: 1 1 auto; /* Ocupa el espacio disponible hacia la izquierda */
+}
+
+.servicios-full .servicio-info .acciones-servicio {
+    flex: 0 0 auto; /* No crece, se mantiene al ancho del botón */
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Responsive: en pantallas pequeñas apilamos contenido y dejamos el botón al final */
+@media (max-width: 760px) {
+    .servicios-full .servicio-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .servicios-full .servicio-info .acciones-servicio {
+        align-self: flex-end;
+        margin-top: 6px;
+    }
+    .servicios-full .servicio-info .card-grid {
+        /* en móvil usamos 2 columnas para las etiquetas/valores */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.servicios-full .servicio-info .card-grid .grid-label {
+    font-size: 0.95rem; /* ligeramente más grande */
+    color: #2563eb; /* azul primario para resaltar */
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+}
+
+.servicios-full .servicio-info .card-grid .grid-value {
+    font-size: 1.02rem;
+    color: #0f172a;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Responsive: en pantallas pequeñas pasar a 2 columnas */
+@media (max-width: 760px) {
+    .servicios-full .servicio-info .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.servicios-full .servicio-card p {
+    margin: 2px 0; 
+    color: #475569;
+    font-size: 0.9rem; 
+}
+
+.servicios-full .servicio-card strong {
+    font-weight: 700;
+    color: #312e81;
+}
+
+/* ============================================== */
+/* ESTILOS DE EDICIÓN (Aseguramos todos los campos) */
+/* ============================================== */
+.servicios-full .servicio-card.editando {
+    background-color: #fffff0; /* Fondo amarillo claro para indicar edición */
+    border-left: 5px solid #f59e0b; /* Borde naranja/amarillo más visible */
+    box-shadow: 0 0 0 2px #f59e0b, 0 4px 15px rgba(245, 158, 11, 0.3); /* Sombra que destaca */
+}
+
+/* FIX CLAVE: Aplicamos estilos consistentes a TODOS los campos editables */
+.servicios-full .servicio-card.editando input,
+.servicios-full .servicio-card.editando textarea,
+.servicios-full .servicio-card.editando select {
+    width: 100%; /* Ocupar todo el ancho disponible */
+    max-width: none; 
+    padding: 7px 9px; /* Un poco más de padding */
+    font-size: 0.9rem; 
+    margin-top: 3px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #f59e0b; /* Borde amarillo más llamativo */
+    background-color: #fff;
+    color: #1e293b;
+    transition: all 0.2s;
+}
+
+/* Estilo de foco para la edición */
+.servicios-full .servicio-card.editando input:focus,
+.servicios-full .servicio-card.editando textarea:focus,
+.servicios-full .servicio-card.editando select:focus {
+    border-color: #dc2626; /* Color de foco distinto y fuerte */
+    box-shadow: 0 0 0 1px #dc2626;
+    outline: none;
+}
+
+.servicios-full .servicio-card.editando .presupuesto-section {
+    padding-top: 10px;
+}
+
+.servicios-full .servicio-card.editando .presupuesto-item {
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+/* Ajuste específico para los inputs del presupuesto */
+.servicios-full .servicio-card.editando .presupuesto-item input[name="descripcion"] {
+    max-width: none;
+}
+
+.servicios-full .servicio-card.editando .presupuesto-item input[name="costo"] {
+    max-width: 100px;
+    text-align: right;
+}
+
+/* FIX CSS: Estilo del botón de remover en modo edición. */
+.servicios-full .servicio-card.editando .presupuesto-item .btn-remove-item { 
+    background-color: #ef4444; /* Rojo */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1; 
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+    /* CAMBIO CLAVE PARA CENTRADO */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.servicios-full .servicio-card.editando .presupuesto-item .btn-remove-item:hover {
+    background-color: #c73131;
+}
+
+.servicios-full .servicio-card.editando .presupuesto-section legend {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f59e0b;
+    border-bottom: 1px solid #f59e0b;
+}
+
+/* ACCIONES */
+.servicios-full .acciones-servicio {
+    margin-top: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+/* Responsive: en pantallas pequeñas las tarjetas se apilan verticalmente */
+@media (max-width: 760px) {
+    .servicios-full .servicio-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .servicios-full .qr-info-header {
+        flex: 0 0 auto;
+        min-width: auto;
+    }
+
+    .servicios-full .acciones-servicio {
+        justify-content: flex-start;
+    }
+}
+
+.servicios-full .acciones-servicio button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Botones específicos */
+.servicios-full .btn-edit-servicio {
+    background: #fbbf24;
+    color: #1e293b;
+    border: none; /* Asegurar que no tengan borde */
+}
+
+.servicios-full .btn-edit-servicio:hover {
+    background: #f59e0b;
+    transform: translateY(-1px);
+}
+
+.servicios-full .btn-delete-servicio, 
+.servicios-full .btn-cancel-edit {
+    background: #ef4444;
+    color: #fff;
+    border: none; /* Asegurar que no tengan borde */
+}
+
+.servicios-full .btn-delete-servicio:hover, 
+.servicios-full .btn-cancel-edit:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* Botón 'Ver más' destacado */
+.servicios-full .btn-ver-mas {
+    padding: 10px 14px;
+    font-size: 1rem; /* un poco más grande */
+    font-weight: 800;
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(37,99,235,0.18);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s;
+}
+
+.servicios-full .btn-ver-mas:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(30,64,175,0.22);
+}
+
+.servicios-full .btn-ver-mas:active {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+/* -------------------------------------- */
+/* 6.1. Estilos del Presupuesto Desplegable (Collapsible) */
+/* -------------------------------------- */
+
+.servicios-full .btn-toggle-presupuesto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 10px;
+    margin: 10px 0;
+    background: #e0e7ff; /* Fondo azul claro */
+    color: #312e81;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.servicios-full .btn-toggle-presupuesto:hover {
+    background-color: #c7d2fe;
+}
+
+.servicios-full .btn-toggle-presupuesto .resumen-total strong {
+    color: #4f46e5;
+    font-size: 1.05em;
+}
+
+.servicios-full .btn-toggle-presupuesto .toggle-icon {
+    font-size: 0.8em;
+    margin-left: 10px;
+    transition: transform 0.2s;
+}
+
+.servicios-full .presupuesto-oculto-detalle {
+    border: 1px dashed #c7d2fe;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.servicios-full .presupuesto-oculto-detalle legend {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #4f46e5;
+    padding: 0 5px;
+}
+
+.servicios-full .presupuesto-oculto-detalle p {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+    padding-bottom: 2px;
+    border-bottom: 1px dotted #e2e8f0;
+}
+
+.servicios-full .presupuesto-oculto-detalle p:last-child {
+    border-bottom: none;
+}
+
+.servicios-full .presupuesto-oculto-detalle .costo-detalle {
+    font-weight: 700;
+    color: #312e81;
+}
+
+/* -------------------------------------- */
+/* 7. RESPONSIVE MÓVIL */
+/* -------------------------------------- */
+@media (max-width: 768px) {
+    .servicios-full {
+        padding: 40px 0;
+    }
+    
+    .servicios-full .servicio-form,
+    .servicios-full .btn-toggle-lista-servicios,
+    .servicios-full .buscador-servicios {
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.06);
+        border: 1px solid #2563eb; /* azul primaria */
+    }
+
+    .servicios-full .servicios-lista-cards {
+        box-shadow: 0 14px 30px rgba(37,99,235,0.08);
+        gap: 15px;
+    }
+
+    .servicios-full .servicio-card.editando textarea,
+    .servicios-full .servicio-card.editando select {
+        max-width: none; /* Asegurar que ocupen todo el ancho disponible */
+    }
+}

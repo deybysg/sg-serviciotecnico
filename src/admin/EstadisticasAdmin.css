@@ -1,121 +1,329 @@
 /*
  * =================================================================
- * ESTILO PREMIUM DASHBOARD (REACT) - VERSIÓN FINAL
- * AJUSTES: 100vw, Padding Lateral Mínimo, Compactación de Elementos, y Responsividad Móvil.
+ * ESTADÍSTICAS ADMIN - TEMA CLARO (según estadisticas-admin-redesign.svg)
+ * Namespace: estdash- / #estdash-root
  * =================================================================
  */
 
-/* --- VARIABLES CSS PERSONALIZADAS --- */
-:root {
-    /* Fondos */
-    --bg-color: #0b1a2e; 	 	/* Fondo principal (Azul muy oscuro/Petróleo) */
-    --card-bg: #1c2b46; 	 	 /* Fondo de tarjetas/módulos (Azul Grisáceo) */
-    --hover-bg: #273859; 	 	/* Fondo al pasar el mouse */
-    /* Colores primarios y de acento */
-    --primary-color: #00bcd4; 	/* Cian Brillante (Para títulos/iconos/barras) */
-    --secondary-color: #4CAF50; /* Verde Esmeralda (Para Ingresos/Éxito) */
-    --text-color: #e0e7ff; 	 	/* Texto principal (Blanco Azulado) */
-    --text-muted: #94a3b8; 	 	/* Texto secundario/etiquetas */
-    /* Sombras y Bordes */
-    --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.4); /* Sombra elegante y profunda */
-    --border-color: rgba(255, 255, 255, 0.08); /* Líneas de separación sutiles */
-    --border-radius: 12px;
+/* --- VARIABLES CSS (TEMA CLARO PRO) --- */
+#estdash-root {
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --panel-bg: #f8fafc;
+    --hover-bg: #f1f5f9;
+    --primary-500: #2563eb;
+    --primary-400: #3b82f6;
+    --accent-400: #06b6d4;
+    --accent-500: #22c55e;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    --label-color: #334155;
+    --line-color: #e2e8f0;
+    --shadow-soft: 0 14px 36px rgba(15, 23, 42, 0.12);
+    --shadow-hover: 0 20px 50px rgba(37, 99, 235, 0.2);
+    --shadow-glow: 0 0 40px rgba(37, 99, 235, 0.15);
+    --border-radius: 16px;
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body[data-role="superadmin"] .estadisticas-admin-page-custom {
+/* =================================================================
+ * OVERRIDES TEMA OSCURO (RESTAURAR ESTILO ORIGINAL SIN CAMBIAR LÓGICA)
+ * Mantiene namespace estdash- para no chocar con otros módulos.
+ * Solo estilos visuales: colores, fondos, sombras más sobrias.
+ * Para volver al claro, eliminar este bloque o moverlo a comentario.
+ * ================================================================= */
+#estdash-root {
+    --bg-color: #0b1a2e;
+    --card-bg: #132238;
+    --panel-bg: #1c2b46;
+    --hover-bg: #203653;
+    --primary-500: #38bdf8; /* Cyan principal luminoso */
+    --primary-400: #0ea5e9;
+    --accent-400: #06b6d4;
+    --accent-500: #0284c7;
+    --text-color: #f1f5f9;
+    --text-muted: #94a3b8;
+    --label-color: #e2e8f0;
+    --line-color: #24364d;
+    --shadow-soft: 0 10px 28px rgba(0,0,0,0.45);
+    --shadow-hover: 0 16px 40px rgba(0,0,0,0.6);
+    --shadow-glow: 0 0 30px rgba(14,165,233,0.35);
+}
+
+/* Página: quitar gradientes claros y overlay */
+.estdash-page {
+    background: var(--bg-color) !important;
+    color: var(--text-color);
+}
+.estdash-page::before { content: none !important; }
+
+/* Header: volver a texto sólido con glow sutil */
+.estdash-page .estdash-header h1 {
+    background: none !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    color: var(--text-color) !important;
+    text-shadow: 0 0 18px rgba(6,182,212,0.35), 0 2px 4px rgba(0,0,0,0.6);
+}
+
+/* Desactivar animaciones y brillos modernos para volver al look clásico */
+.estdash-page,
+.estdash-page * {
+    animation: none !important;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease !important;
+}
+.estdash-page .estdash-kpi-card::before,
+.estdash-page .estdash-kpi-card::after,
+.estdash-page .estdash-chart::after,
+.estdash-page .estdash-tabs::before,
+.estdash-page .estdash-tabs::after,
+.estdash-page .estdash-apply-btn::before {
+    content: none !important;
+}
+.estdash-page .estdash-tab-btn.is-active::before { content: none !important; }
+.estdash-page .estdash-kpi-card:hover { transform: translateY(-4px) !important; }
+.estdash-page .estdash-bar:hover { transform: scaleY(1.02) !important; filter: none !important; }
+
+/* Tabs: fondo oscuro sólido en lugar de glass claro */
+.estdash-page .estdash-tabs {
+    background: var(--panel-bg) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    box-shadow: var(--shadow-soft);
+}
+.estdash-page .estdash-tab-btn {
+    background: transparent;
+    color: var(--text-muted);
+}
+.estdash-page .estdash-tab-btn.is-active {
+    background: linear-gradient(90deg, var(--primary-400), var(--primary-500));
+    color: #0f172a;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 6px 18px rgba(14,165,233,0.4);
+}
+
+/* Filtros: tarjeta oscura plana */
+.estdash-page .estdash-filters {
+    background: var(--panel-bg) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    box-shadow: var(--shadow-soft);
+}
+.estdash-page .estdash-filter-group label { color: var(--text-muted); }
+.estdash-page .estdash-filter-group select,
+.estdash-page .estdash-filter-group input {
+    background: #0f253d;
+    border: 1px solid #264b6d;
+    color: var(--text-color);
+}
+.estdash-page .estdash-filter-group select:focus,
+.estdash-page .estdash-filter-group input:focus {
+    outline: 1px solid var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.25);
+}
+.estdash-page .estdash-apply-btn {
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-400)) !important;
+    color: #082032 !important;
+    box-shadow: 0 8px 26px rgba(14,165,233,0.4);
+}
+
+/* KPI Cards: fondo oscuro y número sin gradiente */
+.estdash-page .estdash-kpi-card {
+    background: var(--panel-bg) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    box-shadow: var(--shadow-soft);
+    transform: none;
+}
+.estdash-page .estdash-kpi-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover), 0 0 30px rgba(14,165,233,0.25);
+}
+.estdash-page .estdash-kpi-value {
+    background: none !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    color: var(--text-color) !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.estdash-page .estdash-kpi-label { color: var(--text-muted); }
+
+/* Gráficos: paneles oscuros y barras con colores vivos */
+.estdash-page .estdash-chart {
+    background: var(--card-bg) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: var(--shadow-soft);
+}
+.estdash-page .estdash-chart h2 {
+    color: var(--text-color) !important;
+}
+.estdash-page .estdash-bar-chart {
+    background: var(--panel-bg) !important;
+    border-left: 2px solid #264b6d !important;
+    border-bottom: 2px solid #264b6d !important;
+}
+.estdash-page .estdash-bar.bar-service {
+    background: linear-gradient(180deg, #0ea5e9, #0369a1) !important;
+}
+.estdash-page .estdash-bar.bar-sales {
+    background: linear-gradient(180deg, #06b6d4, #0e7490) !important;
+}
+.estdash-page .bar-val {
+    background: rgba(0,0,0,0.4) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Pie chart / leyenda */
+.estdash-page .estdash-pie-row { background: var(--panel-bg) !important; backdrop-filter: none !important; }
+.estdash-page .estdash-pie { background: #14283d !important; border: 5px solid var(--panel-bg) !important; }
+.estdash-page .estdash-legend { background: var(--card-bg) !important; backdrop-filter: none !important; border: 1px solid rgba(255,255,255,0.05) !important; }
+.estdash-page .legend-item { color: var(--text-muted) !important; }
+.estdash-page .legend-item:hover { background: rgba(56,189,248,0.15) !important; color: var(--text-color) !important; }
+
+/* Modales: fondos opacos oscuros */
+.estdash-page .estdash-modal-overlay { backdrop-filter: none !important; }
+.estdash-page .estdash-modal {
+    background: var(--card-bg) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: var(--shadow-soft);
+}
+.estdash-page .estdash-modal-header h2 {
+    background: none !important;
+    -webkit-text-fill-color: var(--text-color) !important;
+    color: var(--text-color) !important;
+}
+.estdash-page .estdash-modal-close { background: none !important; color: var(--text-muted) !important; }
+.estdash-page .estdash-modal-close:hover { background: rgba(56,189,248,0.15) !important; color: var(--text-color) !important; }
+.estdash-page .estdash-modal-summary { background: #14283d !important; backdrop-filter: none !important; border: 1px solid rgba(255,255,255,0.05) !important; }
+.estdash-page .estdash-modal-table th { background: #14283d !important; color: var(--text-muted) !important; border-bottom: 1px solid #203653 !important; }
+.estdash-page .estdash-modal-table tbody tr:hover { background: #203653 !important; transform: none !important; box-shadow: none !important; }
+.estdash-page .text-right { background: none !important; -webkit-text-fill-color: var(--text-color) !important; color: var(--text-color) !important; }
+
+/* Fin overrides tema oscuro */
+
+body[data-role="superadmin"] #estdash-root {
   max-width: 1270px;
 }
 
-/* --- ESTILO PRINCIPAL DEL COMPONENTE Y VIEWPORT FIX --- */
-.estadisticas-admin-page-custom {
-    background-color: var(--bg-color);
+/* --- LAYOUT PRINCIPAL --- */
+.estdash-page {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
     color: var(--text-color);
-    /* Compactación: Reducimos el padding lateral a 10px */
-    padding: 30px 10px; 
-    
-    /* Corrección NAV: Se mantiene el margen superior */
-    padding-top: 100px; 
-    margin-top: -40px; 
-    
-    width: 100vw; /* Mantenido a petición */
+    padding: 30px 10px;
+    padding-top: 100px;
+    margin-top: -40px;
+    width: 100vw;
     min-height: 100vh;
-    
-    
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
-    gap: 25px; /* Compactación vertical */
-    transition: background-color 0.3s;
-    /* Esencial con 100vw para evitar el scroll lateral */
-    overflow-x: hidden; 
+    gap: 25px;
+    transition: background 0.5s var(--transition-smooth);
+    overflow-x: hidden;
+    position: relative;
 }
 
-.admin-header {
+.estdash-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 400px;
+    background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.estdash-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+.estdash-page .estdash-header {
     text-align: center;
     padding-bottom: 10px;
 }
 
-.admin-header h1 {
+.estdash-page .estdash-header h1 {
     margin-top: 15px;
-    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-500), var(--accent-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 5px;
     font-size: 2.8em;
     font-weight: 800; 
     letter-spacing: -0.5px;
+    animation: slideInDown 0.6s var(--transition-smooth);
 }
 
-.admin-header p {
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.estdash-page .estdash-header p {
     color: var(--text-muted);
     font-size: 1.2em;
 }
 
-.loading-message, 
-.error-message-full,
-.no-data-message,
-.no-chart-data {
+.estdash-loading,
+.estdash-error,
+.estdash-nodata,
+.estdash-nochart {
     text-align: center;
     padding: 50px;
     font-size: 1.5em;
     color: var(--text-muted);
 }
-.error-message-full {
-    color: #ef5350; 
+.estdash-error {
+    color: #ef5350;
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     margin: 20px auto;
     max-width: 600px;
-    box-shadow: var(--shadow-dark);
+    box-shadow: var(--shadow-soft);
 }
 
-/* --- FILTROS --- */
-.filters-container {
+/* --- FILTROS (TARJETA CON BOTÓN) --- */
+.estdash-page .estdash-filters {
     justify-content: center; 
     display: flex;
     gap: 15px; 
-    /* AJUSTE para el tema oscuro */
-    background-color: var(--card-bg); /* Cambiado de #f7f9fb */
-    border: 1px solid var(--border-color); /* Cambiado de #e0e6ed */
-    padding: 15px;
-    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 12px 14px;
+    border-radius: 16px;
     margin-bottom: 20px;
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.5);
+    align-items: center;
+    animation: fadeInScale 0.6s var(--transition-smooth);
 }
 
-.filter-group {
+.estdash-page .estdash-filter-group {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.filter-group label {
+.estdash-page .estdash-filter-group label {
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--label-color);
     font-size: 1.05em;
 }
 
-.filter-group select {
-    background-color: var(--hover-bg); /* Ajustado a hover-bg para contraste */
+.estdash-page .estdash-filter-group select {
+    background-color: var(--hover-bg);
     color: var(--text-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--line-color);
     border-radius: 8px;
     padding: 10px 15px;
     font-size: 1em;
@@ -123,181 +331,320 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     outline: none;
     transition: all 0.3s ease-in-out;
     appearance: none; 
-    /* Flecha SVG para mantener el estilo (el color es el correcto para text-muted) */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
     background-repeat: no-repeat;
     background-position: right 10px center;
 }
 
-.filter-group select:hover {
-    border-color: var(--primary-color);
+.estdash-page .estdash-filter-group select:hover {
+    border-color: var(--primary-400);
 }
-.filter-group select:disabled {
-    background-color: var(--card-bg); /* Opacidad en el fondo */
+.estdash-page .estdash-filter-group select:disabled {
+    background-color: var(--card-bg);
     cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Botón aplicar filtros (gradiente cian-verde) */
+.estdash-page .estdash-apply-btn {
+    padding: 10px 24px;
+    border-radius: 12px;
+    border: none;
+    background-image: linear-gradient(135deg, var(--accent-400), var(--accent-500));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95em;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.3s var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+.estdash-page .estdash-apply-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+.estdash-page .estdash-apply-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+.estdash-page .estdash-apply-btn:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(34, 197, 94, 0.4);
+}
+.estdash-page .estdash-apply-btn:active {
+    transform: translateY(0);
 }
 
 
-/* --- GRID DE TARJETAS (KEY METRICS) --- */
-.stats-cards-grid {
+/* --- GRID DE KPI CARDS --- */
+.estdash-page .estdash-kpi-grid {
     display: grid;
-    /* Ajuste de tamaño de tarjeta para compactar */
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
     gap: 15px; 
 }
 
-.stat-card {
-    background-color: var(--card-bg);
+.estdash-page .estdash-kpi-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
-    padding: 18px; /* Compactado */
-    box-shadow: var(--shadow-dark);
+    padding: 20px;
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 100px; 
+    min-height: 110px; 
     position: relative;
-    border-top: 3px solid; 
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s var(--transition-smooth);
+    animation: fadeInUp 0.6s var(--transition-smooth) backwards;
 }
 
-.stat-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 188, 212, 0.2); 
+.estdash-page .estdash-kpi-card:nth-child(1) { animation-delay: 0.1s; }
+.estdash-page .estdash-kpi-card:nth-child(2) { animation-delay: 0.2s; }
+.estdash-page .estdash-kpi-card:nth-child(3) { animation-delay: 0.3s; }
+.estdash-page .estdash-kpi-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.stat-value {
-    font-size: 2.5em; /* Reducido */
-    font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 3px;
+.estdash-page .estdash-kpi-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--shadow-hover), var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    border-color: rgba(37, 99, 235, 0.2);
 }
-/* Nuevo estilo para el texto de producto largo */
-.stat-value-producto {
-    /* Estilo para el producto líder, ya que es texto */
-    font-size: 1.4rem; /* Aumentado un poco para que se vea bien en oscuro */
+
+.estdash-page .estdash-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.estdash-page .estdash-kpi-card:hover::before {
+    left: 100%;
+}
+
+.estdash-page .estdash-kpi-value {
+    font-size: 2.6em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--text-color), var(--primary-500));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    letter-spacing: -1px;
+}
+
+.estdash-page .estdash-kpi-producto {
+    font-size: 1.4rem;
     font-weight: 600;
-    color: var(--text-color); /* Ajustado para oscuro */
-    /* Para manejar nombres largos */
+    color: var(--text-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.stat-label {
-    font-size: 0.9em; /* Reducido */
+.estdash-page .estdash-kpi-label {
+    font-size: 0.9em;
     color: var(--text-muted);
 }
 
-.stat-icon {
+.estdash-page .estdash-kpi-icon {
     position: absolute;
     bottom: 15px; 
     right: 15px;
     top: auto; 
     font-size: 3.5em; 
-    opacity: 0.15; 
-    color: var(--primary-color);
-    /* Removido el color de fondo para que la opacidad del color del icono se vea mejor sobre el card-bg */
+    opacity: 0.2; 
+    color: var(--primary-500);
 }
 
-/* Colores específicos para las tarjetas (Icono y Borde Superior) - Servicios */
-.revenue-card { border-top-color: var(--secondary-color); } 
-.revenue-card .stat-icon { 
-    color: var(--secondary-color);
-    opacity: 0.25; 
+/* Colores de íconos de KPI Servicios */
+.kpi-revenue .estdash-kpi-icon { color: var(--accent-500); opacity: 0.25; }
+.kpi-active .estdash-kpi-icon { color: var(--accent-400); opacity: 0.25; }
+.kpi-delivered .estdash-kpi-icon { color: var(--primary-400); opacity: 0.25; }
+.kpi-avgdays .estdash-kpi-icon { color: #e11d48; opacity: 0.25; }
+
+/* Colores de íconos de KPI Ventas */
+.kpi-sales-1 .estdash-kpi-icon { color: #e74c3c; opacity: 0.25; }
+.kpi-sales-2 .estdash-kpi-icon { color: #f1c40f; opacity: 0.25; }
+.kpi-sales-3 .estdash-kpi-icon { color: #1abc9c; opacity: 0.25; }
+.kpi-sales-4 .estdash-kpi-icon { color: #9b59b6; opacity: 0.25; }
+
+/* Grid override para vista de ventas (4 tarjetas) */
+.estdash-page .kpi-sales-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.active-services-card { border-top-color: #ffc107; } 
-.active-services-card .stat-icon { color: #ffc107; }
 
-.delivered-card { border-top-color: var(--primary-color); } 
-.delivered-card .stat-icon { color: var(--primary-color); }
-
-.avg-days-card { border-top-color: #e91e63; } 
-.avg-days-card .stat-icon { color: #e91e63; }
-
-
-/* --- FILA DE GRÁFICOS --- */
-.stats-charts-row {
+/* --- GRÁFICOS (ROW) --- */
+.estdash-page .estdash-charts-row {
     display: grid;
-    /* Ajuste de tamaño de gráfico para compactar */
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
     gap: 15px; 
 }
 
-.chart-block {
-    background-color: var(--card-bg);
+.estdash-page .estdash-chart {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
-    padding: 20px; /* Compactado */
-    box-shadow: var(--shadow-dark);
+    padding: 24px;
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeInUp 0.7s var(--transition-smooth) backwards;
+    position: relative;
+    overflow: hidden;
 }
 
-.chart-block h2 {
-    color: var(--primary-color);
+.estdash-page .estdash-chart::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.05), transparent 70%);
+    pointer-events: none;
+}
+
+.estdash-page .estdash-chart h2 {
+    color: var(--text-color);
     margin-bottom: 8px;
-    font-size: 1.6em;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
+    font-size: 1.7em;
+    font-weight: 700;
+    padding-bottom: 12px;
+    position: relative;
 }
 
-.chart-subtitle {
+.estdash-page .estdash-chart h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-500), var(--accent-400));
+    border-radius: 2px;
+    transition: width 0.4s var(--transition-smooth);
+}
+
+.estdash-page .estdash-chart:hover h2::after {
+    width: 120px;
+}
+
+.estdash-page .estdash-chart-subtitle {
     color: var(--text-muted);
     margin-bottom: 25px;
     font-size: 0.95em;
 }
 
-
-/* --- GRÁFICO DE BARRAS (INGRESOS MENSUALES) --- */
-.bar-chart-container {
+/* --- GRÁFICO DE BARRAS --- */
+.estdash-page .estdash-bar-chart {
     display: flex;
     justify-content: space-around;
     align-items: flex-end;
     height: 300px;
-    border-left: 1px solid var(--border-color); 
-    border-bottom: 1px solid var(--border-color); 
+    border-left: 2px solid rgba(226, 232, 240, 0.5); 
+    border-bottom: 2px solid rgba(226, 232, 240, 0.5); 
     padding-bottom: 30px; 
     position: relative;
     padding-left: 10px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.8));
+    border-radius: 12px;
 }
 
-.chart-bar {
+.estdash-page .estdash-bar {
     flex: 1; 
-    max-width: 50px; /* Barras más delgadas para compactar */
+    max-width: 50px;
     margin: 0 5px;
-    border-radius: 4px 4px 0 0;
-    transition: height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.2s ease, transform 0.2s; 
+    border-radius: 8px 8px 0 0;
+    transition: all 0.4s var(--transition-smooth); 
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(0, 188, 212, 0.5); 
+    transform-origin: bottom;
+    animation: growBar 0.8s var(--transition-smooth) backwards;
 }
 
-/* **ESTILOS ESPECÍFICOS DE BARRAS (NUEVO/AJUSTADO)** */
-
-/* Barra de Servicios (Azul/Cian) */
-.chart-bar.service-bar { 
-    background-color: var(--primary-color); 
+@keyframes growBar {
+    from {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+    to {
+        transform: scaleY(1);
+        opacity: 1;
+    }
 }
 
-/* Barra de Ventas (Verde/Éxito) */
-.chart-bar.sales-bar { 
-    background-color: var(--secondary-color); 
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); 
+.estdash-page .estdash-bar:nth-child(1) { animation-delay: 0.1s; }
+.estdash-page .estdash-bar:nth-child(2) { animation-delay: 0.15s; }
+.estdash-page .estdash-bar:nth-child(3) { animation-delay: 0.2s; }
+.estdash-page .estdash-bar:nth-child(4) { animation-delay: 0.25s; }
+.estdash-page .estdash-bar:nth-child(5) { animation-delay: 0.3s; }
+.estdash-page .estdash-bar:nth-child(6) { animation-delay: 0.35s; }
+.estdash-page .estdash-bar:nth-child(7) { animation-delay: 0.4s; }
+.estdash-page .estdash-bar:nth-child(8) { animation-delay: 0.45s; }
+.estdash-page .estdash-bar:nth-child(9) { animation-delay: 0.5s; }
+.estdash-page .estdash-bar:nth-child(10) { animation-delay: 0.55s; }
+.estdash-page .estdash-bar:nth-child(11) { animation-delay: 0.6s; }
+.estdash-page .estdash-bar:nth-child(12) { animation-delay: 0.65s; }
+
+.estdash-page .estdash-bar.bar-service {
+    background-image: linear-gradient(180deg, var(--primary-400), var(--primary-500));
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35), inset 0 2px 0 rgba(255,255,255,0.3);
+    border-top: 2px solid rgba(255, 255, 255, 0.4);
 }
 
-/* Hover general */
-.chart-bar:hover {
-    background-color: var(--secondary-color); /* El hover general lo hacemos verde */
-    transform: scaleY(1.02);
-    box-shadow: 0 0 15px rgba(76, 175, 80, 0.8); 
+.estdash-page .estdash-bar.bar-sales {
+    background-image: linear-gradient(180deg, var(--accent-500), #16a34a);
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.35), inset 0 2px 0 rgba(255,255,255,0.3);
+    border-top: 2px solid rgba(255, 255, 255, 0.4);
 }
-/* Excepción: Si es barra de servicio y no tiene hover específico, se mantendrá el hover verde general */
 
+.estdash-page .estdash-bar:hover {
+    transform: scaleY(1.05) scaleX(1.1);
+    filter: brightness(1.1);
+    z-index: 10;
+}
 
-.bar-label {
+.estdash-page .estdash-bar.bar-service:hover {
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.5), 0 0 60px rgba(37, 99, 235, 0.3);
+}
+
+.estdash-page .estdash-bar.bar-sales:hover {
+    box-shadow: 0 12px 40px rgba(34, 197, 94, 0.5), 0 0 60px rgba(34, 197, 94, 0.3);
+}
+
+.estdash-page .bar-label {
     position: absolute;
     bottom: -25px;
     width: 100%;
@@ -306,57 +653,70 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     text-align: center;
 }
 
-.bar-value {
-    font-size: 0.8em;
-    color: var(--text-color);
-    padding: 2px 5px;
+.estdash-page .bar-val {
+    font-size: 0.85em;
+    color: white;
+    padding: 6px 10px;
     white-space: nowrap;
     position: absolute;
     top: -25px; 
-    font-weight: 600;
-    background-color: var(--card-bg); 
-    border-radius: 4px;
+    font-weight: 700;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 6px;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: all 0.3s var(--transition-smooth);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 
-.chart-bar:hover .bar-value {
-    opacity: 1; 
+.estdash-page .estdash-bar:hover .bar-val {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.05);
+    background-color: rgba(0, 0, 0, 0.35);
 }
 
 
-/* --- GRÁFICO DE TORTA (DISTRIBUCIÓN DE SERVICIOS) --- */
-.pie-chart-container {
+/* --- GRÁFICO DE TORTA --- */
+.estdash-page .estdash-pie-row {
     display: flex;
     align-items: center;
     justify-content: space-around;
     gap: 30px;
     min-height: 280px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    animation: fadeInUp 0.7s var(--transition-smooth) 0.3s backwards;
 }
 
-.pie-chart {
-    width: 180px; /* Reducido para compactar */
-    height: 180px; /* Reducido para compactar */
+.estdash-page .estdash-pie {
+    width: 180px;
+    height: 180px;
     border-radius: 50%;
-    background-color: var(--bg-color); 
+    background-color: var(--panel-bg);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); 
-    border: 5px solid var(--card-bg); 
-    transition: transform 0.3s ease;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15), 0 4px 12px rgba(99, 102, 241, 0.1);
+    border: 5px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.4s var(--transition-smooth);
 }
 
-.pie-chart:hover {
-    transform: scale(1.05);
+.estdash-page .estdash-pie:hover {
+    transform: scale(1.08) translateY(-4px);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2), 0 8px 24px rgba(99, 102, 241, 0.2);
 }
 
-.conic-pie-chart {
+.estdash-page .estdash-pie-fill {
     width: 100%;
     height: 100%;
     border-radius: 50%;
 }
 
-.pie-legend {
+.estdash-page .estdash-legend {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -364,189 +724,272 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 18px 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
-.legend-item {
+.estdash-page .legend-item {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 1em;
     color: var(--text-color);
-    cursor: default;
-    transition: opacity 0.2s;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-smooth);
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
-.legend-item:hover {
-    opacity: 0.8;
+.estdash-page .legend-item:hover {
+    background: rgba(99, 102, 241, 0.08);
+    transform: translateX(4px);
+    color: var(--primary-500);
 }
 
-.legend-color {
+.estdash-page .legend-color {
     width: 16px;
     height: 16px;
     border-radius: 4px;
     display: inline-block;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
 }
 
-.no-chart-data {
+.estdash-nochart {
     color: var(--text-muted);
     font-style: italic;
     text-align: center;
     padding: 30px;
 }
 
-/* ================================================================= */
-/* --- ESTILOS DEL MODAL DE DETALLE DE SERVICIOS (Se mantiene igual) --- */
-/* ================================================================= */
-
-.monthly-modal-overlay {
+/* --- MODALES --- */
+.estdash-page .estdash-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); 
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeInOverlay 0.3s var(--transition-smooth);
 }
 
-.monthly-service-detail-modal {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.estdash-page .estdash-modal {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px;
     padding: 30px;
     width: 95%;
     max-width: 980px;
-    box-shadow: var(--shadow-dark);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     transform: scale(0.95);
     opacity: 0;
-    animation: fadeIn 0.3s ease-out forwards;
+    animation: modalSlideIn 0.4s var(--transition-smooth) forwards;
 }
 
-@keyframes fadeIn {
+@keyframes modalSlideIn {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
     to {
-        transform: scale(1);
+        transform: scale(1) translateY(0);
         opacity: 1;
     }
 }
 
-.monthly-modal-header {
+.estdash-page .estdash-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(37, 99, 235, 0.2);
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    position: relative;
 }
 
-.monthly-modal-header h2 {
-    color: var(--primary-color);
+.estdash-page .estdash-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 30%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-500), var(--accent-400));
+    border-radius: 2px;
+}
+
+.estdash-page .estdash-modal-header h2 {
+    background: linear-gradient(135deg, var(--primary-500), var(--accent-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 1.8em;
+    font-weight: 700;
 }
 
-.monthly-close-button {
-    background: none;
+.estdash-page .estdash-modal-close {
+    background: rgba(239, 83, 80, 0.1);
     border: none;
     color: var(--text-muted);
     font-size: 2em;
     cursor: pointer;
-    transition: color 0.2s;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s var(--transition-smooth);
 }
 
-.monthly-close-button:hover {
-    color: #ef5350; 
+.estdash-page .estdash-modal-close:hover {
+    color: #ef5350;
+    background: rgba(239, 83, 80, 0.15);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3);
 }
 
-.monthly-modal-summary {
-    background-color: var(--hover-bg);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+.estdash-page .estdash-modal-close:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+.estdash-page .estdash-modal-summary {
+    background: rgba(99, 102, 241, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 24px;
     font-size: 1.1em;
     color: var(--text-color);
     display: flex;
     justify-content: space-around;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
 }
 
-.monthly-modal-list-container {
+.estdash-page .estdash-modal-list {
     max-height: 60vh;
     overflow-y: auto;
-    scrollbar-color: var(--primary-color) var(--hover-bg); 
+    scrollbar-color: var(--primary-500) rgba(226, 232, 240, 0.3);
     scrollbar-width: thin;
+    padding-right: 4px;
 }
 
-.monthly-service-detail-table {
+.estdash-page .estdash-modal-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.estdash-page .estdash-modal-list::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, 0.3);
+    border-radius: 4px;
+}
+
+.estdash-page .estdash-modal-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary-400), var(--primary-500));
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.estdash-page .estdash-modal-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary-500), var(--primary-600));
+}
+
+.estdash-page .estdash-modal-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95em;
 }
 
-.monthly-service-detail-table th, .monthly-service-detail-table td {
+.estdash-page .estdash-modal-table th, .estdash-page .estdash-modal-table td {
     padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--line-color);
 }
 
-.monthly-service-detail-table th {
-    background-color: var(--hover-bg);
-    color: var(--text-muted);
-    font-weight: 600;
+.estdash-page .estdash-modal-table th {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08));
+    color: var(--text-color);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     position: sticky;
     top: 0;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+    font-size: 0.85em;
 }
 
-/* Anchos de columnas para mejor lectura */
-.monthly-service-detail-table .col-idfecha { width: 26%; white-space: nowrap; }
-.monthly-service-detail-table .col-usuario { width: 18%; }
-.monthly-service-detail-table .col-productos { width: auto; }
-.monthly-service-detail-table .col-total { width: 16%; }
+/* Anchos de columnas */
+.estdash-page .estdash-modal-table .col-idfecha { width: 26%; white-space: nowrap; }
+.estdash-page .estdash-modal-table .col-usuario { width: 18%; }
+.estdash-page .estdash-modal-table .col-productos { width: auto; }
+.estdash-page .estdash-modal-table .col-total { width: 16%; }
 
-/* Zebra rows sutiles */
-.monthly-service-detail-table tbody tr:nth-child(odd) {
-    background-color: rgba(255,255,255,0.02);
+.estdash-page .estdash-modal-table tbody tr:nth-child(odd) {
+    background-color: rgba(100, 116, 139, 0.03);
 }
 
-.monthly-service-detail-table tbody tr:hover {
-    background-color: var(--hover-bg);
+.estdash-page .estdash-modal-table tbody tr {
+    transition: all 0.3s var(--transition-smooth);
 }
 
-.monthly-text-right {
+.estdash-page .estdash-modal-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.08), rgba(59, 130, 246, 0.05));
+    transform: translateX(4px);
+    box-shadow: -4px 0 0 0 var(--primary-500);
+}
+
+.estdash-page .text-right {
     text-align: right;
-    font-weight: bold;
-    color: var(--secondary-color);
+    font-weight: 600;
+    color: var(--text-color);
 }
 
-.monthly-service-type-tag {
+.estdash-page .service-type-tag {
     padding: 3px 8px;
     border-radius: 4px;
     font-size: 0.8em;
     font-weight: 600;
-    color: var(--bg-color);
+    color: #fff;
 }
 .tag-celulares { background-color: #4CAF50; }
-.tag-computadora { background-color: #2196F3; color: var(--text-color); }
+.tag-computadora { background-color: #2196F3; }
 .tag-parlantes { background-color: #FF9800; }
-.tag-otros { background-color: #9C27B0; color: var(--text-color); }
+.tag-otros { background-color: #9C27B0; }
 
-.monthly-service-id, .monthly-service-date {
+.estdash-page .service-id, .estdash-page .service-date {
     display: block;
     line-height: 1.2;
 }
-.monthly-service-id { font-weight: 600; color: var(--text-color); }
-.monthly-service-date { font-size: 0.8em; color: var(--text-muted); }
+.estdash-page .service-id { font-weight: 600; color: var(--text-color); }
+.estdash-page .service-date { font-size: 0.8em; color: var(--text-muted); }
 
-/* Botón copiar ID */
-.copy-id {
+.estdash-page .copy-id {
     margin-left: 6px;
     cursor: pointer;
     opacity: 0.7;
 }
-.copy-id:hover { opacity: 1; }
+.estdash-page .copy-id:hover { opacity: 1; }
 
-.monthly-no-data-message-modal {
+.estdash-page .modal-nodata {
     text-align: center;
     padding: 30px;
     color: var(--text-muted);
@@ -554,112 +997,87 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
 }
 
 
-/* ================================================= */
-/* === ESTILOS PARA LA NAVEGACIÓN DE PESTAÑAS (TABS) (AJUSTADO PARA TEMA OSCURO) === */
-/* ================================================= */
-
-.tabs-navigation {
+/* --- TABS (DISEÑO PILL ACTIVO) --- */
+.estdash-page .estdash-tabs {
     display: flex;
+    gap: 8px;
     margin-bottom: 25px;
-    /* AJUSTADO: Fondo oscuro */
-    border-bottom: 2px solid var(--border-color); 
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.6);
+    padding: 6px;
+    border-radius: 16px;
+    max-width: 560px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeInScale 0.5s var(--transition-smooth);
 }
 
-.tab-button {
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.estdash-page .estdash-tab-btn {
     padding: 12px 20px;
     font-size: 1.1rem;
     font-weight: 500;
-    /* AJUSTADO: Color de texto en inactivo */
-    color: var(--text-muted); 
-    background: none;
+    color: var(--primary-500);
+    background: transparent;
     border: none;
-    border-bottom: 3px solid transparent;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin-right: 15px;
+    transition: all 0.4s var(--transition-smooth);
+    margin-right: 0;
     outline: none;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
 }
 
-.tab-button:hover:not(.active-tab) {
-    /* AJUSTADO: Hover sutil */
-    color: var(--text-color);
-    border-bottom-color: var(--hover-bg);
+.estdash-page .estdash-tab-btn:hover:not(.is-active) {
+    color: var(--primary-400);
 }
 
-.tab-button.active-tab {
-    /* AJUSTADO: Color activo */
-    color: var(--primary-color); 
-    border-bottom-color: var(--primary-color);
-    font-weight: 600;
+.estdash-page .estdash-tab-btn.is-active {
+    color: #fff;
+    background-image: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: translateY(-1px);
 }
 
-.content-view {
-    /* Asegura que el contenido debajo de las pestañas se muestre correctamente */
+.estdash-page .estdash-tab-btn.is-active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.estdash-page .estdash-tab-btn.is-active:hover::before {
+    opacity: 1;
+}
+
+.estdash-page .estdash-content {
     padding-top: 10px;
 }
 
 
-/* ================================================= */
-/* === ESTILOS PARA LA VISTA DE VENTAS (EstadisticasVentasView) (NUEVO) === */
-/* ================================================= */
-
-/* Reutilizamos el grid principal, pero le damos un pequeño ajuste si es necesario */
-.sales-grid-override {
-    /* Mantenido el ajuste del ancho para las 4 tarjetas de ventas */
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-/* Estilos de las tarjetas de ventas específicas (Borde Superior) */
-/* Usaremos colores distintos para diferenciar visualmente los tipos de métrica */
-.stat-card.sales-card-1 { border-top-color: #e74c3c; } /* Total Recaudado (Rojo) */
-.stat-card.sales-card-2 { border-top-color: #f1c40f; } /* Transacciones (Amarillo) */
-.stat-card.sales-card-3 { border-top-color: #1abc9c; } /* Producto Líder (Turquesa) */
-.stat-card.sales-card-4 { border-top-color: #9b59b6; } /* Items Vendidos (Púrpura) */
-
-/* Estilos de Iconos de Ventas (Para que se vean en oscuro) */
-.stat-card.sales-card-1 .stat-icon { color: #e74c3c; opacity: 0.25; }
-.stat-card.sales-card-2 .stat-icon { color: #f1c40f; opacity: 0.25; }
-.stat-card.sales-card-3 .stat-icon { color: #1abc9c; opacity: 0.25; }
-.stat-card.sales-card-4 .stat-icon { color: #9b59b6; opacity: 0.25; }
-
-
-/* Placeholder para el segundo bloque de gráfico de ventas */
-.placeholder-ventas {
-    /* Ocupa el 100% de ancho en el grid si solo hay un gráfico */
-    width: 100%;
-}
-
-.placeholder-content {
-    background-color: var(--hover-bg); /* Fondo oscuro coherente */
-    border: 1px dashed var(--border-color); 
-    color: var(--text-muted);
-    padding: 30px;
-    text-align: center;
-    border-radius: 8px;
-    height: 300px; /* Mantener la altura similar al gráfico de barras */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-}
-
-/* Gráfico de torta específico para ventas */
-.sales-category-distribution .pie-chart {
-    border: 5px solid var(--secondary-color); /* Verde en lugar de azul */
-}
-
-.sales-category-distribution .legend-item {
-    font-weight: 500;
-}
-
-/* Lista de productos en el modal de ventas */
-.productos-list-modal {
+/* Lista de productos */
+.estdash-page .productos-list {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
 }
 
-.producto-badge {
+.estdash-page .producto-badge {
     background-color: var(--hover-bg);
     color: var(--text-color);
     padding: 2px 6px;
@@ -669,96 +1087,83 @@ body[data-role="superadmin"] .estadisticas-admin-page-custom {
 }
 
 
-/* ================================================================= */
-/* --- RESPONSIVE DESIGN (FINAL OPTIMIZADO) --- */
-/* ================================================================= */
-
+/* --- RESPONSIVE --- */
 @media (max-width: 992px) {
-    .filters-container {
+    .estdash-page .estdash-filters {
         justify-content: center;
         margin: 0;
     }
-    .stats-cards-grid {
-        /* Tamaño de tarjetas más compacto en tablet */
+    .estdash-page .estdash-kpi-grid {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
         gap: 10px; 
     }
-    /* Ajuste para que las 4 tarjetas de ventas entren bien */
-    .sales-grid-override {
+    .estdash-page .kpi-sales-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
-    .chart-block {
+    .estdash-page .estdash-chart {
         padding: 15px; 
     }
 }
 
 @media (max-width: 768px) {
-    .estadisticas-admin-page-custom {
+    .estdash-page {
         gap: 20px;
-        /* Padding mínimo para que se pegue al borde en móvil */
         padding: 10px 5px; 
         padding-top: 80px; 
         margin-top: -30px;
     }
-    .stats-charts-row {
+    .estdash-page .estdash-charts-row {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    .pie-chart-container {
+    .estdash-page .estdash-pie-row {
         flex-direction: column;
     }
-    .filters-container {
+    .estdash-page .estdash-filters {
         flex-direction: column;
         align-items: center;
         margin: 0;
     }
-    
-    /* Compactar aún más tarjetas y fuentes en móvil */
-    .stat-card {
+    .estdash-page .estdash-kpi-card {
         padding: 10px;
         min-height: 80px;
     }
-    .stat-value {
+    .estdash-page .estdash-kpi-value {
         font-size: 2em;
     }
-    .stat-value-producto {
+    .estdash-page .estdash-kpi-producto {
         font-size: 1.2rem;
     }
-    
-    /* Adaptar tabla en móvil */
-    .monthly-service-detail-table th, .monthly-service-detail-table td {
+    .estdash-page .estdash-modal-table th, .estdash-page .estdash-modal-table td {
         padding: 8px 10px;
     }
-    /* Ocultar la columna de Marca en tablet */
-    .monthly-service-detail-table th:nth-child(3), .monthly-service-detail-table td:nth-child(3) {
+    .estdash-page .estdash-modal-table th:nth-child(3), .estdash-page .estdash-modal-table td:nth-child(3) {
         display: none; 
     }
-    .monthly-service-detail-modal { max-width: 98%; padding: 15px; }
-    .monthly-service-detail-table .col-idfecha { width: auto; }
-    .monthly-service-detail-table .col-usuario { width: auto; }
-    .monthly-service-detail-table .col-total { width: auto; }
+    .estdash-page .estdash-modal { max-width: 98%; padding: 15px; }
+    .estdash-page .estdash-modal-table .col-idfecha { width: auto; }
+    .estdash-page .estdash-modal-table .col-usuario { width: auto; }
+    .estdash-page .estdash-modal-table .col-total { width: auto; }
 }
 
 @media (max-width: 480px) {
-    .admin-header h1 {
+    .estdash-page .estdash-header h1 {
         font-size: 1.8em;
         margin-top: 30px;
     }
-    .stat-value {
+    .estdash-page .estdash-kpi-value {
         font-size: 1.8em;
     }
-    .stat-card {
+    .estdash-page .estdash-kpi-card {
         padding: 10px;
     }
-    .chart-bar {
+    .estdash-page .estdash-bar {
         max-width: 30px;
     }
-    /* Ocultar la fecha en la lista de servicios para ahorrar espacio */
-    .monthly-service-detail-table td .monthly-service-date {
+    .estdash-page .estdash-modal-table td .service-date {
         display: none;
     }
-    /* El contenedor de filtros se muestra en 2 filas */
-    .filters-container {
+    .estdash-page .estdash-filters {
         padding: 10px;
         gap: 10px;
     }

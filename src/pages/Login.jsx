@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import './Login.css';
@@ -36,8 +37,48 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ===== VALIDACIONES FRONTEND =====
+    
+    // Validar username
+    if (!username || username.trim().length < 3) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de validación',
+        text: 'El nombre de usuario debe tener al menos 3 caracteres',
+        timer: 2500,
+        showConfirmButton: false
+      });
+      return;
+    }
+
+    // Validar password
+    if (!password || password.length < 6) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de validación',
+        text: 'La contraseña debe tener al menos 6 caracteres',
+        timer: 2500,
+        showConfirmButton: false
+      });
+      return;
+    }
+
     // Registro
     if (isRegister) {
+      // Validar email en registro
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de validación',
+          text: 'Por favor ingresa un email válido',
+          timer: 2500,
+          showConfirmButton: false
+        });
+        return;
+      }
+
+      // Validar que las contraseñas coincidan
       if (password !== confirmPassword) {
         Swal.fire({
           icon: 'error',
@@ -177,6 +218,12 @@ function Login() {
             {isRegister ? "Crear cuenta" : "Entrar"}
           </button>
         </form>
+
+          {!isRegister && (
+            <div className="forgot-password-link">
+              <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
+            </div>
+          )}
 
         <p className="toggle-text">
           {isRegister ? "¿Ya tienes una cuenta?" : "¿No tienes una cuenta?"}{" "}

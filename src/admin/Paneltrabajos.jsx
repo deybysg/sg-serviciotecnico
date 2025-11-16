@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { FiEye, FiCopy, FiCheck, FiMenu, FiSend } from 'react-icons/fi';
 import Swal from "sweetalert2";
 import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +42,8 @@ const PanelTrabajo = () => {
   const [filtroEstado, setFiltroEstado] = useState("todos");
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
+  const [openVisorId, setOpenVisorId] = useState(null);
+  const closeTimerRef = useRef(null);
 
   const cargarDatos = useCallback(async () => {
     setIsLoading(true);
@@ -107,8 +110,10 @@ const PanelTrabajo = () => {
     const clienteData = s.cliente || s.clienteId;
     const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
     const servicioNumero = String(s.servicioNumero || '');
+    const marca = (s.marcaProducto || '').toLowerCase();
+    const tipo = (s.tipoServicio || '').toLowerCase();
     const coincideBusqueda =
-      servicioNumero.includes(query) || clienteNombre.includes(query);
+      servicioNumero.includes(query) || clienteNombre.includes(query) || marca.includes(query) || tipo.includes(query);
 
     let coincideFiltro = true;
     if (filtroEstado !== "todos") {
@@ -186,6 +191,48 @@ const PanelTrabajo = () => {
         text: error.message || "No se pudo guardar la edición.",
         confirmButtonColor: '#3b82f6'
       });
+    }
+  };
+
+  const handleChangeEstado = async (idServicio, nuevoEstado) => {
+    try {
+      await api.put(`/servicios/${idServicio}`, { estado: nuevoEstado });
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      Toast.fire({ icon: 'success', title: 'Estado actualizado' });
+      cargarDatos();
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+      Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'No se pudo cambiar el estado.' });
+    }
+  };
+
+  const buildMensajeSinSolucion = (servicio, clienteNombre) => {
+    const nro = servicio.servicioNumero || shortId(servicio._id || servicio.id, 6);
+    return `Hola ${clienteNombre}, lamentamos informar que su equipo del servicio N° ${nro} no tiene solución viable por el momento. Podemos coordinar la devolución cuando guste. Gracias.`;
+  };
+
+  const handleNotificarSinSolucion = async (servicio) => {
+    const clienteData = servicio.cliente || servicio.clienteId;
+    const clienteNombre = getClienteName(clienteData, clientes);
+    const mensaje = buildMensajeSinSolucion(servicio, clienteNombre);
+    try {
+      await navigator.clipboard.writeText(mensaje);
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      Toast.fire({ icon: 'info', title: 'Mensaje copiado para notificar' });
+    } catch (e) {
+      Swal.fire({ icon: 'info', title: 'Mensaje generado', html: `<pre style="text-align:left;white-space:pre-wrap">${mensaje}</pre>` });
     }
   };
 
@@ -322,22 +369,92 @@ const PanelTrabajo = () => {
                       {estadoLabel}
                     </span>
                   </p>
+                  <p>
+                    <strong>Equipo:</strong> {servicio.marcaProducto || '—'} · <strong>Tipo:</strong> {servicio.tipoServicio || '—'}
+                  </p>
+                  <div className="fila-secundaria">
+                    <span className="id-servicio" title="Copiar ID" onClick={() => handleCopyId(servicioId)}>#{shortId(servicioId)}</span>
+                    <select
+                      className={`select-estado estado-${servicio.estado}`}
+                      value={servicio.estado}
+                      onChange={(e) => handleChangeEstado(servicioId, e.target.value)}
+                      title="Cambiar estado"
+                    >
+                      {ESTADO_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="acciones">
+                  <div
+                    className="visor-wrapper"
+                    onMouseEnter={() => {
+                      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+                      setOpenVisorId(servicioId);
+                    }}
+                    onMouseLeave={() => {
+                      closeTimerRef.current = setTimeout(() => setOpenVisorId(prev => (prev === servicioId ? null : prev)), 180);
+                    }}
+                  >
+                    <button className="btn-visor" aria-label="Acciones rápidas">
+                      <FiEye size={18} />
+                    </button>
+                    {openVisorId === servicioId && (
+                      <div className="visor-popover">
+                        <div className="visor-header">
+                          <div className="visor-title">Acciones rápidas</div>
+                          <div className="visor-subtitle">#{shortId(servicioId)} · {clienteNombre}</div>
+                        </div>
+                        <div className="visor-resumen">
+                          <div><strong>Orden:</strong> {servicio.servicioNumero || 'N/A'}</div>
+                          <div><strong>Equipo:</strong> {servicio.marcaProducto || '—'}</div>
+                          <div><strong>Tipo:</strong> {servicio.tipoServicio || '—'}</div>
+                        </div>
+                        <div className="visor-estado-inline">
+                          <label>Cambiar estado</label>
+                          <select
+                            className={`select-estado estado-${servicio.estado}`}
+                            value={servicio.estado}
+                            onChange={(e) => handleChangeEstado(servicioId, e.target.value)}
+                          >
+                            {ESTADO_OPTIONS.map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="visor-actions">
+                          <button className="accion copiar" onClick={() => handleCopyId(servicioId)}>
+                            <FiCopy size={16} /> Copiar ID
+                          </button>
+                          <button className="accion notificar" onClick={() => handleNotificarSinSolucion(servicio)}>
+                            <FiSend size={16} /> Notificar sin solución
+                          </button>
+                          <button className="accion entregar" onClick={() => handleEntregarServicio(servicioId)}>
+                            <FiCheck size={16} /> Entregar
+                          </button>
+                          <button className="accion detalles" onClick={() => { setOpenVisorId(null); handleVerDetalles(servicio); }}>
+                            <FiMenu size={16} /> Ver detalles
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     className="btn-detalles"
                     onClick={() => handleVerDetalles(servicio)}
                     title="Ver y Editar Detalles"
                   >
-                    ☰
+                    <FiMenu size={18} />
                   </button>
                   <button
                     className="btn-entregar"
                     onClick={() => handleEntregarServicio(servicioId)}
                     title="Marcar como Entregado"
                   >
-                    ✅
+                    <FiCheck size={18} />
                   </button>
                 </div>
               </div>

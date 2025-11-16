@@ -4,11 +4,17 @@ import { useState, useEffect } from "react";
 
 
 function Home() {
-  const alertaActiva = true;
+  const alertaActiva = false;
   const mensajeAlerta =
     "Hoy no estamos atendiendo por viaje, disculpen las molestias.";
 
   const [showAlert, setShowAlert] = useState(alertaActiva);
+  // Ubicación: cambiá este texto por tu dirección real
+  const MAP_QUERY = 'Av Sarmiento 2da cuadra - San Pedro de Colalao, Tucumán'; //cambiá esto por tu dirección real
+  const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&output=embed`;
+  const MAP_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAP_QUERY)}`;
+  // Estado de conectividad para fallback sin WiFi/Internet
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   // Carrusel desktop
   const images = [
@@ -37,9 +43,38 @@ function Home() {
     return () => clearInterval(interval);
   }, [images.length]);
 
+  useEffect(() => {
+    const update = () => setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+    };
+  }, []);
+
   const nextSlide = () => setCurrent((current + 1) % images.length);
   const prevSlide = () =>
     setCurrent((current - 1 + images.length) % images.length);
+
+  // Scroll suave con control de duración y offset por navbar
+  const smoothScrollTo = (id, duration = 900, offset = 70) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const startY = window.scrollY || window.pageYOffset;
+    const targetY = el.getBoundingClientRect().top + startY - offset;
+    const diff = targetY - startY;
+    const startTime = performance.now();
+    const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const eased = easeInOutCubic(t);
+      window.scrollTo(0, startY + diff * eased);
+      if (elapsed < duration) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
 
   return (
     <div className="home-container">
@@ -87,12 +122,41 @@ function Home() {
             />
             <FaChevronDown className="scroll-down" size={35} />
             <FaChevronDown className="scroll-down" size={40} />
+<section className="quick-links">
+  <h2>Accesos Rápidos</h2>
+  <div className="quick-links-container">
+          <button
+            className="quick-link-btn"
+            onClick={() => smoothScrollTo('servicios',900,30)}
+          >
+            <FaTools size={18} />
+            <span>Servicios</span>
+          </button>
+          <button
+            className="quick-link-btn"
+            onClick={() => smoothScrollTo('contacto',900,24)}
+          >
+            <FaWhatsapp size={18} />
+            <span>Contacto</span>
+          </button>
+          <button
+            className="quick-link-btn"
+            onClick={() => smoothScrollTo('ubicacion',900,24)}
+          >
+            <FaMapMarkerAlt size={18} />
+            <span>Ubicación</span>
+          </button>
+        </div>
+      </section>
           </div>
         </div>
       </div>
 
-      {/* Servicios */}
-      <section className="about-us">
+      {/* Accesos Rápidos */}
+      
+
+  {/* Servicios */}
+  <section id="servicios" className="about-us">
         <h2>Servicios Destacados</h2>
         <div className="services-cards">
           <div className="service-card">
@@ -115,8 +179,8 @@ function Home() {
         </div>
       </section>
 
-      {/* Ubicación */}
-      <section className="location">
+      {/* ¿Por qué elegirnos? */}
+      <section id="por-que-elegirnos" className="location">
         <h2>¿Por qué elegirnos?</h2>
         <p>
           Con más de 3 años de experiencia en reparaciones, ofrecemos soluciones
@@ -124,8 +188,8 @@ function Home() {
         </p>
       </section>
 
-      {/* Redes sociales */}
-      <section className="socials">
+      {/* Contacto */}
+      <section id="contacto" className="socials">
         <h2>Contáctanos</h2>
         <p><FaMapMarkerAlt /> Av Sarmiento 2da cuadra - San Pedro de Colalao</p>
       <p>
@@ -155,6 +219,33 @@ function Home() {
   </a>
 </div>
 </section>
+
+      {/* Ubicación - Mapa */}
+      <section id="ubicacion" className="map-section">
+        <h2>Ubicación</h2>
+        <p className="map-address">
+          <FaMapMarkerAlt /> {MAP_QUERY}
+        </p>
+        <div className="map-container">
+          {isOnline ? (
+            <iframe
+              title="Mapa - SG Servicios Técnicos"
+              width="100%"
+              height="400"
+              style={{ border: 0, borderRadius: '12px' }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={MAP_EMBED_SRC}
+            />
+          ) : (
+            <div className="map-fallback">
+              <p>Sin conexión. Ver ubicación en Google Maps:</p>
+              <a className="map-link-btn" href={MAP_LINK} target="_blank" rel="noreferrer">Abrir en Google Maps</a>
+            </div>
+          )}
+        </div>
+      </section>
 
 {/* Footer */}
 <footer className="home-footer">

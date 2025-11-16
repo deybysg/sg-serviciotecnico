@@ -80,12 +80,12 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // REGISTRO con JWT
-    const register = useCallback(async (username, password) => {
+    const register = useCallback(async (username, password, email) => {
         try {
             const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, role: 'user' })
+                body: JSON.stringify({ username, password, email, role: 'user' })
             });
 
             const data = await res.json();

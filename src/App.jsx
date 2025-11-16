@@ -9,6 +9,8 @@ import Servicios from "./pages/Servicios";
 import Login from "./pages/Login";
 
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ConsultaServicio from "./pages/ConsultaServicio"; 
 
 // Panel Admin
@@ -43,6 +45,8 @@ function AppBody() {
             <Route path="/productos" element={<Productos />} />
             <Route path="/login" element={<Login />} />
             <Route path="/servicios" element={<Servicios />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
               
             {/* ✅ RUTAS PÚBLICAS PARA SEGUIMIENTO DE SERVICIO */}
             <Route path="/seguimiento" element={<ConsultaServicio />} />

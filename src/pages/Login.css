@@ -137,6 +137,24 @@
     color: #67E8F9; 
 }
 
+    /* Enlace de recuperación de contraseña */
+    .forgot-password-link {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .forgot-password-link a {
+        color: #67E8F9;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .forgot-password-link a:hover {
+        color: #38bdf8;
+        text-decoration: underline;
+    }
+
 /* Texto para alternar login/registro */
 .toggle-text {
     margin-top: 1.75rem;

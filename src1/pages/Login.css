@@ -1,0 +1,157 @@
+/* Contenedor centrado y full width */
+.auth-container {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Fondo oscuro y profundo */
+    background: #0D1117; 
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box; 
+    padding: 0 16px; 
+}
+
+/* Tarjeta de login */
+.auth-card {
+    /* Color de tarjeta ligeramente más claro que el fondo, con transparencia */
+    background: rgba(18, 24, 34, 0.85); 
+    /* Borde sutil de neón azul */
+    border: 1px solid rgba(56, 189, 248, 0.15); 
+    padding: 2.5rem;
+    border-radius: 12px;
+    /* Sombra profunda y neón sutil */
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.4), 
+        0 0 25px rgba(56, 189, 248, 0.2); 
+    width: 100%;
+    max-width: 400px; /* Ancho máximo fijo para mantener el diseño */
+    text-align: center;
+    color: #E2E8F0; 
+    box-sizing: border-box;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Efecto Hover: Tarjeta se destaca ligeramente */
+.auth-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.5), 
+        0 0 40px rgba(56, 189, 248, 0.3); 
+}
+
+/* Título */
+.auth-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #67E8F9; 
+    text-shadow: 0 0 10px rgba(103, 232, 249, 0.6);
+}
+
+/* 🎯 CORRECCIÓN DE ALINEACIÓN: Formulario (Flex container) */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem; /* Separación consistente entre elementos */
+    width: 100%;
+}
+
+/* --- CLASES DE INPUTS Y ALINEACIÓN --- */
+
+/* Contenedor del Input (necesario para la posición de íconos) */
+.input-group {
+    position: relative;
+    width: 100%; /* 🎯 CLAVE: Ocupa el 100% del formulario */
+    display: flex;
+    align-items: center; 
+}
+
+/* Input Styles */
+.auth-form input {
+    /* Padding para dejar espacio al ícono de la izquierda y al ojo de la derecha */
+    padding: 1rem 3rem 1rem 3rem; 
+    border: 1px solid #334155; 
+    border-radius: 6px;
+    outline: none;
+    background: #0f172a;
+    color: #F8FAFC;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 100%; /* 🎯 CLAVE: El input se estira al 100% del .input-group */
+}
+
+/* Efecto Focus en Inputs: Borde neón */
+.auth-form input:focus {
+    background: #1e293b;
+    border: 1px solid #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6); 
+}
+
+/* Botón */
+.auth-btn {
+    margin-top: 0.25rem; /* Ajuste el margen superior para que se acerque a los inputs */
+    padding: 1rem;
+    border: none;
+    border-radius: 6px;
+    background: #38bdf8;
+    color: #0D1117;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); 
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 100%; /* 🎯 CLAVE: El botón ocupa el 100% del formulario (igual que los inputs) */
+}
+
+/* Efecto Hover en Botón: Aumento de brillo y ligero movimiento */
+.auth-btn:hover {
+    background: #0ea5e9;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.7);
+    transform: translateY(-1px);
+}
+
+/* --- ESTILOS DE ÍCONOS --- */
+
+/* Ícono a la izquierda (Usuario, Candado, Email) */
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #67E8F9;
+    font-size: 1rem;
+    z-index: 5;
+}
+
+/* Ícono de Ojo a la derecha */
+.eye-icon {
+    position: absolute;
+    right: 1rem; /* Mantenemos 1rem para que quede bien alineado con el padding del input */
+    color: #94A3B8; 
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+    z-index: 5;
+}
+
+.eye-icon:hover {
+    color: #67E8F9; 
+}
+
+/* Texto para alternar login/registro */
+.toggle-text {
+    margin-top: 1.75rem;
+    font-size: 0.9rem;
+    color: #94A3B8; 
+}
+
+.toggle-text span {
+    color: #67E8F9;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.toggle-text span:hover {
+    text-decoration: none;
+    color: #06B6D4; 
+}
