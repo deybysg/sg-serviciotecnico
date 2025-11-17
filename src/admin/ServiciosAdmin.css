@@ -256,50 +256,123 @@
 }
 
 .servicios-full .servicios-lista-cards {
-    display: grid;
-    /* Mantenemos el tamaño mínimo de 280px para que entren 3 tarjetas en 950px */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-    gap: 20px;
+    /* Cambiamos a una LISTA moderna: una columna full-width con filas separadas */
+    display: block;
+    gap: 12px;
     margin: 0 auto;
 }
 
 /* Tarjeta Individual de Servicio (MODO NORMAL MÁS COMPACTO) */
 .servicios-full .servicio-card {
-    background: white;
-    /* Reducción de padding para compacidad */
-    padding: 12px 15px; 
+    background: linear-gradient(90deg, #ffffff, #fbfbff);
+    padding: 18px;
     border-radius: 12px;
-    box-shadow: inset 0 0 0 1px #e2e8f0, 0 2px 8px rgba(0,0,0,0.05); 
-    border-left: 5px solid #6366f1; 
-    transition: transform 0.2s, box-shadow 0.3s, background-color 0.3s;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+    /* Full blue frame around the card for a professional look */
+    border: 2px solid rgba(37,99,235,0.15);
+    transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.12s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .servicios-full .servicio-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgba(37,99,235,0.08);
+    border-color: rgba(37,99,235,0.35);
 }
 
 .servicios-full .qr-info-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* Reducción de márgenes y padding */
-    margin-bottom: 8px; 
-    padding-bottom: 6px;
-    border-bottom: 1px dashed #e2e8f0;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 220px;
+    flex: 0 0 220px;
+    margin: 0;
+    padding: 0;
 }
 
 .servicios-full .qr-info-header h4 {
     color: #4f46e5;
-    margin: 0;
-    font-size: 1.2em; 
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.servicios-full .servicio-card .servicio-info {
+    flex: 1 1 auto;
+}
+
+/* Grid estilo tabla: etiquetas arriba, valores abajo */
+.servicios-full .servicio-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Empuja .acciones-servicio al borde derecho */
+    gap: 12px;
+    width: 100%;
+}
+
+.servicios-full .servicio-info .card-grid {
+    display: grid;
+    /* Cinco columnas: Cliente, Tipo, Marca, Modelo, Entrada */
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px 14px;
+    align-items: center;
+    width: 100%;
+    flex: 1 1 auto; /* Ocupa el espacio disponible hacia la izquierda */
+}
+
+.servicios-full .servicio-info .acciones-servicio {
+    flex: 0 0 auto; /* No crece, se mantiene al ancho del botón */
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Responsive: en pantallas pequeñas apilamos contenido y dejamos el botón al final */
+@media (max-width: 760px) {
+    .servicios-full .servicio-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .servicios-full .servicio-info .acciones-servicio {
+        align-self: flex-end;
+        margin-top: 6px;
+    }
+    .servicios-full .servicio-info .card-grid {
+        /* en móvil usamos 2 columnas para las etiquetas/valores */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.servicios-full .servicio-info .card-grid .grid-label {
+    font-size: 0.95rem; /* ligeramente más grande */
+    color: #2563eb; /* azul primario para resaltar */
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+}
+
+.servicios-full .servicio-info .card-grid .grid-value {
+    font-size: 1.02rem;
+    color: #0f172a;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Responsive: en pantallas pequeñas pasar a 2 columnas */
+@media (max-width: 760px) {
+    .servicios-full .servicio-info .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .servicios-full .servicio-card p {
-    /* Reducción de margen y tamaño de letra para compacidad */
-    margin: 4px 0; 
+    margin: 2px 0; 
     color: #475569;
-    font-size: 0.85rem; 
+    font-size: 0.9rem; 
 }
 
 .servicios-full .servicio-card strong {
@@ -394,10 +467,29 @@
 
 /* ACCIONES */
 .servicios-full .acciones-servicio {
-    margin-top: 12px;
+    margin-top: 0;
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    flex: 0 0 auto;
+}
+
+/* Responsive: en pantallas pequeñas las tarjetas se apilan verticalmente */
+@media (max-width: 760px) {
+    .servicios-full .servicio-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .servicios-full .qr-info-header {
+        flex: 0 0 auto;
+        min-width: auto;
+    }
+
+    .servicios-full .acciones-servicio {
+        justify-content: flex-start;
+    }
 }
 
 .servicios-full .acciones-servicio button {
@@ -429,6 +521,30 @@
 .servicios-full .btn-cancel-edit:hover {
     background: #dc2626;
     transform: translateY(-1px);
+}
+
+/* Botón 'Ver más' destacado */
+.servicios-full .btn-ver-mas {
+    padding: 10px 14px;
+    font-size: 1rem; /* un poco más grande */
+    font-weight: 800;
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(37,99,235,0.18);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s;
+}
+
+.servicios-full .btn-ver-mas:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(30,64,175,0.22);
+}
+
+.servicios-full .btn-ver-mas:active {
+    transform: translateY(-1px);
+    opacity: 0.95;
 }
 
 /* -------------------------------------- */
@@ -510,18 +626,16 @@
     .servicios-full .servicio-form,
     .servicios-full .btn-toggle-lista-servicios,
     .servicios-full .buscador-servicios {
-        max-width: 100%;
-        padding-left: 10px;
-        padding-right: 10px;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.06);
+        border: 1px solid #2563eb; /* azul primaria */
     }
 
     .servicios-full .servicios-lista-cards {
-        grid-template-columns: 1fr;
+        box-shadow: 0 14px 30px rgba(37,99,235,0.08);
         gap: 15px;
     }
 
-    /* Ajuste de inputs en móvil para el modo edición */
-    .servicios-full .servicio-card.editando input,
     .servicios-full .servicio-card.editando textarea,
     .servicios-full .servicio-card.editando select {
         max-width: none; /* Asegurar que ocupen todo el ancho disponible */

@@ -31,6 +31,7 @@ const PASOS = {
     P1_RECIBIDO: 'pendiente', 
     P2_EN_REVISION: 'enRevision',
     P3_DIAGNOSTICO: 'diagnostico',
+    P2_5_SIN_SOLUCION: 'sinSolucion',
     P4_REPARACION: 'reparacion',
     P5_TERMINADO: 'terminado', 
     P6_ENTREGADO: 'entregado'
@@ -46,7 +47,9 @@ const ESTADO_DISPLAY = {
     revisionTerminada: "En Reparación", // Típicamente un estado transitorio o interno
     terminado: "Listo para Retirar",
     entregado: "Servicio Entregado y Cerrado",
+    sinSolucion: "Notificaion"
 };
+
 
 
 function ConsultaServicio() {
@@ -184,8 +187,9 @@ function ConsultaServicio() {
             PASOS.P1_RECIBIDO,         // 0
             PASOS.P2_EN_REVISION,      // 1
             PASOS.P3_DIAGNOSTICO,      // 2
-            'presupuestoPendiente',    // 3
-            PASOS.P4_REPARACION,       // 4
+            PASOS.P2_5_SIN_SOLUCION,   // 3 (estado intermedio: sin solución)
+            'presupuestoPendiente',    // 4
+            PASOS.P4_REPARACION,       // 5
             'revisionTerminada',       // 5
             PASOS.P5_TERMINADO,        // 6
             PASOS.P6_ENTREGADO         // 7
@@ -198,6 +202,8 @@ function ConsultaServicio() {
             'P1_RECIBIDO': order.indexOf(PASOS.P1_RECIBIDO),
             // P2_DIAGNOSTICO se activa con enRevision, diagnostico y presupuestoPendiente
             'P2_DIAGNOSTICO': order.indexOf(PASOS.P2_EN_REVISION),
+            // Paso intermedio: sinSolucion
+            'P2_5_SIN_SOLUCION': order.indexOf(PASOS.P2_5_SIN_SOLUCION),
             // P3_REPARACION se activa con reparacion y revisionTerminada
             'P3_REPARACION': order.indexOf(PASOS.P4_REPARACION),
             // P4_TERMINADO se activa con terminado y entregado
@@ -212,6 +218,8 @@ function ConsultaServicio() {
     
     // Determinar el ícono principal basado en el estado
     const getStatusIcon = (estado) => {
+        // Estado específico: sinSolucion tiene prioridad y muestra una señal de advertencia
+        if (estado === 'sinSolucion') return { icon: "⚠️", class: "sin-solucion-bg" };
         if (estado === PASOS.P6_ENTREGADO) return { icon: "✅", class: "entregado-bg" };
         if (isStepActive('P4_TERMINADO')) return { icon: "🎁", class: "listo-bg" };
         if (isStepActive('P3_REPARACION')) return { icon: "🔧", class: "reparacion-bg" };
@@ -296,6 +304,15 @@ function ConsultaServicio() {
                                 <span className="timeline-label">Diagnóstico</span>
                             </div>
                             
+                            <div className={`timeline-line ${isStepActive('P2_5_SIN_SOLUCION') ? 'line-active' : ''}`}></div>
+
+                            <div className="timeline-step">
+                                <div className={`timeline-circle ${isStepActive('P2_5_SIN_SOLUCION') ? 'active' : ''}`}>
+                                    {isStepActive('P2_5_SIN_SOLUCION') && <span role="img" aria-label="Warning">⚠️</span>}
+                                </div>
+                                <span className="timeline-label">Notificaion</span>
+                            </div>
+
                             <div className={`timeline-line ${isStepActive('P3_REPARACION') ? 'line-active' : ''}`}></div>
 
                             <div className="timeline-step">
@@ -326,6 +343,31 @@ function ConsultaServicio() {
                             {/* Presupuesto Total en la vista principal */}
                             <p><strong>Presupuesto Total:</strong> ${formatNumber(servicio.presupuesto?.total) || 'Pendiente'}</p>
                         </div>
+
+                        {/* Mostrar notificación específica cuando el servicio está marcado como 'sinSolucion' */}
+                        {(servicio?.estado === 'sinSolucion' || servicio?.sinSolucion) && (
+                            <div className="seguimiento-sinsolucion-box" style={{ border: '1px solid #f59e0b', padding: 12, borderRadius: 6, background: '#fff7ed', marginBottom: 12 }}>
+                                    <h3 style={{ marginTop: 0 }}>Notificaion</h3>
+                                {/* Mostrar detalleCliente si existe, si no tomar la última entrada de tipo 'sinSolucion' */}
+                                {(() => {
+                                    const sinEntries = servicio.seguimiento ? servicio.seguimiento.filter(e => e.tipo === 'sinSolucion') : [];
+                                    const latest = sinEntries.length > 0 ? sinEntries.slice().reverse()[0] : null;
+                                    const mensaje = servicio.detalleCliente || latest?.mensaje || 'El equipo no tiene solución.';
+                                    return (
+                                        <>
+                                            <p className="seguimiento-mensaje" style={{ margin: '0 0 8px 0', fontWeight: 600 }}>{mensaje}</p>
+                                            {latest && (
+                                                <div style={{ fontSize: '0.85rem', color: '#374151' }}>
+                                                    <span>Enviado por {latest.autor || 'Taller'}</span>
+                                                    <span> • </span>
+                                                    <span>{new Date(latest.fecha).toLocaleString()}</span>
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        )}
 
                         <div className="action-buttons">
                             {(servicio.presupuesto?.total > 0 || servicio.estado === 'presupuestoPendiente') && (

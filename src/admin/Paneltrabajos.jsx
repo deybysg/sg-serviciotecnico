@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { FiEye, FiCopy, FiCheck, FiMenu, FiSend } from 'react-icons/fi';
 import Swal from "sweetalert2";
 import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +30,8 @@ const getClienteName = (clienteId, clientes) => {
 
 // Helper para mostrar IDs cortos en la UI (últimos 8 caracteres)
 const shortId = (id, length = 8) => String(id || "").slice(-length).toUpperCase();
+// Formatear/mostrar el número de servicio (3 dígitos) cuando exista
+const formatServicioNumero = (num) => (num !== undefined && num !== null && num !== "") ? String(num).padStart(3, '0') : null;
 
 const PanelTrabajo = () => {
   const [servicios, setServicios] = useState([]);
@@ -40,10 +41,10 @@ const PanelTrabajo = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [visibleTooltipId, setVisibleTooltipId] = useState(null);
+  const tooltipTimer = useRef(null);
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
-  const [openVisorId, setOpenVisorId] = useState(null);
-  const closeTimerRef = useRef(null);
 
   const cargarDatos = useCallback(async () => {
     setIsLoading(true);
@@ -109,11 +110,11 @@ const PanelTrabajo = () => {
     // Manejar tanto cliente populado como clienteId
     const clienteData = s.cliente || s.clienteId;
     const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
-    const servicioNumero = String(s.servicioNumero || '');
-    const marca = (s.marcaProducto || '').toLowerCase();
-    const tipo = (s.tipoServicio || '').toLowerCase();
+    const servicioId = String(s._id || s.id);
+    const servicioIdCorto = shortId(servicioId).toLowerCase();
+    const servicioNumeroStr = String(s.servicioNumero || "").toLowerCase();
     const coincideBusqueda =
-      servicioNumero.includes(query) || clienteNombre.includes(query) || marca.includes(query) || tipo.includes(query);
+      servicioId.includes(query) || servicioIdCorto.includes(query) || servicioNumeroStr.includes(query) || clienteNombre.includes(query);
 
     let coincideFiltro = true;
     if (filtroEstado !== "todos") {
@@ -159,6 +160,31 @@ const PanelTrabajo = () => {
     }
   };
 
+  // Tooltip handlers: show on enter, hide 2s after leave
+  const handleTooltipEnter = (id) => {
+    if (tooltipTimer.current) {
+      clearTimeout(tooltipTimer.current);
+      tooltipTimer.current = null;
+    }
+    setVisibleTooltipId(id);
+  };
+
+  const handleTooltipLeave = () => {
+    if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+    tooltipTimer.current = setTimeout(() => {
+      setVisibleTooltipId(null);
+      tooltipTimer.current = null;
+    }, 500); // mantener 500ms antes de ocultar
+  };
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimer.current) {
+        clearTimeout(tooltipTimer.current);
+      }
+    };
+  }, []);
+
   const handleGuardarEdicion = async (idServicio, datosEditados) => {
     try {
       await api.put(`/servicios/${idServicio}`, datosEditados);
@@ -194,45 +220,62 @@ const PanelTrabajo = () => {
     }
   };
 
-  const handleChangeEstado = async (idServicio, nuevoEstado) => {
+  // Función para cambiar el estado desde el select en cada tarjeta
+  const handleCambiarEstado = async (idServicio, nuevoEstado) => {
+    // Pedir confirmación antes de aplicar el cambio
+    const estadoLabel = getEstadoLabel(nuevoEstado);
+    const confirm = await Swal.fire({
+      title: 'Confirmar cambio de estado',
+      text: `¿Deseas cambiar el estado a "${estadoLabel}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#64748b',
+    });
+
+    if (!confirm.isConfirmed) {
+      // Si cancela, no hacer nada (el select mostrará el valor controlado actual)
+      return;
+    }
+
     try {
-      await api.put(`/servicios/${idServicio}`, { estado: nuevoEstado });
+      const datosActualizados = { estado: nuevoEstado };
+      // Si se marca como entregado, agregar fechaSalida
+      if (nuevoEstado === 'entregado') {
+        datosActualizados.fechaSalida = new Date().toISOString();
+      }
+
+      await api.put(`/servicios/${idServicio}`, datosActualizados);
+
       const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 2000,
+        timer: 2500,
         timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
       });
-      Toast.fire({ icon: 'success', title: 'Estado actualizado' });
+
+      Toast.fire({
+        icon: 'success',
+        title: 'Estado actualizado'
+      });
+
+      // Refrescar datos
       cargarDatos();
     } catch (error) {
       console.error('Error al cambiar estado:', error);
-      Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'No se pudo cambiar el estado.' });
-    }
-  };
-
-  const buildMensajeSinSolucion = (servicio, clienteNombre) => {
-    const nro = servicio.servicioNumero || shortId(servicio._id || servicio.id, 6);
-    return `Hola ${clienteNombre}, lamentamos informar que su equipo del servicio N° ${nro} no tiene solución viable por el momento. Podemos coordinar la devolución cuando guste. Gracias.`;
-  };
-
-  const handleNotificarSinSolucion = async (servicio) => {
-    const clienteData = servicio.cliente || servicio.clienteId;
-    const clienteNombre = getClienteName(clienteData, clientes);
-    const mensaje = buildMensajeSinSolucion(servicio, clienteNombre);
-    try {
-      await navigator.clipboard.writeText(mensaje);
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'No se pudo actualizar el estado.',
+        confirmButtonColor: '#3b82f6'
       });
-      Toast.fire({ icon: 'info', title: 'Mensaje copiado para notificar' });
-    } catch (e) {
-      Swal.fire({ icon: 'info', title: 'Mensaje generado', html: `<pre style="text-align:left;white-space:pre-wrap">${mensaje}</pre>` });
     }
   };
 
@@ -292,9 +335,80 @@ const PanelTrabajo = () => {
         confirmButtonColor: '#3b82f6'
       });
     }
-  };  if (isLoading) return <div className="panel-loading">Cargando Panel de Trabajo...</div>;
+  };
 
-  return (
+  // Botón en tarjeta: marcar equipo como sin solución y notificar al cliente
+  const handleMarcarSinSolucion = async (servicio) => {
+    const { value: motivo, isConfirmed } = await Swal.fire({
+      title: 'notificar al cliente',
+      input: 'textarea',
+      inputLabel: 'Detalle / motivo que se enviará al cliente',
+      inputPlaceholder: 'Escribe aquí el detalle que quieres notificar al cliente...',
+      inputAttributes: {
+        'aria-label': 'Detalle para el cliente'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Notificar y marcar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#10b981'
+    });
+
+    if (!isConfirmed) return;
+
+    // Construir mensaje por defecto si el admin confirma sin escribir texto
+    const textoMotivo = (motivo || '').toString().trim();
+    let mensajeFinal = textoMotivo;
+    if (!mensajeFinal) {
+      if (servicio?.tipoServicio === 'celulares') {
+        mensajeFinal = 'El teléfono no tiene solución.';
+      } else {
+        mensajeFinal = 'El equipo no tiene solución.';
+      }
+      // Adjuntar marca/modelo si está disponible
+      if (servicio?.marcaProducto) {
+        mensajeFinal += ` (${servicio.marcaProducto})`;
+      }
+    }
+
+    const payload = {
+      mensaje: mensajeFinal,
+      tipo: 'sinSolucion',
+      autor: 'taller',
+      marcarSinSolucion: true
+    };
+
+    try {
+      const idServicio = servicio._id || servicio.id;
+      await api.patch(`/servicios/${idServicio}/seguimiento`, payload);
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      Toast.fire({ icon: 'success', title: 'Marcado como sin solución y agregado a seguimiento' });
+      cargarDatos();
+    } catch (error) {
+      console.error('Error al marcar sin solución:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'No se pudo marcar como sin solución.',
+        confirmButtonColor: '#3b82f6'
+      });
+    }
+  };
+
+  if (isLoading) return <div className="panel-loading">Cargando Panel de Trabajo...</div>;
+
+  return (
     <div className="panel-trabajo-container">
       {/* 🔽 Filtros de estado con conteo (Se mantiene) */}
       <div className="filtros-container">
@@ -349,6 +463,8 @@ const PanelTrabajo = () => {
             // Manejar tanto cliente populado como clienteId
             const clienteData = servicio.cliente || servicio.clienteId;
             const clienteNombre = getClienteName(clienteData, clientes);
+            // Mostrar marca y modelo (equipo) en la lista principal
+            const equipoStr = [servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || '—';
             const estadoLabel = getEstadoLabel(servicio.estado);
             const esPrioridad =
               servicio.estado === "terminado" ||
@@ -362,100 +478,108 @@ const PanelTrabajo = () => {
               >
                 <div className="info-resumen">
                   <p>
-                    <strong>N° Orden:</strong> {servicio.servicioNumero || 'N/A'},{' '}
+                    <strong>N° Orden:</strong>{' '}
+                    {servicio.servicioNumero ? (
+                      <>
+                        <span className="servicio-numero">#{formatServicioNumero(servicio.servicioNumero)}</span>{' '}
+                        <span
+                          title="Copiar Número de Servicio"
+                          onClick={() => handleCopyId(formatServicioNumero(servicio.servicioNumero))}
+                          style={{ cursor: 'pointer', marginLeft: 6 }}
+                        >📋</span>,{' '}
+                      </>
+                    ): (
+                      <>
+                        {shortId(servicioId)}{' '}
+                        <span
+                          title="Copiar ID completo"
+                          onClick={() => handleCopyId(servicioId)}
+                          style={{ cursor: 'pointer', marginLeft: 6 }}
+                        >📋</span>,{' '}
+                      </>
+                    )}
                     <strong>Cliente:</strong> {clienteNombre},{" "}
-                    <strong>Estado:</strong>{" "}
-                    <span className={`estado-badge estado-${servicio.estado}`}>
-                      {estadoLabel}
-                    </span>
+                    <strong>Equipo:</strong> {equipoStr},{" "}
+                    
+                   
                   </p>
-                  <p>
-                    <strong>Equipo:</strong> {servicio.marcaProducto || '—'} · <strong>Tipo:</strong> {servicio.tipoServicio || '—'}
-                  </p>
-                  <div className="fila-secundaria">
-                    <span className="id-servicio" title="Copiar ID" onClick={() => handleCopyId(servicioId)}>#{shortId(servicioId)}</span>
-                    <select
-                      className={`select-estado estado-${servicio.estado}`}
-                      value={servicio.estado}
-                      onChange={(e) => handleChangeEstado(servicioId, e.target.value)}
-                      title="Cambiar estado"
-                    >
-                      {ESTADO_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 <div className="acciones">
-                  <div
-                    className="visor-wrapper"
-                    onMouseEnter={() => {
-                      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-                      setOpenVisorId(servicioId);
-                    }}
-                    onMouseLeave={() => {
-                      closeTimerRef.current = setTimeout(() => setOpenVisorId(prev => (prev === servicioId ? null : prev)), 180);
-                    }}
-                  >
-                    <button className="btn-visor" aria-label="Acciones rápidas">
-                      <FiEye size={18} />
-                    </button>
-                    {openVisorId === servicioId && (
-                      <div className="visor-popover">
-                        <div className="visor-header">
-                          <div className="visor-title">Acciones rápidas</div>
-                          <div className="visor-subtitle">#{shortId(servicioId)} · {clienteNombre}</div>
-                        </div>
-                        <div className="visor-resumen">
-                          <div><strong>Orden:</strong> {servicio.servicioNumero || 'N/A'}</div>
-                          <div><strong>Equipo:</strong> {servicio.marcaProducto || '—'}</div>
-                          <div><strong>Tipo:</strong> {servicio.tipoServicio || '—'}</div>
-                        </div>
-                        <div className="visor-estado-inline">
-                          <label>Cambiar estado</label>
-                          <select
-                            className={`select-estado estado-${servicio.estado}`}
-                            value={servicio.estado}
-                            onChange={(e) => handleChangeEstado(servicioId, e.target.value)}
-                          >
-                            {ESTADO_OPTIONS.map(opt => (
-                              <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="visor-actions">
-                          <button className="accion copiar" onClick={() => handleCopyId(servicioId)}>
-                            <FiCopy size={16} /> Copiar ID
-                          </button>
-                          <button className="accion notificar" onClick={() => handleNotificarSinSolucion(servicio)}>
-                            <FiSend size={16} /> Notificar sin solución
-                          </button>
-                          <button className="accion entregar" onClick={() => handleEntregarServicio(servicioId)}>
-                            <FiCheck size={16} /> Entregar
-                          </button>
-                          <button className="accion detalles" onClick={() => { setOpenVisorId(null); handleVerDetalles(servicio); }}>
-                            <FiMenu size={16} /> Ver detalles
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                  {/* Select de estado colocado junto al ojo */}
+                  <div className="estado-visor-group">
+                    <select
+                      className={`estado-select estado-${servicio.estado}`}
+                      value={servicio.estado}
+                      onChange={(e) => handleCambiarEstado(servicioId, e.target.value)}
+                      title="Cambiar estado"
+                    >
+                      {ESTADO_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  <button
-                    className="btn-detalles"
-                    onClick={() => handleVerDetalles(servicio)}
-                    title="Ver y Editar Detalles"
+                  {/* Ojo con tooltip de detalles al pasar el cursor */}
+                  <div
+                    className={`visor-wrapper ${visibleTooltipId === servicioId ? 'show' : ''}`}
+                    onMouseEnter={() => handleTooltipEnter(servicioId)}
+                    onMouseLeave={handleTooltipLeave}
+                    aria-hidden
                   >
-                    <FiMenu size={18} />
-                  </button>
-                  <button
-                    className="btn-entregar"
-                    onClick={() => handleEntregarServicio(servicioId)}
-                    title="Marcar como Entregado"
-                  >
-                    <FiCheck size={18} />
-                  </button>
+                    <button
+                      className="btn-visor"
+                      title="Vista rápida: Detalles del servicio"
+                      type="button"
+                    >
+                      👁️
+                    </button>
+
+                    
+                    <div className="tooltip">
+                      <div className="tooltip-row">
+                        <strong>Orden:</strong>
+                        <span>{servicio.servicioNumero ? `#${formatServicioNumero(servicio.servicioNumero)}` : shortId(servicioId)}</span>
+                      </div>
+                      <div className="tooltip-row">
+                        <strong>Cliente:</strong>
+                        <span>{clienteNombre}</span>
+                      </div>
+                      <div className="tooltip-row">
+                        <strong>Equipo:</strong>
+                        <span>{[servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || '—'}</span>
+                      </div>
+                      <div className="tooltip-row">
+                        <strong>Estado:</strong>
+                        <span>{estadoLabel}</span>
+                      </div>
+                      <div className="tooltip-row">
+                        <strong>Entrada:</strong>
+                        <span>{servicio.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleString() : '—'}</span>
+                      </div>
+                  
+                      <div className="tooltip-actions">
+                        <button
+                          className="btn-sinsolucion"
+                          onClick={() => { setVisibleTooltipId(null); handleMarcarSinSolucion(servicio); }}
+                          title="Notificar al cliente"
+                        >
+                          Notificar
+                        </button>
+                        <button
+                          className="btn-entregar"
+                          onClick={() => { setVisibleTooltipId(null); handleEntregarServicio(servicioId); }}
+                        >
+                          Entregar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botón de entrega (mantener para accesibilidad/tap) */}
+                 
                 </div>
               </div>
             );

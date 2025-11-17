@@ -7,6 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import html2canvas from "html2canvas"; 
 import jsPDF from "jspdf"; 
 import ComprobantePDF from "./ComprobantePDF"; 
+import ModalDetalles from "./ModalDetalles";
 import "./serviciosAdmin.css";
 import { shortId, toIdString } from "../utils/id";
 
@@ -16,6 +17,22 @@ const TIPO_SERVICIO_OPTIONS = [
     { value: "parlantes", label: "Parlantes" },
     { value: "otros", label: "Otros" },
 ];
+
+// Opciones de marca dependientes del tipo de equipo
+const BRAND_OPTIONS = {
+    celulares: ["Samsung", "Apple", "Xiaomi", "Motorola", "Huawei", "Otro"],
+    computadora: ["HP", "Dell", "Lenovo", "Asus", "Acer", "Otro"],
+    parlantes: ["JBL", "Bose", "Sony", "Philips", "Otro"],
+    otros: [] // Para 'otros' dejamos campo libre
+};
+
+// Opciones de modelo dependientes del tipo de equipo
+const MODEL_OPTIONS = {
+    celulares: ["Galaxy S22", "iPhone 13", "Redmi Note 11", "Moto G Power", "Otro"],
+    computadora: ["Pavilion", "Inspiron", "ThinkPad", "ZenBook", "Aspire", "Otro"],
+    parlantes: ["Flip", "Charge", "SoundLink", "SRS-XB", "Otro"],
+    otros: [] // Campo libre para 'otros'
+};
 
 const ESTADO_OPTIONS = [
     { value: "pendiente", label: "Pendiente" },
@@ -34,9 +51,10 @@ function ServiciosAdmin() {
     const initialState = {
         clienteId: null,
         marcaProducto: "",
+        modeloProducto: "",
         tipoServicio: TIPO_SERVICIO_OPTIONS[0].value,
         detalles: "",
-        presupuesto: { items: [{ descripcion: "", costo: "" }], subtotal: 0, iva: 0, total: 0 },
+        presupuesto: { items: [{ descripcion: "", costo: "" }], subtotal: 0, iva: 0, total: 0, senia: 0 },
         estado: ESTADO_OPTIONS[0].value,
         fechaEntrada: new Date().toISOString(), 
         fechaSalida: null,
@@ -50,7 +68,9 @@ function ServiciosAdmin() {
     const [editId, setEditId] = useState(null); 
     const [editData, setEditData] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [showBudgetId, setShowBudgetId] = useState(null); 
+    // presupuesto toggle removed from tarjeta: no UI state needed here
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalService, setModalService] = useState(null);
     
     // ** ESTADO CLAVE AÑADIDO: Para forzar el doble renderizado **
     const [serviceToPrint, setServiceToPrint] = useState(null);
@@ -84,14 +104,14 @@ function ServiciosAdmin() {
     }, []);
 
     // Helper para calcular totales del presupuesto
-    const calcularTotal = (items) => {
+    // Ahora acepta senia (seña) y descuenta del total
+    const calcularTotal = (items, senia = 0) => {
         const subtotal = items.reduce((sum, item) => sum + Number(item.costo || 0), 0);
-        return { subtotal, iva: 0, total: subtotal };
+        const total = subtotal - Number(senia || 0);
+        return { subtotal, iva: 0, total };
     };
 
-    const toggleBudget = (id) => {
-        setShowBudgetId(showBudgetId === id ? null : id);
-    };
+    // toggleBudget removed — presupuesto no se muestra en la tarjeta
     
     // ----------------------------------------
     // Generación de Comprobante PDF (MODIFICADO)
@@ -131,7 +151,8 @@ function ServiciosAdmin() {
                     
                     // ** SOLUCIÓN AL NOMBRE DEL ARCHIVO: Usar el nombre del cliente **
                     // Eliminamos caracteres especiales/espacios para un nombre de archivo limpio
-                    const nombreClienteLimpio = serviceToPrint.clienteNombre.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+                    const nombreFuente = serviceToPrint?.clienteNombre || serviceToPrint?.cliente?.nombreCompleto || '';
+                    const nombreClienteLimpio = nombreFuente.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
                     const sid = toIdString(serviceToPrint._id || serviceToPrint.id);
                     pdf.save(`Servicio_${sid}_${nombreClienteLimpio}.pdf`);
 
@@ -160,24 +181,32 @@ function ServiciosAdmin() {
         const newItems = formData.presupuesto.items.map((item, i) =>
             i === index ? { ...item, [name]: newValue } : item
         );
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = formData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const addPresupuestoItem = () => {
         const newItems = [...formData.presupuesto.items, { descripcion: "", costo: "" }];
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = formData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const removePresupuestoItem = (index) => {
         const newItems = formData.presupuesto.items.filter((_, i) => i !== index);
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = formData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setFormData({ ...formData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const handleGeneralChange = (e) => {
         const { name, value } = e.target;
+        // Si cambia el tipo de servicio, reiniciamos la marca para forzar re-selección
+        if (name === 'tipoServicio') {
+            setFormData({ ...formData, tipoServicio: value, marcaProducto: '', modeloProducto: '' });
+            return;
+        }
         setFormData({ ...formData, [name]: value });
     };
 
@@ -196,6 +225,7 @@ function ServiciosAdmin() {
         const dataToSend = {
             cliente: formData.clienteId, // Backend espera "cliente", no "clienteId"
             marcaProducto: formData.marcaProducto,
+            modeloProducto: formData.modeloProducto,
             tipoServicio: formData.tipoServicio,
             detalles: formData.detalles,
             estado: formData.estado,
@@ -258,12 +288,14 @@ function ServiciosAdmin() {
             if (clonedData.cliente && typeof clonedData.cliente === 'object') {
                 clonedData.cliente = clonedData.cliente._id;
             }
+            // Asegurar modeloProducto
+            clonedData.modeloProducto = clonedData.modeloProducto || '';
             clonedData.presupuesto.items = clonedData.presupuesto.items.map(item => ({
                 ...item,
                 costo: item.costo === 0 ? "" : item.costo
             }));
+            clonedData.presupuesto.senia = clonedData.presupuesto.senia || 0;
             setEditData(clonedData);
-            setShowBudgetId(null);
         }
     };
     
@@ -281,6 +313,12 @@ function ServiciosAdmin() {
             newValue = null;
         }
         
+        // Si cambia el tipo en el modo edición, reiniciar marcaProducto
+        if (name === 'tipoServicio') {
+            setEditData({ ...editData, tipoServicio: newValue, marcaProducto: '', modeloProducto: '' });
+            return;
+        }
+
         setEditData({ ...editData, [name]: newValue });
     };
 
@@ -291,20 +329,23 @@ function ServiciosAdmin() {
         const newItems = editData.presupuesto.items.map((item, idx) =>
             idx === i ? { ...item, [name]: newValue } : item
         );
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = editData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const addEditPresupuestoItem = () => {
         const newItems = [...editData.presupuesto.items, { descripcion: "", costo: "" }];
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = editData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const removeEditPresupuestoItem = (i) => {
         const newItems = editData.presupuesto.items.filter((_, idx) => idx !== i);
-        const { subtotal, iva, total } = calcularTotal(newItems);
-        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total } });
+        const senia = editData.presupuesto?.senia || 0;
+        const { subtotal, iva, total } = calcularTotal(newItems, senia);
+        setEditData({ ...editData, presupuesto: { items: newItems, subtotal, iva, total, senia } });
     };
 
     const handleSaveEdit = async () => {
@@ -368,6 +409,16 @@ function ServiciosAdmin() {
             cancelButtonColor: '#64748b',
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
+            // Forzar render dentro del body para evitar stacking context issues
+            target: document.body,
+            allowOutsideClick: false,
+            didOpen: () => {
+                // Asegurar que el swal está por encima de modales con z-index muy alto
+                const containers = document.querySelectorAll('.swal2-container');
+                const popups = document.querySelectorAll('.swal2-popup');
+                containers.forEach(c => { c.style.zIndex = '2147483647'; c.style.position = 'fixed'; });
+                popups.forEach(p => { p.style.zIndex = '2147483647'; });
+            }
         });
         if (!confirm.isConfirmed) return;
 
@@ -405,20 +456,77 @@ function ServiciosAdmin() {
         }
     };
 
+    // ---------------------------
+    // Modal "Ver más" handlers
+    // ---------------------------
+    const openModal = async (service) => {
+        // Asegurarse de que el campo cliente esté poblado con el objeto cliente
+        let serviceToShow = service;
+        try {
+            if (service && service.cliente && typeof service.cliente === 'string') {
+                const clienteFull = await api.get(`/clientes/${service.cliente}`);
+                serviceToShow = { ...service, cliente: clienteFull };
+            }
+        } catch (err) {
+            // Si falla, seguimos mostrando lo que tengamos
+            console.warn('No se pudo obtener cliente completo para modal:', err);
+        }
+        setModalService(serviceToShow);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setModalService(null);
+    };
+
+    const handleModalSave = async (id, dataToSave) => {
+        try {
+            const updated = await api.put(`/servicios/${id}`, dataToSave);
+            setServicios(prevServicios => prevServicios.map(s => (s._id || s.id) === (updated._id || updated.id) ? updated : s));
+            closeModal();
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+            Toast.fire({ icon: 'success', title: '✅ Servicio actualizado' });
+        } catch (err) {
+            console.error('Error guardando desde modal:', err);
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'No se pudo guardar.' });
+        }
+    };
+
+    const handleModalDelete = async (id) => {
+        // Reuse the existing delete flow (incluye confirmación)
+        await handleDeleteServicio(id);
+        closeModal();
+    };
+
+    const handleModalPrint = (service) => {
+        generarComprobante(service);
+    };
+
 
     // ----------------------------------------
     // Filtrado y Ordenamiento
     // ----------------------------------------
     const serviciosFiltrados = servicios.filter((s) => {
-        const query = searchQuery.toLowerCase();
-        const clienteId = typeof s.cliente === 'object' ? s.cliente._id : s.cliente;
-        const clienteNombre = typeof s.cliente === 'object' ? s.cliente.nombreCompleto : (clientes.find(c => c.value === clienteId)?.label || "");
+        const query = (searchQuery || '').toString().toLowerCase();
+        // cliente puede ser null, un id (string) o un objeto poblado
+        const clienteId = (s.cliente && typeof s.cliente === 'object') ? (s.cliente._id || s.cliente.id || '') : (s.cliente || '');
+        const clienteNombre = (s.cliente && typeof s.cliente === 'object') ? (s.cliente.nombreCompleto || '') : (clientes.find(c => c.value === clienteId)?.label || "");
         const servicioNumero = s.servicioNumero ? s.servicioNumero.toString() : "";
+        const marca = (s.marcaProducto || '').toString().toLowerCase();
+        const tipo = (s.tipoServicio || '').toString().toLowerCase();
         return (
             servicioNumero.includes(query) ||
-            s.marcaProducto.toLowerCase().includes(query) ||
-            s.tipoServicio.toLowerCase().includes(query) ||
-            clienteNombre.toLowerCase().includes(query)
+            marca.includes(query) ||
+            tipo.includes(query) ||
+            (clienteNombre || '').toString().toLowerCase().includes(query)
         );
     });
 
@@ -446,14 +554,44 @@ function ServiciosAdmin() {
                             placeholder="Buscar cliente..." 
                             classNamePrefix="react-select"
                         />
-                        <label>Marca del Producto:</label>
-                        <input type="text" name="marcaProducto" value={formData.marcaProducto} onChange={handleGeneralChange} required />
                         <label>Tipo de Equipo:</label>
                         <select name="tipoServicio" value={formData.tipoServicio} onChange={handleGeneralChange}>
                             {TIPO_SERVICIO_OPTIONS.map((o) => (
                                 <option key={o.value} value={o.value}>{o.label}</option>
                             ))}
                         </select>
+                        <label>Marca del Producto:</label>
+                        {formData.tipoServicio === 'otros' ? (
+                            <input type="text" name="marcaProducto" value={formData.marcaProducto} onChange={handleGeneralChange} placeholder="Especifique la marca" required />
+                        ) : (
+                            <select name="marcaProducto" value={formData.marcaProducto} onChange={handleGeneralChange} required>
+                                <option value="">Seleccione marca...</option>
+                                {(BRAND_OPTIONS[formData.tipoServicio] || []).map((m) => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))}
+                            </select>
+                        )}
+                        <label>Modelo del Producto:</label>
+                        {formData.tipoServicio === 'otros' ? (
+                            <input type="text" name="modeloProducto" value={formData.modeloProducto} onChange={handleGeneralChange} placeholder="Especifique el modelo" />
+                        ) : (
+                            <>
+                                {/* Allow typing or selecting a suggested model via datalist */}
+                                <input
+                                    list={`model-options-${formData.tipoServicio}`}
+                                    type="text"
+                                    name="modeloProducto"
+                                    value={formData.modeloProducto}
+                                    onChange={handleGeneralChange}
+                                    placeholder="Seleccione o escriba el modelo"
+                                />
+                                <datalist id={`model-options-${formData.tipoServicio}`}>
+                                    {(MODEL_OPTIONS[formData.tipoServicio] || []).map((mo) => (
+                                        <option key={mo} value={mo} />
+                                    ))}
+                                </datalist>
+                            </>
+                        )}
                         <label>Detalles:</label>
                         <textarea name="detalles" value={formData.detalles} onChange={handleGeneralChange} rows="3" />
                         
@@ -478,10 +616,19 @@ function ServiciosAdmin() {
                                 <button type="button" onClick={() => removePresupuestoItem(i)} className="btn-remove-item">&times;</button>
                             </div>
                         ))}
+                        <div style={{display:'flex', gap: '8px', alignItems:'center', marginTop: '8px'}}>
+                            <label style={{minWidth: '70px'}}>Seña:</label>
+                            <input type="number" name="senia" value={formData.presupuesto.senia || ''} onChange={(e) => {
+                                const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                const { subtotal, iva, total } = calcularTotal(formData.presupuesto.items, val);
+                                setFormData({ ...formData, presupuesto: { ...formData.presupuesto, senia: val, subtotal, iva, total } });
+                            }} />
+                        </div>
                         <button type="button" onClick={addPresupuestoItem}>+ Agregar ítem</button>
                         <div className="presupuesto-resumen">
                             <p>Subtotal: ${formData.presupuesto.subtotal.toFixed(2)}</p>
-                            <p>Total: ${formData.presupuesto.total.toFixed(2)}</p>
+                            <p>Seña: -${(formData.presupuesto.senia || 0).toFixed(2)}</p>
+                            <p>Total a Pagar: ${formData.presupuesto.total.toFixed(2)}</p>
                         </div>
                     </fieldset>
 
@@ -510,15 +657,14 @@ function ServiciosAdmin() {
                     <div className="servicios-lista-wrapper">
                         <div className="servicios-lista-cards">
                             {serviciosOrdenados.map((s) => {
-                                // El backend puede enviar cliente como objeto poblado o como ID
-                                const clienteId = typeof s.cliente === 'object' ? s.cliente._id : s.cliente;
-                                const clienteObj = clientes.find(c => c.value === clienteId);
-                                const clienteNombre = typeof s.cliente === 'object' ? s.cliente.nombreCompleto : (clienteObj?.label || "Cliente desconocido");
+                                // El backend puede enviar cliente como objeto poblado, ID o null
+                                    const clienteId = (s.cliente && typeof s.cliente === 'object') ? (s.cliente._id || s.cliente.id || '') : (s.cliente || '');
+                                    const clienteObj = clientes.find(c => c.value === clienteId);
+                                    const clienteNombre = (s.cliente && typeof s.cliente === 'object') ? (s.cliente.nombreCompleto || '') : (clienteObj?.label || "Cliente desconocido");
                                 const servicioId = s._id || s.id;
                                 const servicioNumero = s.servicioNumero || 'N/A';
-                                const isEditing = editId === servicioId; 
-                                const isBudgetOpen = showBudgetId === servicioId; 
-             {/*QR */}          const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
+                                const isEditing = editId === servicioId;
+                                const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
 
                                 return (
                                     <div 
@@ -566,7 +712,7 @@ function ServiciosAdmin() {
                                                 />
                                             </div>
                                         </div>
-                                        {isEditing ? (
+                                        {isEditing && editData ? (
                                             <>
                                                 {/* MODO EDICIÓN */}
                                                 <label>Cliente:</label>
@@ -576,7 +722,36 @@ function ServiciosAdmin() {
                                                      ))}
                                                  </select>
                                                  <label>Marca Producto:</label>
-                                                 <input type="text" name="marcaProducto" value={editData.marcaProducto} onChange={handleEditChange} />
+                                                 {editData.tipoServicio === 'otros' ? (
+                                                     <input type="text" name="marcaProducto" value={editData.marcaProducto} onChange={handleEditChange} />
+                                                 ) : (
+                                                     <select name="marcaProducto" value={editData.marcaProducto} onChange={handleEditChange}>
+                                                         <option value="">Seleccione marca...</option>
+                                                         {(BRAND_OPTIONS[editData.tipoServicio] || []).map((m) => (
+                                                             <option key={m} value={m}>{m}</option>
+                                                         ))}
+                                                     </select>
+                                                 )}
+                                                 <label>Modelo Producto:</label>
+                                                 {editData.tipoServicio === 'otros' ? (
+                                                     <input type="text" name="modeloProducto" value={editData.modeloProducto || ''} onChange={handleEditChange} />
+                                                 ) : (
+                                                     <>
+                                                         <input
+                                                             list={`model-options-${editData.tipoServicio}`}
+                                                             type="text"
+                                                             name="modeloProducto"
+                                                             value={editData.modeloProducto || ''}
+                                                             onChange={handleEditChange}
+                                                             placeholder="Seleccione o escriba el modelo"
+                                                         />
+                                                         <datalist id={`model-options-${editData.tipoServicio}`}>
+                                                             {(MODEL_OPTIONS[editData.tipoServicio] || []).map((mo) => (
+                                                                 <option key={mo} value={mo} />
+                                                             ))}
+                                                         </datalist>
+                                                     </>
+                                                 )}
                                                  <label>Tipo de Servicio:</label>
                                                  <select name="tipoServicio" value={editData.tipoServicio} onChange={handleEditChange}>
                                                      {TIPO_SERVICIO_OPTIONS.map((o) => (
@@ -620,10 +795,19 @@ function ServiciosAdmin() {
                                                                    <button type="button" onClick={() => removeEditPresupuestoItem(idx)} className="btn-remove-item">&times;</button>
                                                                </div>
                                                            ))}
+                                                       <div style={{display:'flex', gap: '8px', alignItems:'center', marginTop: '8px'}}>
+                                                           <label style={{minWidth: '70px'}}>Seña:</label>
+                                                           <input type="number" name="senia" value={editData.presupuesto.senia || ''} onChange={(e) => {
+                                                               const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                                               const { subtotal, iva, total } = calcularTotal(editData.presupuesto.items, val);
+                                                               setEditData({ ...editData, presupuesto: { ...editData.presupuesto, senia: val, subtotal, iva, total } });
+                                                           }} />
+                                                       </div>
                                                        <button type="button" onClick={addEditPresupuestoItem}>+ Agregar ítem</button>
                                                        <div className="presupuesto-resumen">
                                                                <p>Subtotal: ${editData.presupuesto.subtotal.toFixed(2)}</p>
-                                                               <p>Total: ${editData.presupuesto.total.toFixed(2)}</p>
+                                                               <p>Seña: -${(editData.presupuesto.senia || 0).toFixed(2)}</p>
+                                                               <p>Total a Pagar: ${editData.presupuesto.total.toFixed(2)}</p>
                                                        </div>
                                                    </fieldset>
 
@@ -634,51 +818,30 @@ function ServiciosAdmin() {
                                             </>
                                         ) : (
                                             <>
-                                                {/* MODO VISUALIZACIÓN */}
-                                                <p><strong>Cliente:</strong> {clienteNombre}</p>
-                                                <p><strong>Marca:</strong> {s.marcaProducto}</p>
-                                                <p><strong>Tipo:</strong> {TIPO_SERVICIO_OPTIONS.find(o => o.value === s.tipoServicio)?.label || s.tipoServicio}</p>
-                                                <p><strong>Estado:</strong> {ESTADO_OPTIONS.find(o => o.value === s.estado)?.label || s.estado}</p>
-                                                
-                                                <p>
-                                                    <strong>Entrada:</strong> 
-                                                    {s.fechaEntrada 
-                                                        // ** (3) VISUALIZACIÓN:** Muestra solo la fecha y usa 'T12:00:00' para prevenir el rollback de la zona horaria
-                                                        ? new Date(s.fechaEntrada.split('T')[0] + 'T12:00:00').toLocaleDateString() 
-                                                        : 'N/A'
-                                                    }
-                                                </p>
-                                                {s.fechaSalida && (
-                                                    <p><strong>Entrega:</strong> {new Date(s.fechaSalida).toLocaleDateString()}</p>
-                                                )}
-                                                
-                                                {/* Botón de Presupuesto Desplegable */}
-                                                <button 
-                                                     className="btn-toggle-presupuesto"
-                                                     onClick={() => toggleBudget(servicioId)} 
-                                                >
-                                                     <span className="resumen-total">
-                                                         Total Presupuesto: <strong>${s.presupuesto.total.toFixed(2)}</strong>
-                                                     </span>
-                                                     <span className="toggle-icon">{isBudgetOpen ? '▲' : '▼'}</span>
-                                                 </button>
+                                                {/* MODO VISUALIZACIÓN: Grid con etiquetas arriba y valores abajo */}
+                                                <div className="servicio-info">
+                                                    <div className="card-grid">
+                                                        <div className="grid-label">Cliente</div>
+                                                        <div className="grid-label">Tipo</div>
+                                                        <div className="grid-label">Marca</div>
+                                                        <div className="grid-label">Modelo</div>
+                                                        <div className="grid-label">Entrada</div>
 
-                                                 {/* Contenido del Presupuesto (Renderizado Condicional) */}
-                                                 {isBudgetOpen && (
-                                                     <fieldset className="presupuesto-oculto-detalle">
-                                                          <legend>Detalle Ítems</legend>
-                                                          {s.presupuesto.items.map((item, idx) => (
-                                                               <p key={idx}>{item.descripcion} <span className="costo-detalle">${item.costo.toFixed(2)}</span></p>
-                                                           ))}
-                                                     </fieldset>
-                                                 )}
-                                                
-                                                <div className="acciones-servicio">
-                                                     <button onClick={() => handleEditClick(servicioId)} className="btn-edit-servicio">Editar</button>
-                                                     <button onClick={() => handleDeleteServicio(servicioId)} className="btn-delete-servicio">Eliminar</button>
-                                                     {/* NUEVO: Botón para generar PDF, pasa el nombre del cliente */}
-                                                     <button onClick={() => generarComprobante({ ...s, clienteNombre })} className="btn-pdf-servicio"> <GoDownload /></button>
-                                                 </div>
+                                                        <div className="grid-value">{clienteNombre}</div>
+                                                        <div className="grid-value">{TIPO_SERVICIO_OPTIONS.find(o => o.value === s.tipoServicio)?.label || s.tipoServicio}</div>
+                                                        <div className="grid-value">{s.marcaProducto || 'N/A'}</div>
+                                                        <div className="grid-value">{s.modeloProducto || 'N/A'}</div>
+                                                        <div className="grid-value">{
+                                                            s.fechaEntrada
+                                                                ? new Date(s.fechaEntrada.split('T')[0] + 'T12:00:00').toLocaleDateString()
+                                                                : 'N/A'
+                                                        }</div>
+                                                    </div>
+
+                                                    <div className="acciones-servicio">
+                                                        <button onClick={() => openModal(s)} className="btn-ver-mas">Ver más</button>
+                                                    </div>
+                                                </div>
                                             </>
                                         )}
                                     </div>
@@ -706,6 +869,18 @@ function ServiciosAdmin() {
                 >
                     <ComprobantePDF service={serviceToPrint} TIPO_SERVICIO_OPTIONS={TIPO_SERVICIO_OPTIONS} ESTADO_OPTIONS={ESTADO_OPTIONS} />
                 </div>
+            )}
+            {/* Modal de 'Ver más' con todas las opciones: ver/editar/eliminar/imprimir */}
+            {modalOpen && modalService && (
+                <ModalDetalles
+                    isOpen={modalOpen}
+                    onClose={closeModal}
+                    servicio={modalService}
+                    clientes={[modalService.cliente]}
+                    onSave={handleModalSave}
+                    onDelete={handleModalDelete}
+                    onPrint={handleModalPrint}
+                />
             )}
         </div>
     );
