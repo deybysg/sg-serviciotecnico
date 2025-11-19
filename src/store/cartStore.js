@@ -92,7 +92,16 @@ const useCartStore = create((set, get) => ({
     if (existingItem) {
       // Verificar stock
       if (existingItem.cantidad >= product.stock) {
-        Swal.fire('Sin Stock', `Solo quedan ${product.stock} unidades de este producto.`, 'warning');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'warning',
+          title: 'Sin Stock',
+          text: `Solo quedan ${product.stock} unidades`,
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true
+        });
         return;
       }
 
@@ -115,7 +124,8 @@ const useCartStore = create((set, get) => ({
       icon: 'success',
       title: `¡${product.nombre} agregado!`,
       showConfirmButton: false,
-      timer: 1500
+      timer: 2000,
+      timerProgressBar: true
     });
 
     // Persistir después de agregar
@@ -174,7 +184,8 @@ const useCartStore = create((set, get) => ({
           icon: 'info',
           title: 'Producto eliminado',
           showConfirmButton: false,
-          timer: 1500
+          timer: 2000,
+          timerProgressBar: true
         });
 
         // Persistir después de eliminar
@@ -214,7 +225,8 @@ const useCartStore = create((set, get) => ({
             icon: 'info',
             title: 'Carrito vaciado',
             showConfirmButton: false,
-            timer: 1500
+            timer: 2000,
+            timerProgressBar: true
           });
         } catch (err) {
           console.warn('Error al vaciar en servidor, vaciando localmente', err);
