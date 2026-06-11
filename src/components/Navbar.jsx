@@ -4,10 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
-import { TbInfoSmall } from "react-icons/tb";
-import { GrInfo } from "react-icons/gr";
-import { RiInformation2Fill } from "react-icons/ri";
 import { BsInfoCircleFill } from "react-icons/bs";
+import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser } from "react-icons/fi";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
@@ -17,12 +15,21 @@ function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const totalItems = useCartStore(state => state.getTotalItems()); 
-  const [isCartOpen, setIsCartOpen] = useState(false); 
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     document.body.dataset.role = user?.role || 'guest';
     return () => { delete document.body.dataset.role; };
   }, [user]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Escuchar evento global de reseteo de carritos (solo útil para superadmin)
   useEffect(() => {
@@ -69,11 +76,18 @@ function Navbar() {
   };
 
   const isAdminish = user?.role === 'admin' || user?.role === 'superadmin';
-  const navbarClass = isAdminish ? 'navbar-sg navbar-admin-mode' : 'navbar-sg';
+  const navbarClass = [
+    'navbar-sg',
+    isAdminish ? 'navbar-admin-mode' : '',
+    isScrolled ? 'navbar-scrolled' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <>
       <nav className={navbarClass}>
+        {/* Scanline effect */}
+        <div className="scanline" />
+        
         {/* 1. IZQUIERDA: Hamburguesa + Logo */}
         <div className="navbar-section-left">
           <div className="navbar-hamburguesa-container">
@@ -94,7 +108,7 @@ function Navbar() {
         {(!user || user.role === 'user') && (
           <div className="navbar-section-center-tracking">
             <NavLink to="/seguimiento" className="tracking-oval-link">
-              Seguimiento de Servicio
+              <FiSearch size={14} /> Seguimiento de Servicio
             </NavLink>
           </div>
         )}
@@ -103,18 +117,18 @@ function Navbar() {
         <ul className="navbar-links-right">
           {!user && (
             <>
-              <li><NavLink to="/" end>Inicio</NavLink></li>
-              <li><NavLink to="/productos">Productos</NavLink></li>
-              <li><NavLink to="/login">Login</NavLink></li>
-              <li><NavLink to="/servicios">Info <BsInfoCircleFill /></NavLink></li>
+              <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
+              <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
+              <li><NavLink to="/login"><FiLogIn size={14} /> Login</NavLink></li>
+              <li><NavLink to="/servicios"><BsInfoCircleFill size={14} /> Info</NavLink></li>
             </>
           )}
 
           {user?.role === 'user' && (
             <>
-              <li><NavLink to="/" end>Inicio</NavLink></li>
-              <li><NavLink to="/productos">Productos</NavLink></li>
-              <li><NavLink to="/miscomprasmodal">Mis compras</NavLink></li>
+              <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
+              <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
+              <li><NavLink to="/miscomprasmodal"><FiShoppingBag size={14} /> Mis compras</NavLink></li>
 
               {/* === CARRITO EN PC === */}
               <li>
@@ -128,22 +142,23 @@ function Navbar() {
               </li>
 
               <li>
-                <button onClick={handleLogout} className="logout-btn">Logout</button>
+                <button onClick={handleLogout} className="logout-btn">
+                  <FiLogOut size={14} /> Salir
+                </button>
               </li>
             </>
           )}
 
           {user?.role === 'admin' && (
             <>
-              <li><NavLink to="/admin/paneltrabajos"><FaTools style={{ marginRight: '8px' }} />Panel de Trabajo</NavLink></li>
-              <li><NavLink to="/admin/clientes">Clientes</NavLink></li>
-              <li><NavLink to="/admin/productosAdmin">Productos</NavLink></li>
-              <li><NavLink to="/admin/servicios">Servicios</NavLink></li>
-              {/* <li><NavLink to="/admin/estadisticas">Estadísticas</NavLink></li>
-              <li><NavLink to="/admin/historial">H. Servicios</NavLink></li>
-              <li><NavLink to="/admin/historialventas">H. Ventas</NavLink></li> */}
+              <li><NavLink to="/admin/paneltrabajos"><FaTools style={{ marginRight: '8px' }} />Panel</NavLink></li>
+              <li><NavLink to="/admin/clientes"><FiUser size={14} /> Clientes</NavLink></li>
+              <li><NavLink to="/admin/productosAdmin"><FiBox size={14} /> Productos</NavLink></li>
+              <li><NavLink to="/admin/servicios"><FiSearch size={14} /> Servicios</NavLink></li>
               <li>
-                <button onClick={handleLogout} className="logout-btn">Logout</button>
+                <button onClick={handleLogout} className="logout-btn">
+                  <FiLogOut size={14} /> Salir
+                </button>
               </li>
             </>
           )}
@@ -152,7 +167,9 @@ function Navbar() {
             <>
               {/* Para superadmin usamos la barra lateral; aquí solo dejamos Logout */}
               <li>
-                <button onClick={handleLogout} className="logout-btn">Logout</button>
+                <button onClick={handleLogout} className="logout-btn">
+                  <FiLogOut size={14} /> Salir
+                </button>
               </li>
             </>
           )}

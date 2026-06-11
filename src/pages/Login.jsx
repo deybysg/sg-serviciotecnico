@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import './Login.css';
-import { FaEye, FaEyeSlash, FaLock, FaUser, FaEnvelope } from 'react-icons/fa'; 
+import { FiEye, FiEyeOff, FiLock, FiUser, FiMail, FiLogIn, FiUserPlus, FiArrowRight } from "react-icons/fi"; 
 
 function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -158,10 +158,13 @@ function Login() {
     <div className="auth-container">
       <div className="auth-card">
         <h2>{isRegister ? "Registrarse" : "Iniciar Sesión"}</h2>
+        <p className="subtitle">
+          {isRegister ? "Crea una nueva cuenta para acceder" : "Ingresa tus credenciales para continuar"}
+        </p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <FaUser className="input-icon"/>
+            <FiUser className="input-icon" size={18} />
             <input
               type="text"
               placeholder="Nombre de usuario"
@@ -173,7 +176,7 @@ function Login() {
 
           {isRegister && (
             <div className="input-group">
-              <FaEnvelope className="input-icon"/>
+              <FiMail className="input-icon" size={18} />
               <input
                 type="email"
                 placeholder="Correo electrónico"
@@ -185,7 +188,7 @@ function Login() {
           )}
 
           <div className="input-group">
-            <FaLock className="input-icon"/>
+            <FiLock className="input-icon" size={18} />
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Contraseña"
@@ -194,13 +197,13 @@ function Login() {
               required
             />
             <span className="eye-icon" onClick={togglePasswordVisibility}>
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
             </span>
           </div>
 
           {isRegister && (
             <div className="input-group">
-              <FaLock className="input-icon"/>
+              <FiLock className="input-icon" size={18} />
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirmar contraseña"
@@ -209,21 +212,29 @@ function Login() {
                 required
               />
               <span className="eye-icon" onClick={togglePasswordVisibility}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
               </span>
             </div>
           )}
 
           <button type="submit" className="auth-btn">
-            {isRegister ? "Crear cuenta" : "Entrar"}
+            {isRegister ? (
+              <><FiUserPlus size={18} /> Crear cuenta</>
+            ) : (
+              <><FiLogIn size={18} /> Entrar <FiArrowRight size={16} /></>
+            )}
           </button>
         </form>
 
-          {!isRegister && (
-            <div className="forgot-password-link">
-              <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
-            </div>
-          )}
+        {!isRegister && (
+          <div className="forgot-password-link">
+            <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
+          </div>
+        )}
+
+        <div className="auth-divider">
+          <span>o</span>
+        </div>
 
         <p className="toggle-text">
           {isRegister ? "¿Ya tienes una cuenta?" : "¿No tienes una cuenta?"}{" "}

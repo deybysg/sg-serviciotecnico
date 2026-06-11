@@ -67,6 +67,52 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
   const [page, setPage] = useState(1);
   const [quantities, setQuantities] = useState({});
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const slides = [
+    {
+      imagen: "/img/fondo2.png",
+      titulo: "Laptops Gaming",
+      subtitulo: "Rendimiento extremo para gamers y creadores.",
+      cta: "Ver colección",
+      categoria: "computadoras",
+    },
+    {
+      imagen: "/img/fondo3.png",
+      titulo: "Smartphones 2024",
+      subtitulo: "La última tecnología en la palma de tu mano.",
+      cta: "Explorar",
+      categoria: "celulares",
+    },
+    {
+      imagen: "/img/fondo1.jpg",
+      titulo: "Setup Perfecto",
+      subtitulo: "Accesorios y periféricos para tu estación de trabajo.",
+      cta: "Descubrir",
+      categoria: "accesorios",
+    },
+    {
+      imagen: "/img/fondo4.png",
+      titulo: "Audio Premium",
+      subtitulo: "Sumergite en el sonido con cancelación de ruido.",
+      cta: "Escuchar",
+      categoria: "audio",
+    },
+  ];
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isPaused, slides.length]);
+
+  const goToSlide = (index) => setCurrentSlide(index);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+
   useEffect(() => {
     let mounted = true;
 
@@ -223,14 +269,50 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   return (
     <main className="products-page">
-      <section className="products-hero">
-        <div className="products-hero-copy">
-          <h1>Productos</h1>
-          <p>Encuentra la mejor tecnología con garantía y al mejor precio.</p>
+      <section
+        className="products-hero"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        <div className="carousel-track">
+          {slides.map((slide, index) => (
+            <div key={index} className={`carousel-slide ${index === currentSlide ? "active" : ""}`}>
+              <img src={slide.imagen} alt={slide.titulo} />
+              <div className="carousel-overlay" />
+              <div className="carousel-content">
+                <span className="carousel-badge">Destacado</span>
+                <h2>{slide.titulo}</h2>
+                <p>{slide.subtitulo}</p>
+                <button
+                  className="carousel-cta"
+                  onClick={() => {
+                    setCategoria(slide.categoria);
+                    window.scrollTo({ top: 420, behavior: "smooth" });
+                  }}
+                >
+                  {slide.cta} <FaChevronRight />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="products-hero-art">
-          <span className="cart-line"><FaShoppingCart /></span>
-          <img src="/img/fondo2.png" alt="Tecnología destacada" />
+
+        <button className="carousel-nav carousel-prev" onClick={prevSlide} aria-label="Anterior">
+          <FaChevronLeft />
+        </button>
+        <button className="carousel-nav carousel-next" onClick={nextSlide} aria-label="Siguiente">
+          <FaChevronRight />
+        </button>
+
+        <div className="carousel-dots">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              className={index === currentSlide ? "active" : ""}
+              onClick={() => goToSlide(index)}
+              aria-label={`Ir al slide ${index + 1}`}
+            />
+          ))}
         </div>
       </section>
 

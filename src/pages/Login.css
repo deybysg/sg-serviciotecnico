@@ -1,175 +1,347 @@
-/* Contenedor centrado y full width */
+/* ============================================
+   LOGIN - ESTILO NEON MODERNO
+   ============================================ */
+
+:root {
+  --neon-blue: #00b7ff;
+  --neon-purple: #bf32ff;
+  --neon-green: #23dd5f;
+  --neon-amber: #ffc400;
+  --neon-red: #ff4d4d;
+  --panel-bg: #02050d;
+  --panel-border: rgba(94, 164, 255, 0.22);
+  --panel-card-bg: linear-gradient(145deg, rgba(5, 11, 28, 0.94), rgba(3, 7, 18, 0.9));
+  --panel-shadow: inset 0 0 55px rgba(0, 183, 255, 0.05), 0 24px 60px rgba(0, 0, 0, 0.32);
+  --text-primary: #f8fbff;
+  --text-secondary: rgba(232, 241, 255, 0.72);
+  --text-muted: rgba(232, 241, 255, 0.58);
+  --input-bg: rgba(255, 255, 255, 0.035);
+  --input-border: rgba(210, 228, 255, 0.16);
+  --radius: 10px;
+  --radius-lg: 14px;
+  --transition: 0.25s ease;
+}
+
+/* 1. PAGE */
 .auth-container {
-    width: 100vw;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Fondo oscuro y profundo */
-    background: #0D1117; 
-    font-family: 'Inter', sans-serif;
-    box-sizing: border-box; 
-    padding: 0 16px; 
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 24px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(0, 183, 255, 0.14), transparent 26%),
+    radial-gradient(circle at 88% 10%, rgba(191, 50, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, #02050d 0%, #040814 55%, #02040b 100%) fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Tarjeta de login */
+/* Animated background orbs */
+.auth-container::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 183, 255, 0.08), transparent 70%);
+  pointer-events: none;
+  animation: orbFloat1 12s ease-in-out infinite;
+}
+
+.auth-container::after {
+  content: '';
+  position: fixed;
+  bottom: -10%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(191, 50, 255, 0.08), transparent 70%);
+  pointer-events: none;
+  animation: orbFloat2 15s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, 30px) scale(1.2); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, -50px) scale(1.15); }
+}
+
+/* 2. CARD */
 .auth-card {
-    /* Color de tarjeta ligeramente más claro que el fondo, con transparencia */
-    background: rgba(18, 24, 34, 0.85); 
-    /* Borde sutil de neón azul */
-    border: 1px solid rgba(56, 189, 248, 0.15); 
-    padding: 2.5rem;
-    border-radius: 12px;
-    /* Sombra profunda y neón sutil */
-    box-shadow: 
-        0 4px 6px rgba(0, 0, 0, 0.4), 
-        0 0 25px rgba(56, 189, 248, 0.2); 
-    width: 100%;
-    max-width: 400px; /* Ancho máximo fijo para mantener el diseño */
-    text-align: center;
-    color: #E2E8F0; 
-    box-sizing: border-box;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  width: 100%;
+  max-width: 420px;
+  padding: 48px 36px;
+  margin: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  background: var(--panel-card-bg);
+  box-shadow: var(--panel-shadow);
+  text-align: center;
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+  animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
 }
 
-/* Efecto Hover: Tarjeta se destaca ligeramente */
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Top gradient line */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+  background-size: 200% 100%;
+  animation: gradientShift 3s linear infinite;
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.5);
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Hover effect */
 .auth-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 8px 30px rgba(0, 0, 0, 0.5), 
-        0 0 40px rgba(56, 189, 248, 0.3); 
+  transform: translateY(-4px);
+  border-color: rgba(0, 183, 255, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(0, 183, 255, 0.1);
 }
 
-/* Título */
+/* 3. HEADER */
 .auth-card h2 {
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #67E8F9; 
-    text-shadow: 0 0 10px rgba(103, 232, 249, 0.6);
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 850;
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.18);
 }
 
-/* 🎯 CORRECCIÓN DE ALINEACIÓN: Formulario (Flex container) */
+.auth-card .subtitle {
+  margin: 0 0 28px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* 4. FORM */
 .auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem; /* Separación consistente entre elementos */
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
 }
 
-/* --- CLASES DE INPUTS Y ALINEACIÓN --- */
-
-/* Contenedor del Input (necesario para la posición de íconos) */
+/* 5. INPUT GROUP */
 .input-group {
-    position: relative;
-    width: 100%; /* 🎯 CLAVE: Ocupa el 100% del formulario */
-    display: flex;
-    align-items: center; 
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* Input Styles */
 .auth-form input {
-    /* Padding para dejar espacio al ícono de la izquierda y al ojo de la derecha */
-    padding: 1rem 3rem 1rem 3rem; 
-    border: 1px solid #334155; 
-    border-radius: 6px;
-    outline: none;
-    background: #0f172a;
-    color: #F8FAFC;
-    font-size: 1rem;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    width: 100%; /* 🎯 CLAVE: El input se estira al 100% del .input-group */
+  width: 100%;
+  height: 50px;
+  padding: 0 44px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-/* Efecto Focus en Inputs: Borde neón */
+.auth-form input::placeholder {
+  color: var(--text-muted);
+}
+
 .auth-form input:focus {
-    background: #1e293b;
-    border: 1px solid #38bdf8;
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6); 
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.25), 0 0 28px rgba(191, 50, 255, 0.22);
 }
 
-/* Botón */
-.auth-btn {
-    margin-top: 0.25rem; /* Ajuste el margen superior para que se acerque a los inputs */
-    padding: 1rem;
-    border: none;
-    border-radius: 6px;
-    background: #38bdf8;
-    color: #0D1117;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); 
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    width: 100%; /* 🎯 CLAVE: El botón ocupa el 100% del formulario (igual que los inputs) */
-}
-
-/* Efecto Hover en Botón: Aumento de brillo y ligero movimiento */
-.auth-btn:hover {
-    background: #0ea5e9;
-    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.7);
-    transform: translateY(-1px);
-}
-
-/* --- ESTILOS DE ÍCONOS --- */
-
-/* Ícono a la izquierda (Usuario, Candado, Email) */
+/* 6. ICONS */
 .input-icon {
-    position: absolute;
-    left: 1rem;
-    color: #67E8F9;
-    font-size: 1rem;
-    z-index: 5;
+  position: absolute;
+  left: 14px;
+  color: var(--neon-blue);
+  font-size: 1rem;
+  z-index: 5;
+  filter: drop-shadow(0 0 6px rgba(0, 183, 255, 0.4));
+  transition: color 0.2s;
 }
 
-/* Ícono de Ojo a la derecha */
+.input-group:focus-within .input-icon {
+  color: var(--neon-blue);
+  filter: drop-shadow(0 0 10px rgba(0, 183, 255, 0.6));
+}
+
 .eye-icon {
-    position: absolute;
-    right: 1rem; /* Mantenemos 1rem para que quede bien alineado con el padding del input */
-    color: #94A3B8; 
-    cursor: pointer;
-    font-size: 1rem;
-    transition: color 0.2s ease;
-    z-index: 5;
+  position: absolute;
+  right: 14px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s, filter 0.2s;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
 }
 
 .eye-icon:hover {
-    color: #67E8F9; 
+  color: var(--neon-blue);
+  background: rgba(0, 183, 255, 0.08);
+  filter: drop-shadow(0 0 8px rgba(0, 183, 255, 0.4));
 }
 
-    /* Enlace de recuperación de contraseña */
-    .forgot-password-link {
-        margin-top: 1rem;
-        text-align: center;
-    }
+/* 7. BUTTON */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 50px;
+  margin-top: 4px;
+  border: 1px solid rgba(191, 50, 255, 0.74);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(191, 50, 255, 0.18), rgba(0, 183, 255, 0.22));
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  box-shadow: 0 0 22px rgba(191, 50, 255, 0.22);
+  position: relative;
+  overflow: hidden;
+}
 
-    .forgot-password-link a {
-        color: #67E8F9;
-        font-size: 0.9rem;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
+.auth-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s ease;
+}
 
-    .forgot-password-link a:hover {
-        color: #38bdf8;
-        text-decoration: underline;
-    }
+.auth-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 25px rgba(0, 183, 255, 0.25), 0 0 28px rgba(191, 50, 255, 0.22);
+}
 
-/* Texto para alternar login/registro */
+.auth-btn:hover::before {
+  left: 100%;
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+}
+
+/* 8. FORGOT PASSWORD */
+.forgot-password-link {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.forgot-password-link a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.forgot-password-link a:hover {
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px rgba(0, 183, 255, 0.4);
+}
+
+/* 9. TOGGLE TEXT */
 .toggle-text {
-    margin-top: 1.75rem;
-    font-size: 0.9rem;
-    color: #94A3B8; 
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .toggle-text span {
-    color: #67E8F9;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.3s ease;
+  color: var(--neon-blue);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: none;
 }
 
 .toggle-text span:hover {
-    text-decoration: none;
-    color: #06B6D4; 
+  color: var(--neon-purple);
+  text-shadow: 0 0 12px rgba(191, 50, 255, 0.4);
+}
+
+/* 10. DIVIDER */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94, 164, 255, 0.3), transparent);
+}
+
+/* 11. RESPONSIVE */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 32px 20px;
+    border-radius: var(--radius);
+  }
+
+  .auth-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .auth-form input {
+    height: 46px;
+    font-size: 0.9rem;
+  }
+
+  .auth-btn {
+    height: 46px;
+  }
 }
