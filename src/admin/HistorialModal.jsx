@@ -1,5 +1,6 @@
 import React from 'react';
 import { shortId, toIdString } from "../utils/id";
+import { FiX, FiHash, FiTool, FiCheckCircle, FiClock, FiFileText, FiDollarSign } from "react-icons/fi";
 // Asume que los estilos se cargan via HistorialAdmin.jsx
 
 const LOCALE = 'es-AR'; // Localización para las fechas
@@ -115,11 +116,11 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
         );
     };
     
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={onClose}>&times;</button>
-                
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={onClose}><FiX size={20} /></button>
+                
                 <h3 className="modal-titulo">
                     {isSingleService ? (() => {
                         const s = servicios[0];

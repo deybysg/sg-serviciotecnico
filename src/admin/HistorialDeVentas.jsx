@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Swal from "sweetalert2";
-import HistorialDeVentasModal from "./HistorialDeVentasModal"; 
+import HistorialDeVentasModal from "./HistorialDeVentasModal";
 import "./HistorialDeVentas.css";
 import { api } from "../services/api";
 import { shortId, toIdString } from "../utils/id";
+import {
+  FiShoppingCart, FiSearch, FiHash, FiUser, FiCalendar,
+  FiDollarSign, FiCheckCircle, FiEye, FiMoreVertical
+} from "react-icons/fi";
 
 const LOCALE = 'es-AR'; 
 const TIME_OPTIONS = { hour: '2-digit', minute: '2-digit', hour12: false }; 
@@ -144,123 +148,133 @@ const HistorialDeVentas = () => {
         setVentasDeUsuario([]);
     };
 
-    if (isLoading) return <div className="ventas-loading">Cargando Historial de Ventas...</div>;
+    if (isLoading) return (
+        <div className="ventas-historial-container">
+            <div className="ventas-loading"><FiShoppingCart size={24} style={{ marginBottom: 8 }} /> Cargando Historial de Ventas...</div>
+        </div>
+    );
     
     return (
         <div className="ventas-historial-container">
-            <h2 className="ventas-historial-title">Historial de Ventas 🛒</h2>
+            <div className="ventas-historial-shell">
+                <div className="ventas-historial-header">
+                    <h2><FiShoppingCart size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} /> Historial de Ventas</h2>
+                    <p>Gestiona y consulta el historial de todas las ventas realizadas.</p>
+                </div>
 
-            <div className="ventas-historial-buscador">
-                <input
-                    type="text"
-                    placeholder="Buscar por ID (corto o completo) o nombre de usuario..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="ventas-historial-input"
+                <div className="ventas-historial-buscador">
+                    <div className="ventas-historial-search">
+                        <FiSearch size={16} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por ID (corto o completo) o nombre de usuario..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Encabezado de la tabla dinámico */}
+                <div className={`ventas-historial-encabezados ventas-historial-encabezados-modo-${listaFinalParaRenderizar.mode}`}>
+                    {listaFinalParaRenderizar.mode === 'ventas' ? (
+                        <>
+                            <p><FiHash size={12} /> ID</p>
+                            <p><FiUser size={12} /> Usuario</p>
+                            <p><FiCalendar size={12} /> Fecha</p>
+                            <p><FiDollarSign size={12} /> Total</p>
+                            <p><FiCheckCircle size={12} /> Estado</p>
+                            <p><FiEye size={12} /> Ver</p>
+                        </>
+                    ) : (
+                        <>
+                            <p><FiUser size={12} /> Usuario</p>
+                            <p><FiCheckCircle size={12} /> Ventas</p>
+                            <p><FiDollarSign size={12} /> Total Acumulado</p>
+                            <p><FiCalendar size={12} /> Última Compra</p>
+                            <p><FiEye size={12} /> Historial</p>
+                        </>
+                    )}
+                </div>
+
+                <div className="ventas-historial-lista">
+                    {listaFinalParaRenderizar.data.length === 0 ? (
+                        <p className="ventas-mensaje-vacio">
+                            {listaFinalParaRenderizar.mode === 'ventas' ? 
+                                "No hay ventas registradas." :
+                                "No se encontraron coincidencias con la búsqueda."
+                            }
+                        </p>
+                    ) : (
+                        listaFinalParaRenderizar.mode === 'ventas' ? (
+                            // MODO 1: LISTA COMPLETA DE VENTAS INDIVIDUALES
+                            listaFinalParaRenderizar.data.map((venta) => {
+                                const fecha = new Date(venta.fechaCompra);
+
+                                return (
+                                    <div 
+                                        key={venta.id} 
+                                        className="venta-historial-row" 
+                                    >
+                                        <p className="col-id">#{shortId(toIdString(venta.id), 6)}</p> 
+                                        <p className="col-usuario">{venta.username}</p>
+                                        <p className="col-fecha">
+                                            {fecha.toLocaleDateString(LOCALE)} {fecha.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        </p>
+                                        <p className="col-total">{formatCurrency(venta.totalVenta)}</p>
+                                        <p className={`col-estado estado-${venta.estado.toLowerCase().replace(/ /g, '-')}`}>{venta.estado}</p>
+                                        <div className="col-acciones">
+                                            <button 
+                                                className="btn-ventas-icon"
+                                                onClick={() => handleVerDetallesDeVenta(venta)} 
+                                                title="Ver Detalles de la Venta"
+                                            >
+                                                <FiMoreVertical size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            // MODO 2: LISTA AGRUPADA POR USUARIO
+                            listaFinalParaRenderizar.data.map((data) => {
+                                const ventasCount = data.ventasCompletas.length;
+                                const ultimaCompra = new Date(data.ultimaVenta.fechaCompra);
+                                
+                                return (
+                                    <div 
+                                        key={data.username} 
+                                        className="usuario-historial-row"
+                                    >
+                                        <p className="col-usuario-name">{data.username}</p>
+                                        <p className="col-count">
+                                            <span className="badge-ventas-historial">{ventasCount}</span>
+                                        </p>
+                                        <p className="col-total-acc">{formatCurrency(data.totalAcumulado)}</p>
+                                        <p className="col-ultima-compra">
+                                            {ultimaCompra.toLocaleDateString(LOCALE)} a las {ultimaCompra.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        </p>
+                                        <div className="col-acciones">
+                                            <button 
+                                                className="btn-ver-historial" 
+                                                onClick={() => handleVerHistorialCompleto(data)} 
+                                            >
+                                                <FiEye size={14} /> Historial
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )
+                    )}
+                </div>
+
+                <HistorialDeVentasModal
+                    isOpen={modalOpen}
+                    onClose={handleCloseModal}
+                    venta={ventaSeleccionada}
+                    ventasDeUsuario={ventasDeUsuario}
                 />
             </div>
-
-            {/* Encabezado de la tabla dinámico */}
-            <div className={`ventas-historial-encabezados ventas-historial-encabezados-modo-${listaFinalParaRenderizar.mode}`}>
-                {listaFinalParaRenderizar.mode === 'ventas' ? (
-                    <>
-                        <p>ID Venta</p>
-                        <p>Usuario</p>
-                        <p>F. y Hora</p>
-                        <p>Total</p>
-                        <p>Estado</p>
-                        <p>Detalles</p> 
-                    </>
-                ) : (
-                    <>
-                        <p>Usuario</p>
-                        <p>Ventas Realizadas</p>
-                        <p>Total Acumulado</p>
-                        <p>Última Compra</p>
-                        <p>Opciones</p>
-                    </>
-                )}
-            </div>
-
-            <div className="ventas-historial-lista">
-                {listaFinalParaRenderizar.data.length === 0 ? (
-                    <p className="ventas-mensaje-vacio">
-                        {listaFinalParaRenderizar.mode === 'ventas' ? 
-                            "No hay ventas registradas." :
-                            "No se encontraron coincidencias con la búsqueda."
-                        }
-                    </p>
-                ) : (
-                    listaFinalParaRenderizar.mode === 'ventas' ? (
-                        // MODO 1: LISTA COMPLETA DE VENTAS INDIVIDUALES
-                        listaFinalParaRenderizar.data.map((venta) => {
-                            const fecha = new Date(venta.fechaCompra);
-
-                            return (
-                                <div 
-                                    key={venta.id} 
-                                    className="venta-historial-row" 
-                                >
-                                    {/* Mostrar ID corto con shortId */}
-                                    <p className="col-id">#{shortId(toIdString(venta.id), 6)}</p> 
-                                    <p className="col-usuario">{venta.username}</p>
-                                    <p className="col-fecha">
-                                        {fecha.toLocaleDateString(LOCALE)} {fecha.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
-                                    </p>
-                                    <p className="col-total">{formatCurrency(venta.totalVenta)}</p>
-                                    <p className={`col-estado estado-${venta.estado.toLowerCase().replace(/ /g, '-')}`}>{venta.estado}</p>
-                                    <div className="col-acciones">
-                                        <button 
-                                            className="btn-ver-detalle btn-ventas-icon"
-                                            onClick={() => handleVerDetallesDeVenta(venta)} 
-                                            title="Ver Detalles de la Venta"
-                                        >
-                                            <span className="icon-more-options">⋮</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        // MODO 2: LISTA AGRUPADA POR USUARIO
-                        listaFinalParaRenderizar.data.map((data) => {
-                            const ventasCount = data.ventasCompletas.length;
-                            const ultimaCompra = new Date(data.ultimaVenta.fechaCompra);
-                            
-                            return (
-                                <div 
-                                    key={data.username} 
-                                    className="usuario-historial-row"
-                                >
-                                    <p className="col-usuario-name">{data.username}</p>
-                                    <p className="col-count">
-                                        <span className="badge-ventas-historial">{ventasCount}</span>
-                                    </p>
-                                    <p className="col-total-acc">{formatCurrency(data.totalAcumulado)}</p>
-                                    <p className="col-ultima-compra">
-                                        {ultimaCompra.toLocaleDateString(LOCALE)} a las {ultimaCompra.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
-                                    </p>
-                                    <div className="col-acciones">
-                                        <button 
-                                            className="btn-ver-historial btn-ventas-icon-with-text" 
-                                            onClick={() => handleVerHistorialCompleto(data)} 
-                                        >
-                                            <span className="icon-more-options">⋮</span> Historial
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )
-                )}
-            </div>
-
-            <HistorialDeVentasModal
-                isOpen={modalOpen}
-                onClose={handleCloseModal}
-                venta={ventaSeleccionada}
-                ventasDeUsuario={ventasDeUsuario}
-            />
         </div>
     );
 };

@@ -4,6 +4,10 @@ import ServiciosModal from "./HistorialModal";
 import "./HistorialAdmin.css";
 import { api } from "../services/api";
 import { shortId, toIdString } from "../utils/id";
+import {
+  FiBook, FiSearch, FiCalendar, FiX, FiUser, FiTool,
+  FiCheckCircle, FiClock, FiHash, FiEye, FiMoreVertical
+} from "react-icons/fi";
 
 const LOCALE = 'es-AR'; // Localización para las fechas
 const TIME_OPTIONS = { hour12: false }; // Opciones para el formato 24h
@@ -228,172 +232,179 @@ const HistorialAdmin = () => {
         setServiciosDeCliente([]);
     };
 
-    if (isLoading) return <div className="historial-loading">Cargando Historial...</div>;
+    if (isLoading) return (
+        <div className="historial-container">
+            <div className="historial-loading"><FiBook size={24} style={{ marginBottom: 8 }} /> Cargando Historial...</div>
+        </div>
+    );
     
     return (
         <div className="historial-container">
-            <h2>Historial de Servicios Entregados 📚</h2>
+            <div className="historial-shell">
+                <div className="historial-header">
+                    <h2><FiBook size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} /> Historial de Servicios Entregados</h2>
+                    <p>Gestiona y consulta el historial de todos los servicios entregados.</p>
+                </div>
 
-            <div className="historial-buscador" style={{display:'flex', flexDirection:'column', gap:12}}>
-                <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16}}>
-                    <div style={{display:'flex', alignItems:'center', gap:12}}>
-                        <div style={{display:'flex', alignItems:'center'}}>
-                            <label style={{marginRight:6}}>Mes:</label>
+                <div className="historial-filters">
+                    <div className="historial-filters-row">
+                        <div className="historial-filters-left">
+                            <label><FiCalendar size={14} /> Mes:</label>
                             <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
-                            {selectedMonth && <button style={{marginLeft:8}} onClick={() => setSelectedMonth('')}>Limpiar</button>}
+                            {selectedMonth && (
+                                <button className="historial-btn-clear" onClick={() => setSelectedMonth('')}>
+                                    <FiX size={14} /> Limpiar
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="historial-top3">
+                            <h3><FiUser size={14} /> Top 3 Clientes — {selectedMonth ? selectedMonth : 'Todos los tiempos'}</h3>
+                            <div className="historial-top3-grid">
+                                {(() => {
+                                    const counts = {};
+                                    serviciosPorPeriodo.forEach(s => {
+                                        const cid = s.clienteId || 'sin-id';
+                                        counts[cid] = (counts[cid] || 0) + 1;
+                                    });
+                                    const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0,3);
+                                    if (entries.length === 0) return <p style={{color: 'var(--text-muted)', fontSize: '0.85rem'}}>No hay servicios en el periodo.</p>;
+                                    return entries.map(([cid, cnt], idx) => {
+                                        const clienteObj = clientes.find(c => String(c.id) === String(cid)) || { id: cid, nombreCompleto: 'Cliente Desconocido' };
+                                        return (
+                                            <div key={cid} className="historial-top3-card">
+                                                <span className="historial-top3-rank">#{idx+1}</span>
+                                                <p className="historial-top3-name">{clienteObj.nombreCompleto}</p>
+                                                <p className="historial-top3-count">{cnt} servicios</p>
+                                                <button onClick={() => {
+                                                    const serviciosCliente = serviciosPorPeriodo.filter(s => String(s.clienteId) === String(cid));
+                                                    handleVerHistorialCompleto({ cliente: clienteObj, serviciosCompletos: serviciosCliente, servicioResumen: serviciosCliente[0] });
+                                                }}>Ver historial</button>
+                                            </div>
+                                        );
+                                    });
+                                })()}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Top 3 clientes en el periodo seleccionado (o total si no hay periodo) */}
-                    <div className="top3-clientes" style={{minWidth:260}}>
-                        <h3 style={{marginTop:0}}>Top 3 Clientes — {selectedMonth ? selectedMonth : 'Todos los tiempos'}</h3>
-                        <div style={{display:'flex', gap:12}}>
-                            {(() => {
-                                // calcular top 3
-                                const counts = {};
-                                serviciosPorPeriodo.forEach(s => {
-                                    const cid = s.clienteId || 'sin-id';
-                                    counts[cid] = (counts[cid] || 0) + 1;
-                                });
-                                const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0,3);
-                                if (entries.length === 0) return <p>No hay servicios en el periodo.</p>;
-                                return entries.map(([cid, cnt], idx) => {
-                                    const clienteObj = clientes.find(c => String(c.id) === String(cid)) || { id: cid, nombreCompleto: 'Cliente Desconocido' };
-                                    return (
-                                        <div key={cid} style={{padding:8, border:'1px solid #e2e8f0', borderRadius:6}}>
-                                            <strong>#{idx+1}</strong>
-                                            <p style={{margin:0}}>{clienteObj.nombreCompleto}</p>
-                                            <p style={{margin:0}}>{cnt} servicios</p>
-                                            <button onClick={() => {
-                                                // abrir historial del cliente
-                                                const serviciosCliente = serviciosPorPeriodo.filter(s => String(s.clienteId) === String(cid));
-                                                handleVerHistorialCompleto({ cliente: clienteObj, serviciosCompletos: serviciosCliente, servicioResumen: serviciosCliente[0] });
-                                            }}>Ver historial</button>
-                                        </div>
-                                    );
-                                });
-                            })()}
-                        </div>
+                    <div className="historial-search">
+                        <FiSearch size={16} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por cliente o ID (corto o completo) para agrupar..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                 </div>
 
-                {/* Buscador por cliente o ID - debajo del Top3 */}
-                <div>
-                    <input
-                        type="text"
-                        placeholder="Buscar por cliente o ID (corto o completo) para agrupar..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{width:'100%'}}
-                    />
-                </div>
-            </div>
-
-            {/* Encabezado de la tabla dinámico */}
-            <div className={`historial-encabezados historial-encabezados-modo-${listaFinalParaRenderizar.mode}`}>
-                {listaFinalParaRenderizar.mode === 'servicios' ? (
-                    <>
-                        <p>ID Servicio</p>
-                        <p>Cliente</p>
-                        <p>Tipo</p>
-                        <p>F. Entrada</p>
-                        <p>F. Salida</p>
-                        <p>Opciones</p> 
-                    </>
-                ) : (
-                    <>
-                        <p>ID Cliente</p>
-                        <p>Nombre Cliente</p>
-                        <p>Servicios Entregados</p>
-                        <p>Última Entrada</p>
-                        <p>Historial</p>
-                    </>
-                )}
-            </div>
-
-            <div className="servicios-historial-lista">
-                {listaFinalParaRenderizar.data.length === 0 ? (
-                    <p className="mensaje-vacio">
-                        {listaFinalParaRenderizar.mode === 'servicios' ? 
-                            "No hay servicios entregados registrados." :
-                            "No se encontraron coincidencias con la búsqueda."
-                        }
-                    </p>
-                ) : (
-                    listaFinalParaRenderizar.mode === 'servicios' ? (
-                        // MODO 1: LISTA COMPLETA DE SERVICIOS
-                        listaFinalParaRenderizar.data.map(({ servicio, clienteNombre }) => {
-                            const fechaEntrada = new Date(servicio.fechaEntrada);
-                            const fechaSalida = servicio.fechaSalida ? new Date(servicio.fechaSalida) : null;
-
-                            return (
-                                <div 
-                                    key={servicio.id} 
-                                    className="servicio-historial-row" 
-                                >
-                                    <p className="col-id">{formatServicioNumero(servicio)}</p>
-                                    <p className="col-cliente">{clienteNombre}</p>
-                                    <p className="col-tipo">{servicio.tipoServicio || 'N/A'}</p>
-                                    <p className="col-entrada">
-                                        {fechaEntrada.toLocaleDateString(LOCALE)} {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
-                                    </p>
-                                    <p className="col-salida">
-                                        {fechaSalida ? `${fechaSalida.toLocaleDateString(LOCALE)} ${fechaSalida.toLocaleTimeString(LOCALE, TIME_OPTIONS)}` : 'N/A'}
-                                    </p>
-                                    <div className="col-acciones">
-                                        <button 
-                                            className="btn-ver-detalle btn-icon"
-                                            onClick={() => handleVerDetallesDeServicio(servicio)} 
-                                            title="Ver Detalles del Servicio"
-                                        >
-                                            <span className="icon-more-options">⋮</span> {/* Ícono de tres puntos */}
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })
+                {/* Encabezado de la tabla dinámico */}
+                <div className={`historial-encabezados historial-encabezados-modo-${listaFinalParaRenderizar.mode}`}>
+                    {listaFinalParaRenderizar.mode === 'servicios' ? (
+                        <>
+                            <p><FiHash size={12} /> ID</p>
+                            <p><FiUser size={12} /> Cliente</p>
+                            <p><FiTool size={12} /> Tipo</p>
+                            <p><FiCalendar size={12} /> Entrada</p>
+                            <p><FiCheckCircle size={12} /> Salida</p>
+                            <p><FiEye size={12} /> Ver</p>
+                        </>
                     ) : (
-                        // MODO 2: LISTA AGRUPADA POR CLIENTE
-                        listaFinalParaRenderizar.data.map((data) => {
-                            const cliente = data.cliente || { id: data.servicioResumen?.clienteId || 'sin-id', nombreCompleto: 'Cliente Desconocido' };
-                            const serviciosCount = data.serviciosCompletos.length;
-                            const servicioResumen = data.servicioResumen;
-                            const fechaEntrada = new Date(servicioResumen.fechaEntrada);
-                            
-                            return (
-                                <div 
-                                    key={cliente.id || (servicioResumen?.clienteId || shortId(toIdString(servicioResumen.id),6))} 
-                                    className="cliente-historial-row"
-                                >
-                                    <p className="col-id">{shortId(toIdString(cliente.id || servicioResumen?.clienteId), 6)}</p>
-                                    <p className="col-nombre">{cliente.nombreCompleto || 'Cliente Desconocido'}</p>
-                                    <p className="col-count">
-                                        <span className="badge-servicios-historial">{serviciosCount}</span>
-                                    </p>
-                                    <p className="col-entrada">
-                                        {fechaEntrada.toLocaleDateString(LOCALE)} a las {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
-                                    </p>
-                                    <div className="col-acciones">
-                                        <button 
-                                            className="btn-ver-historial btn-icon-with-text" 
-                                            onClick={() => handleVerHistorialCompleto(data)} 
-                                        >
-                                            <span className="icon-more-options">⋮</span> Historial
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )
-                )}
-            </div>
+                        <>
+                            <p><FiHash size={12} /> ID</p>
+                            <p><FiUser size={12} /> Cliente</p>
+                            <p><FiCheckCircle size={12} /> Entregados</p>
+                            <p><FiCalendar size={12} /> Última Entrada</p>
+                            <p><FiEye size={12} /> Historial</p>
+                        </>
+                    )}
+                </div>
 
-            <ServiciosModal
-                isOpen={modalOpen}
-                onClose={handleCloseModal}
-                cliente={clienteSeleccionado}
-                servicios={serviciosDeCliente}
-            />
+                <div className="servicios-historial-lista">
+                    {listaFinalParaRenderizar.data.length === 0 ? (
+                        <p className="mensaje-vacio">
+                            {listaFinalParaRenderizar.mode === 'servicios' ? 
+                                "No hay servicios entregados registrados." :
+                                "No se encontraron coincidencias con la búsqueda."
+                            }
+                        </p>
+                    ) : (
+                        listaFinalParaRenderizar.mode === 'servicios' ? (
+                            // MODO 1: LISTA COMPLETA DE SERVICIOS
+                            listaFinalParaRenderizar.data.map(({ servicio, clienteNombre }) => {
+                                const fechaEntrada = new Date(servicio.fechaEntrada);
+                                const fechaSalida = servicio.fechaSalida ? new Date(servicio.fechaSalida) : null;
+
+                                return (
+                                    <div 
+                                        key={servicio.id} 
+                                        className="servicio-historial-row" 
+                                    >
+                                        <p className="col-id">{formatServicioNumero(servicio)}</p>
+                                        <p className="col-cliente">{clienteNombre}</p>
+                                        <p className="col-tipo">{servicio.tipoServicio || 'N/A'}</p>
+                                        <p className="col-entrada">
+                                            {fechaEntrada.toLocaleDateString(LOCALE)} {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        </p>
+                                        <p className="col-salida">
+                                            {fechaSalida ? `${fechaSalida.toLocaleDateString(LOCALE)} ${fechaSalida.toLocaleTimeString(LOCALE, TIME_OPTIONS)}` : 'N/A'}
+                                        </p>
+                                        <div className="col-acciones">
+                                            <button 
+                                                className="btn-ver-detalle"
+                                                onClick={() => handleVerDetallesDeServicio(servicio)} 
+                                                title="Ver Detalles del Servicio"
+                                            >
+                                                <FiMoreVertical size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            // MODO 2: LISTA AGRUPADA POR CLIENTE
+                            listaFinalParaRenderizar.data.map((data) => {
+                                const cliente = data.cliente || { id: data.servicioResumen?.clienteId || 'sin-id', nombreCompleto: 'Cliente Desconocido' };
+                                const serviciosCount = data.serviciosCompletos.length;
+                                const servicioResumen = data.servicioResumen;
+                                const fechaEntrada = new Date(servicioResumen.fechaEntrada);
+                                
+                                return (
+                                    <div 
+                                        key={cliente.id || (servicioResumen?.clienteId || shortId(toIdString(servicioResumen.id),6))} 
+                                        className="cliente-historial-row"
+                                    >
+                                        <p className="col-id">{shortId(toIdString(cliente.id || servicioResumen?.clienteId), 6)}</p>
+                                        <p className="col-nombre">{cliente.nombreCompleto || 'Cliente Desconocido'}</p>
+                                        <p className="col-count">
+                                            <span className="badge-servicios-historial">{serviciosCount}</span>
+                                        </p>
+                                        <p className="col-entrada">
+                                            {fechaEntrada.toLocaleDateString(LOCALE)} a las {fechaEntrada.toLocaleTimeString(LOCALE, TIME_OPTIONS)}
+                                        </p>
+                                        <div className="col-acciones">
+                                            <button 
+                                                className="btn-ver-historial" 
+                                                onClick={() => handleVerHistorialCompleto(data)} 
+                                            >
+                                                <FiEye size={14} /> Historial
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )
+                    )}
+                </div>
+
+                <ServiciosModal
+                    isOpen={modalOpen}
+                    onClose={handleCloseModal}
+                    cliente={clienteSeleccionado}
+                    servicios={serviciosDeCliente}
+                />
+            </div>
         </div>
     );
 };

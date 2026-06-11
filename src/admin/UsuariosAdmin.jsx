@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import './UsuariosAdmin.css';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
+import {
+  FiUsers, FiUser, FiMail, FiLock, FiShield, FiPlus,
+  FiSave, FiX, FiEdit3, FiTrash2, FiAlertTriangle,
+  FiCheckCircle, FiHash, FiLoader
+} from "react-icons/fi";
 
 export default function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
@@ -228,120 +233,157 @@ export default function UsuariosAdmin() {
 
   return (
     <div className="usuarios-admin-page">
-      <header className="usuarios-admin-header">
-        <h2>Usuarios</h2>
-        <span className="badge-super">SuperAdmin</span>
-      </header>
+      <div className="usuarios-shell">
+        <header className="usuarios-admin-header">
+          <h2><FiUsers size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} /> Usuarios</h2>
+          <span className="badge-super"><FiShield size={12} /> SuperAdmin</span>
+        </header>
 
-      <section className="usuarios-form">
-        <h3>Crear usuario</h3>
-        <form onSubmit={handleCreate} className="create-form">
-          <input
-            type="text"
-            placeholder="Username"
-            value={form.username}
-            onChange={e => setForm({ ...form, username: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email (opcional)"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-          />
-          <select
-            value={form.role}
-            onChange={e => setForm({ ...form, role: e.target.value })}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear'}</button>
-        </form>
-      </section>
+        <section className="usuarios-card">
+          <h3><FiUser size={16} /> Crear usuario</h3>
+          <form onSubmit={handleCreate} className="create-form">
+            <div className="create-form-field">
+              <label><FiUser size={12} /> Username</label>
+              <input
+                type="text"
+                placeholder="Nombre de usuario"
+                value={form.username}
+                onChange={e => setForm({ ...form, username: e.target.value })}
+              />
+            </div>
+            <div className="create-form-field">
+              <label><FiMail size={12} /> Email</label>
+              <input
+                type="email"
+                placeholder="Email (opcional)"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
+            <div className="create-form-field">
+              <label><FiLock size={12} /> Contraseña</label>
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
+            <div className="create-form-field">
+              <label><FiShield size={12} /> Rol</label>
+              <select
+                value={form.role}
+                onChange={e => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" disabled={saving}>
+              {saving ? <><FiLoader size={14} /> Guardando...</> : <><FiPlus size={14} /> Crear</>}
+            </button>
+          </form>
+        </section>
 
-      {error && <div className="usuarios-error">{error}</div>}
-
-      <section className="usuarios-list">
-        <h3>Listado</h3>
-        {loading ? (
-          <div>Cargando...</div>
-        ) : (
-          <table className="usuarios-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map(u => (
-                <tr key={u._id || u.id}>
-                  <td>
-                    {editingId === (u._id || u.id) ? (
-                      <input
-                        type="text"
-                        value={editForm.username}
-                        onChange={e => setEditForm({ ...editForm, username: e.target.value })}
-                      />
-                    ) : (
-                      u.username
-                    )}
-                  </td>
-                  <td>
-                    {editingId === (u._id || u.id) ? (
-                      <input
-                        type="email"
-                        placeholder="Email (opcional)"
-                        value={editForm.email}
-                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                      />
-                    ) : (
-                      u.email || <span style={{color: '#999', fontStyle: 'italic'}}>Sin email</span>
-                    )}
-                  </td>
-                  <td>
-                    {editingId === (u._id || u.id) ? (
-                      <select
-                        value={editForm.role}
-                        onChange={e => setEditForm({ ...editForm, role: e.target.value })}
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                        {u.role === 'superadmin' && <option value="superadmin">SuperAdmin</option>}
-                      </select>
-                    ) : (
-                      <span className={`role-pill role-${u.role}`}>{u.role}</span>
-                    )}
-                  </td>
-                  <td className="acciones">
-                    {editingId === (u._id || u.id) ? (
-                      <>
-                        <button className="btn" onClick={() => handleUpdate(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>Guardar</button>
-                        <button className="btn secondary" onClick={cancelEdit}>Cancelar</button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="btn" onClick={() => startEdit(u)} disabled={protectedUsernames.has(u.username)}>Editar</button>
-                        <button className="btn danger" onClick={() => handleDelete(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>Eliminar</button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {error && (
+          <div className="usuarios-error">
+            <FiAlertTriangle size={16} /> {error}
+          </div>
         )}
-      </section>
 
-      <p className="hint">Nota: El SuperAdmin no puede editarse ni eliminarse.</p>
+        <section className="usuarios-card">
+          <h3><FiUsers size={16} /> Listado</h3>
+          {loading ? (
+            <div className="usuarios-loading"><FiLoader size={20} /> Cargando usuarios...</div>
+          ) : (
+            <div className="usuarios-table-container">
+              <table className="usuarios-table">
+                <thead>
+                  <tr>
+                    <th><FiUser size={12} /> Username</th>
+                    <th><FiMail size={12} /> Email</th>
+                    <th><FiShield size={12} /> Rol</th>
+                    <th><FiEdit3 size={12} /> Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuarios.map(u => (
+                    <tr key={u._id || u.id}>
+                      <td>
+                        {editingId === (u._id || u.id) ? (
+                          <input
+                            type="text"
+                            value={editForm.username}
+                            onChange={e => setEditForm({ ...editForm, username: e.target.value })}
+                          />
+                        ) : (
+                          <strong style={{ color: '#fff', fontWeight: 700 }}>{u.username}</strong>
+                        )}
+                      </td>
+                      <td>
+                        {editingId === (u._id || u.id) ? (
+                          <input
+                            type="email"
+                            placeholder="Email (opcional)"
+                            value={editForm.email}
+                            onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                          />
+                        ) : (
+                          u.email || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin email</span>
+                        )}
+                      </td>
+                      <td>
+                        {editingId === (u._id || u.id) ? (
+                          <select
+                            value={editForm.role}
+                            onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            {u.role === 'superadmin' && <option value="superadmin">SuperAdmin</option>}
+                          </select>
+                        ) : (
+                          <span className={`role-pill role-${u.role}`}>
+                            {u.role === 'superadmin' && <FiShield size={10} />}
+                            {u.role === 'admin' && <FiCheckCircle size={10} />}
+                            {u.role === 'user' && <FiUser size={10} />}
+                            {u.role}
+                          </span>
+                        )}
+                      </td>
+                      <td className="acciones">
+                        {editingId === (u._id || u.id) ? (
+                          <>
+                            <button className="btn save" onClick={() => handleUpdate(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>
+                              <FiSave size={12} /> Guardar
+                            </button>
+                            <button className="btn secondary" onClick={cancelEdit}>
+                              <FiX size={12} /> Cancelar
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button className="btn" onClick={() => startEdit(u)} disabled={protectedUsernames.has(u.username)}>
+                              <FiEdit3 size={12} /> Editar
+                            </button>
+                            <button className="btn danger" onClick={() => handleDelete(u._id || u.id)} disabled={protectedUsernames.has(u.username)}>
+                              <FiTrash2 size={12} /> Eliminar
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <p className="hint">
+          <FiAlertTriangle size={12} /> Nota: El SuperAdmin no puede editarse ni eliminarse.
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Swal from 'sweetalert2';
-import { FaMoneyBillWave, FaShoppingCart, FaBoxOpen } from 'react-icons/fa';
+import {
+  FiDollarSign, FiShoppingCart, FiBox, FiBarChart2,
+  FiTool, FiCheckCircle, FiClock, FiTrendingUp, FiX,
+  FiClipboard, FiCopy, FiFilter, FiCalendar, FiPieChart,
+  FiActivity, FiHash
+} from 'react-icons/fi';
 import './EstadisticasAdmin.css';
 import { api } from '../services/api';
 import { useRef } from 'react';
@@ -364,25 +369,25 @@ const EstadisticasServiciosView = ({
                 <div className="estdash-kpi-card kpi-revenue">
                     <div className="estdash-kpi-value">{formatCurrency(stats.totalRevenue)}</div>
                     <div className="estdash-kpi-label">Ingresos Totales (Servicios Entregados)</div>
-                    <span className="estdash-kpi-icon">💰</span>
+                    <span className="estdash-kpi-icon"><FiDollarSign size={48} /></span>
                 </div>
 
                 <div className="estdash-kpi-card kpi-active">
                     <div className="estdash-kpi-value">{stats.activeServicesCount}</div>
                     <div className="estdash-kpi-label">Equipos en Taller (Activos)</div>
-                    <span className="estdash-kpi-icon">🔧</span>
+                    <span className="estdash-kpi-icon"><FiTool size={48} /></span>
                 </div>
 
                 <div className="estdash-kpi-card kpi-delivered">
                     <div className="estdash-kpi-value">{stats.deliveredServicesCount}</div>
                     <div className="estdash-kpi-label">Total de Servicios Entregados</div>
-                    <span className="estdash-kpi-icon">✅</span>
+                    <span className="estdash-kpi-icon"><FiCheckCircle size={48} /></span>
                 </div>
 
                 <div className="estdash-kpi-card kpi-avgdays">
                     <div className="estdash-kpi-value">{stats.avgServiceDays} días</div>
                     <div className="estdash-kpi-label">Promedio de Días en Servicio</div>
-                    <span className="estdash-kpi-icon">⏳</span>
+                    <span className="estdash-kpi-icon"><FiClock size={48} /></span>
                 </div>
             </div>
 
@@ -515,7 +520,7 @@ const EstadisticasVentasView = ({
                 
                 {/* Tarjeta 1: Total Vendido */}
                 <div className="estdash-kpi-card kpi-sales-1">
-                    <FaMoneyBillWave className="estdash-kpi-icon sales-icon-1" />
+                    <span className="estdash-kpi-icon"><FiDollarSign size={48} /></span>
                     <div className="stat-info">
                         <div className="estdash-kpi-value">{formatCurrency(salesStats.totalVendido)}</div>
                         <div className="estdash-kpi-label">Total Recaudado (Ventas)</div>
@@ -524,7 +529,7 @@ const EstadisticasVentasView = ({
                 
                 {/* Tarjeta 2: Cantidad de Ventas */}
                 <div className="estdash-kpi-card kpi-sales-2">
-                    <FaShoppingCart className="estdash-kpi-icon sales-icon-2" />
+                    <span className="estdash-kpi-icon"><FiShoppingCart size={48} /></span>
                     <div className="stat-info">
                         <div className="estdash-kpi-value">{salesStats.cantidadVentas}</div>
                         <div className="estdash-kpi-label">Transacciones de Ventas</div>
@@ -533,7 +538,7 @@ const EstadisticasVentasView = ({
 
                 {/* Tarjeta 3: Producto Más Vendido */}
                 <div className="estdash-kpi-card kpi-sales-3">
-                    <FaBoxOpen className="estdash-kpi-icon sales-icon-3" />
+                    <span className="estdash-kpi-icon"><FiBox size={48} /></span>
                     <div className="stat-info">
                         <div className="estdash-kpi-producto">{salesStats.productoMasVendido}</div>
                         <div className="estdash-kpi-label">Producto Líder (Unidades)</div>
@@ -543,7 +548,7 @@ const EstadisticasVentasView = ({
                 <div className="estdash-kpi-card kpi-sales-4">
                     <div className="estdash-kpi-value">{salesStats.cantidadProductosVendidos}</div>
                     <div className="estdash-kpi-label">Total de Items Vendidos</div>
-                    <span className="estdash-kpi-icon">📦</span>
+                    <span className="estdash-kpi-icon"><FiClipboard size={48} /></span>
                 </div>
             </div>
             
@@ -754,26 +759,27 @@ function EstadisticasAdmin() {
 
     return (
         <div className="estdash-page" id="estdash-root">
-            <header className="estdash-header">
-                <h1 className="title-bold">📊 Panel de Estadísticas</h1>
-                <p>Resumen de rendimiento del taller y ventas de productos.</p>
-            </header>
+            <div className="estdash-container">
+                <header className="estdash-header">
+                    <h1><FiBarChart2 size={28} style={{ verticalAlign: 'middle', marginRight: 10 }} /> Panel de Estadísticas</h1>
+                    <p>Resumen de rendimiento del taller y ventas de productos.</p>
+                </header>
 
-            {/* --- NAVEGACIÓN DE PESTAÑAS (TABS) --- */}
-            <div className="estdash-tabs">
-                <button
-                    className={`estdash-tab-btn ${viewMode === 'servicios' ? 'is-active' : ''}`}
-                    onClick={() => setViewMode('servicios')}
-                >
-                    Estadísticas de Servicios
-                </button>
-                <button
-                    className={`estdash-tab-btn ${viewMode === 'ventas' ? 'is-active' : ''}`}
-                    onClick={() => setViewMode('ventas')}
-                >
-                    Estadísticas de Ventas
-                </button>
-            </div>
+                {/* --- NAVEGACIÓN DE PESTAÑAS (TABS) --- */}
+                <div className="estdash-tabs">
+                    <button
+                        className={`estdash-tab-btn ${viewMode === 'servicios' ? 'is-active' : ''}`}
+                        onClick={() => setViewMode('servicios')}
+                    >
+                        <FiActivity size={16} /> Estadísticas de Servicios
+                    </button>
+                    <button
+                        className={`estdash-tab-btn ${viewMode === 'ventas' ? 'is-active' : ''}`}
+                        onClick={() => setViewMode('ventas')}
+                    >
+                        <FiTrendingUp size={16} /> Estadísticas de Ventas
+                    </button>
+                </div>
             
             <div className="estdash-content">
                 {viewMode === 'servicios' && (
@@ -807,21 +813,22 @@ function EstadisticasAdmin() {
                 )}
             </div>
 
-            {/* --- MODAL DE DETALLE DE SERVICIOS --- */}
-            {selectedMonthData && (
-                <MonthlyServiceDetailModal
-                    data={selectedMonthData}
-                    onClose={() => setSelectedMonthData(null)}
-                />
-            )}
-            
-            {/* --- MODAL DE DETALLE DE VENTAS --- */}
-            {selectedMonthSalesData && (
-                <MonthlySalesDetailModal
-                    data={selectedMonthSalesData}
-                    onClose={() => setSelectedMonthSalesData(null)}
-                />
-            )}
+                {/* --- MODAL DE DETALLE DE SERVICIOS --- */}
+                {selectedMonthData && (
+                    <MonthlyServiceDetailModal
+                        data={selectedMonthData}
+                        onClose={() => setSelectedMonthData(null)}
+                    />
+                )}
+                
+                {/* --- MODAL DE DETALLE DE VENTAS --- */}
+                {selectedMonthSalesData && (
+                    <MonthlySalesDetailModal
+                        data={selectedMonthSalesData}
+                        onClose={() => setSelectedMonthSalesData(null)}
+                    />
+                )}
+            </div>
         </div>
     );
 }
@@ -918,7 +925,7 @@ const MonthlySalesDetailModal = ({ data, onClose }) => {
                                                         await navigator.clipboard.writeText(String(venta.id));
                                                         Swal.fire({ toast:true, position:'top-end', icon:'success', title:'ID copiado', showConfirmButton:false, timer:1400 });
                                                     } catch {}
-                                                }}>📋</span>
+                                                }}><FiCopy size={14} /></span>
                                             <span className="service-date"> ({new Date(venta.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
                                         <td className="col-usuario">{venta.username}</td>
