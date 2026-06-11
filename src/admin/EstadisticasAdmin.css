@@ -179,12 +179,19 @@
 .estdash-page .legend-item:hover { background: rgba(56,189,248,0.15) !important; color: var(--text-color) !important; }
 
 /* Modales: fondos opacos oscuros */
-.estdash-page .estdash-modal-overlay { backdrop-filter: none !important; }
+.estdash-page .estdash-modal-overlay { 
+    backdrop-filter: none !important;
+    z-index: 9999 !important;
+}
 .estdash-page .estdash-modal {
     background: var(--card-bg) !important;
     backdrop-filter: none !important;
     border: 1px solid rgba(255,255,255,0.06) !important;
     box-shadow: var(--shadow-soft);
+    opacity: 1 !important;
+    transform: scale(1) translateY(0) !important;
+    position: relative !important;
+    z-index: 10000 !important;
 }
 .estdash-page .estdash-modal-header h2 {
     background: none !important;
@@ -651,6 +658,7 @@ body[data-role="superadmin"] #estdash-root {
     font-size: 0.8em;
     color: var(--text-muted);
     text-align: center;
+    pointer-events: none;
 }
 
 .estdash-page .bar-val {
@@ -668,6 +676,7 @@ body[data-role="superadmin"] #estdash-root {
     opacity: 0;
     transition: all 0.3s var(--transition-smooth);
     text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    pointer-events: none;
 }
 
 .estdash-page .estdash-bar:hover .bar-val {

@@ -1,39 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import Swal from 'sweetalert2';
 import '../pages/ComprobanteVenta.css';
 
 function ComprobanteVenta() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [venta, setVenta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   useEffect(() => {
     const fetchVenta = async () => {
       try {
         const v = await api.get(`/ventas/${id}`);
-        
-        // Permitir si es dueño o si es admin/superadmin
-        const ventaUserId = v.usuario?._id || v.usuario?.id || v.usuario;
-        const currentUserId = user?._id || user?.id;
-        
-        if (user && (user.role === 'admin' || user.role === 'superadmin' || String(currentUserId) === String(ventaUserId))) {
-          setVenta(v);
-        } else {
-          setForbidden(true);
-        }
+        setVenta(v);
       } catch (err) {
         console.error('Error cargando venta:', err);
-        setVenta(null);
+        if (err.status === 403) {
+          setForbidden(true);
+        } else {
+          setVenta(null);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVenta();
+    if (user) {
+      fetchVenta();
+    } else {
+      setLoading(false);
+    }
   }, [id, user]);
 
   if (loading) return <div>Cargando comprobante...</div>;
@@ -48,6 +50,53 @@ function ComprobanteVenta() {
 
   const totalCalc = (items) => {
     return (items || []).reduce((s, it) => s + ((it.subtotal != null) ? it.subtotal : ((it.precioUnitario || 0) * (it.cantidad || 0))), 0);
+  };
+
+  const handleDescargarPDF = async () => {
+    try {
+      setDownloadingPDF(true);
+      
+      const token = localStorage.getItem('token');
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const url = `${apiBase}/ventas/comprobante/${id}/pdf`;
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined
+        }
+      });
+      
+      if (!resp.ok) {
+        throw new Error('No se pudo descargar el comprobante PDF');
+      }
+      
+      const blob = await resp.blob();
+      const enlace = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      enlace.href = objectUrl;
+      enlace.download = `comprobante-${id}.pdf`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      URL.revokeObjectURL(objectUrl);
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Descarga exitosa!',
+        text: 'El comprobante PDF se ha descargado correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (e) {
+      console.error(e);
+      Swal.fire('Error', e.message || 'No se pudo descargar el PDF.', 'error');
+    } finally {
+      setDownloadingPDF(false);
+    }
+  };
+
+  const handleVolver = () => {
+    navigate('/miscomprasmodal');
   };
 
   return (
@@ -74,7 +123,7 @@ function ComprobanteVenta() {
             <p><strong>Usuario:</strong> {venta.username}</p>
             {venta.nombreCliente && <p><strong>Nombre:</strong> {venta.nombreCliente}</p>}
             {venta.direccion && <p><strong>Dirección:</strong> {venta.direccion}</p>}
-            <p><strong>Método de pago:</strong> {venta.metodoPago || '—'}</p>
+            <p><strong>Método de pago: </strong>  {venta.metodoPago || '—'}</p>
           </div>
 
           <div className="productos-table-wrap">
@@ -112,8 +161,22 @@ function ComprobanteVenta() {
         <footer className="comprobante-footer">
           <div className="footer-left">Gracias por tu compra.</div>
           <div className="footer-actions">
+            <button className="btn-volver" onClick={handleVolver}>← Volver</button>
             <button className="btn-print" onClick={() => window.print()}>Imprimir</button>
-            <button className="btn-download" onClick={() => alert('Descarga no implementada - usar imprimir')}>Descargar</button>
+            <button 
+              className="btn-download" 
+              onClick={handleDescargarPDF}
+              disabled={downloadingPDF}
+            >
+              {downloadingPDF ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Descargando...
+                </>
+              ) : (
+                'Descargar PDF'
+              )}
+            </button>
           </div>
         </footer>
       </div>

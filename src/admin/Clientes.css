@@ -1,29 +1,40 @@
+/* Modern tech theme: gradients, glass surfaces, soft shadows */
+:root {
+    --color-primary: #2563eb;
+    --color-primary-600: #1d4ed8;
+    --color-secondary: #06b6d4;
+    --glass-bg: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.12);
+    --shadow-soft: 0 8px 24px rgba(2, 6, 23, 0.3);
+    --shadow-strong: 0 20px 40px rgba(2, 6, 23, 0.45);
+}
+
 /* 1. SECCIÓN PRINCIPAL (Full Width) */
 .clientes-full {
-    width: 100vw;
-    min-height: 100vh;
-    background-color: #faf8fc; /* Fondo muy claro para contraste */
-    padding: 60px 0;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+        width: 100vw;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0b1220, #0d1a2f 50%, #0b2747);
+        padding: 60px 0;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        color: #e5e7eb;
 }
 
 /* 2. CONTENEDOR INTERNO CENTRADO */
 .clientes-container {
     width: 100%;
-    max-width: 1280px;
+    max-width: 1000px;
     padding: 0 20px;
     box-sizing: border-box;
-    color: #1e293b;
 }
 
 /* 3. TÍTULO */
 .clientes-container h2 {
     text-align: center;
-    margin-bottom: 4px; 
-    color: #312e81; /* Azul/Púrpura Oscuro */
+    margin-bottom: 16px;
+    color: #e5e7eb;
     font-size: 2rem;
     font-weight: 800;
     letter-spacing: -0.5px;
@@ -31,79 +42,67 @@
 
 /* 4. FORMULARIO DE REGISTRO (Inputs apilados) */
 .cliente-form {
-    max-width: 500px; 
+    max-width: 640px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 35px;
-
+    margin-bottom: 28px;
     display: grid;
-    grid-template-columns: 1fr; 
-    
-    gap: 20px;
-    background: #3e9ca8;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(49, 46, 129, 0.3);
+    grid-template-columns: 1fr;
+    gap: 18px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
 }
 
 /* 5. INPUTS DEL FORMULARIO */
 .cliente-form input {
-    padding: 13px;
-    border: none;
-    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     outline: none;
     font-size: 1rem;
-    color: #1e293b;
-    transition: box-shadow 0.3s ease;
+    color: #e5e7eb;
+    background: rgba(255,255,255,0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-.cliente-form input:focus {
-    box-shadow: 0 0 0 3px #0f172a; /* Cambio de color para un estilo más limpio */
-}
+.cliente-form input::placeholder { color: #9ca3af; }
+.cliente-form input:focus { border-color: rgba(255,255,255,0.28); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25); }
 
 /* 6. BOTÓN DE ENVÍO (Submit) */
 .btn-primary {
-    grid-column: span 1; 
-    max-width: none; 
+    grid-column: span 1;
     justify-self: stretch;
-    
-    padding: 14px 20px;
-    background: #0f172a;
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.1rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s;
-}
-
-.btn-primary:hover {
-    background-color: #1e293b;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* 7. BOTÓN DE TOGGLE (Mostrar/Ocultar Lista) */
-.btn-toggle {
-    display: block;
-    margin: 30px auto;
-    padding: 14px 25px;
-    background: #4f46e5;
+    padding: 12px 18px;
+    background: linear-gradient(180deg, var(--color-primary), var(--color-primary-600));
     color: #fff;
     font-weight: 700;
     font-size: 1rem;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    transition: filter 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 10px 18px rgba(37,99,235,0.35);
 }
+.btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
-.btn-toggle:hover {
-    background: #3730a3;
-    box-shadow: 0 6px 20px rgba(55, 48, 163, 0.5);
+/* 7. BOTÓN DE TOGGLE (Mostrar/Ocultar Lista) */
+.btn-toggle {
+    display: block;
+    margin: 22px auto 0;
+    padding: 12px 22px;
+    background: var(--glass-bg);
+    color: #e5e7eb;
+    border: 1px solid var(--glass-border);
+    font-weight: 700;
+    font-size: 0.98rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+    box-shadow: var(--shadow-soft);
 }
+.btn-toggle:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.28); }
 
 /* 8. ANIMACIÓN Y CONTENEDOR DE LA LISTA */
 .clientes-lista-wrapper {
@@ -112,24 +111,19 @@
     transition: max-height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
     opacity: 0;
 }
-
-.clientes-lista-wrapper.show {
-    max-height: 3000px;
-    opacity: 1;
-}
+.clientes-lista-wrapper.show { max-height: 3000px; opacity: 1; }
 
 /* 9. LISTA DE CLIENTES (Fondo de la lista) - AJUSTE CLAVE PARA COMPACTAR */
 .clientes-lista {
-    margin-top: 25px;
-    padding: 25px;
-    background: #ffffff;
+    margin-top: 22px;
+    padding: 20px;
+    background: var(--glass-bg);
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    
-    max-width: 800px; 
-    margin-left: auto; 
-    margin-right: auto; 
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* 10. BUSCADOR - Ajustado a nuevo ancho */
@@ -142,46 +136,29 @@
     padding: 12px 15px;
     width: 90%;
     max-width: 450px;
-    border-radius: 10px;
-    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
     outline: none;
-    transition: border-color 0.3s;
+    color: #e5e7eb;
+    background: rgba(255,255,255,0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-.buscador input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f6;
-}
+.buscador input::placeholder { color: #9ca3af; }
+.buscador input:focus { border-color: rgba(255,255,255,0.28); box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25); }
 
 /* 11. TARJETAS DE CLIENTES */
 .cliente-card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: inset 0 0 0 1px #e2e8f0, 0 2px 8px rgba(0, 0, 0, 0.05); 
-    margin-bottom: 18px;
-    border-left: 5px solid #6366f1;
-    transition: transform 0.2s;
+    background: radial-gradient(120% 120% at 0% 100%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.cliente-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.cliente-card h4 {
-    margin: 0 0 10px 0;
-    color: #4f46e5;
-    font-size: 1.25rem;
-    border-bottom: 1px dashed #e2e8f0;
-    padding-bottom: 5px;
-}
-
-.cliente-card p {
-    margin: 5px 0;
-    color: #475569;
-    font-size: 0.95rem;
-}
+.cliente-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-strong); }
+.cliente-card h4 { margin: 0 0 8px 0; color: #93c5fd; font-size: 1.2rem; border-bottom: 1px dashed var(--glass-border); padding-bottom: 6px; }
+.cliente-card p { margin: 5px 0; color: #cbd5e1; font-size: 0.95rem; }
 
 /* 12. ACCIONES (Botones de editar/eliminar) */
 .acciones {
@@ -203,35 +180,12 @@
     transition: background-color 0.3s ease, transform 0.1s;
 }
 
-.btn-edit {
-    background: #fbbf24;
-    color: #1e293b;
-}
+.btn-edit { background: var(--glass-bg); color: #fde68a; border: 1px solid var(--glass-border); }
+.btn-edit:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.28); }
+.btn-delete { background: linear-gradient(180deg, #ef4444, #dc2626); color: #fff; }
+.btn-delete:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
-.btn-edit:hover {
-    background: #f59e0b;
-    transform: translateY(-1px);
-}
-
-.btn-delete {
-    background: #ef4444;
-    color: #fff;
-}
-
-.btn-delete:hover {
-    background: #dc2626;
-    transform: translateY(-1px);
-}
-
-.no-clientes {
-    text-align: center;
-    color: #64748b;
-    font-style: italic;
-    padding: 30px;
-    font-size: 1.1rem;
-    border: 1px dashed #cbd5e1;
-    border-radius: 12px;
-}
+.no-clientes { text-align: center; color: #94a3b8; font-style: italic; padding: 22px; font-size: 1.05rem; border: 1px dashed var(--glass-border); border-radius: 12px; }
 
 /* --- */
 /* 14. ESTILOS PARA HISTORIAL DE SERVICIOS */
@@ -245,52 +199,23 @@
 .btn-historial {
     width: 100%;
     padding: 10px 15px;
-    background: #eef2ff; /* Color de fondo suave */
-    color: #4f46e5;
-    border: 1px solid #c7d2fe;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s;
-}
-
-.btn-historial:hover,
-.btn-historial.active {
-    background: #ddd6fe; /* Un poco más oscuro al hacer hover o si está activo */
-    color: #312e81;
-}
-
-.servicios-historial-section {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f8fafc; /* Fondo para separar el historial */
-    border: 1px solid #e2e8f0;
+    background: var(--glass-bg);
+    color: #93c5fd;
+    border: 1px solid var(--glass-border);
     border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.15s ease, border-color 0.2s ease;
 }
+.btn-historial:hover, .btn-historial.active { transform: translateY(-1px); border-color: rgba(255,255,255,0.28); }
 
-.historial-titulo {
-    font-size: 1.1rem;
-    color: #312e81;
-    margin-top: 0;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #e0e7ff;
-}
+.servicios-historial-section { margin-top: 20px; padding: 15px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; }
 
-.servicio-item {
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #e0e7ff;
-    border-radius: 8px;
-    background-color: #ffffff;
-    border-left: 4px solid #a5b4fc; /* Barra lateral para distinguir cada servicio */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+.historial-titulo { font-size: 1.1rem; color: #e5e7eb; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid var(--glass-border); }
 
-.servicio-item p {
-    margin: 3px 0;
-    font-size: 0.9rem;
-}
+.servicio-item { padding: 12px; margin-bottom: 10px; border: 1px solid var(--glass-border); border-radius: 12px; background: rgba(255,255,255,0.06); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+.servicio-item p { margin: 3px 0; font-size: 0.9rem; color: #cbd5e1; }
 
 .no-servicios {
     text-align: center;
@@ -346,7 +271,7 @@
 }
 
 /* --- */
-/* 15. ESTILOS PARA EL MODAL DE SERVICIOS */
+/* 15. ESTILOS PARA EL MODAL DE SERVICIOS (Glass/blur) */
 /* --- */
 
 /* Fondo oscurecido que cubre toda la pantalla */
@@ -356,25 +281,26 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: radial-gradient(120% 120% at 0% 100%, rgba(2,6,23,0.65) 0%, rgba(2,6,23,0.75) 100%);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Asegura que esté por encima de todo */
-    backdrop-filter: blur(3px);
+    z-index: 1000;
+    backdrop-filter: blur(6px);
 }
 
 /* Contenido del modal */
 .modal-content {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 15px;
-    max-width: 90%;
-    width: 600px; /* Ancho cómodo para el historial */
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+    padding: 24px;
+    border-radius: 18px;
+    max-width: 92%;
+    width: 640px;
     max-height: 80vh;
-    overflow-y: auto; /* Permite scroll si la lista es larga */
+    overflow-y: auto;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-strong);
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -389,42 +315,14 @@
     }
 }
 
-.modal-titulo {
-    color: #312e81;
-    border-bottom: 2px solid #e0e7ff;
-    padding-bottom: 10px;
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-}
+.modal-titulo { color: #e5e7eb; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin: 0 0 16px 0; font-size: 1.4rem; }
 
 /* Botón de cerrar (X) */
-.modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: #475569;
-    transition: color 0.2s;
-}
-
-.modal-close-btn:hover {
-    color: #ef4444;
-}
+.modal-close-btn { position: absolute; top: 12px; right: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); font-size: 1.6rem; cursor: pointer; color: #e5e7eb; border-radius: 10px; padding: 2px 10px; transition: transform 0.15s ease, border-color 0.2s ease; }
+.modal-close-btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.28); }
 
 /* Estilo para cada servicio dentro del modal */
-.servicio-item-modal {
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #e0e7ff;
-    border-radius: 8px;
-    background-color: #f8fafc;
-    border-left: 4px solid #6366f1;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
+.servicio-item-modal { padding: 15px; margin-bottom: 15px; border: 1px solid var(--glass-border); border-radius: 12px; background: rgba(255,255,255,0.06); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
 
 .servicio-item-modal p {
     margin: 4px 0;
@@ -441,21 +339,8 @@
 }
 
 /* Botón de detalle dentro del servicio (futuro link) */
-.btn-ver-detalle-servicio {
-    padding: 8px 15px;
-    margin-top: 10px;
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-}
-
-.btn-ver-detalle-servicio:hover {
-    background-color: #2563eb;
-}
+.btn-ver-detalle-servicio { padding: 8px 14px; margin-top: 10px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-600)); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 0.9rem; transition: filter 0.15s ease, transform 0.15s ease; box-shadow: 0 8px 14px rgba(37,99,235,0.35); }
+.btn-ver-detalle-servicio:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
 /* --- */
 /* (Revisa si eliminaste la sección 14 original, ya que ya no se necesita el estilo de lista dentro de la tarjeta) */

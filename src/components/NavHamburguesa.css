@@ -1,217 +1,281 @@
-/* === NavHamburguesa.css (Estilos Consolidados y Corregidos) === */
-
-/* El botón hamburguesa se alinea con el nav y nunca queda fuera */
 .nav-hamburguesa-btn {
     display: none;
-    background: #145a6a;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(0, 183, 255, 0.35);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 183, 255, 0.16), rgba(191, 50, 255, 0.18));
     color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 0.7rem;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+    box-shadow: 0 0 18px rgba(0, 183, 255, 0.16), 0 10px 24px rgba(0, 0, 0, 0.24);
     cursor: pointer;
-    transition: background 0.2s, transform 0.3s;
-    position: relative;
-    top: 0;
-    right: 0;
+    transition: transform 180ms ease, box-shadow 180ms ease;
     z-index: 1200;
 }
 
-@media (max-width: 900px) {
-    .nav-hamburguesa-btn {
-        display: block;
-    }
+.nav-hamburguesa-btn.active {
+    transform: rotate(90deg) scale(1.05);
+    box-shadow: 0 0 24px rgba(191, 50, 255, 0.38);
 }
 
-@media (min-width: 901px) {
-    .nav-hamburguesa-btn {
-        display: none !important;
-    }
+.nav-hamburguesa-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(86vw, 360px);
+    height: 100vh;
+    z-index: 1300;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(circle at 18% 8%, rgba(0, 183, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 84% 20%, rgba(191, 50, 255, 0.2), transparent 36%),
+        linear-gradient(180deg, rgba(2, 6, 17, 0.98), rgba(5, 10, 25, 0.96));
+    backdrop-filter: blur(22px) saturate(160%);
+    border-right: 1px solid rgba(94, 164, 255, 0.18);
+    box-shadow: 20px 0 55px rgba(0, 0, 0, 0.42);
+    transform: translateX(-102%);
+    transition: transform 240ms ease, opacity 240ms ease;
+    opacity: 0;
+    pointer-events: none;
+    overflow-y: auto;
 }
 
-/* El menú hamburguesa se integra visualmente con el nav */
-@media (max-width: 900px) {
-    .nav-hamburguesa-menu {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        max-width: 320px;
-        height: 100vh;
-        background: #145a6a;
-        color: #fff;
-        box-shadow: 4px 0 16px rgba(44,62,80,0.18);
-        z-index: 1300;
-        transform: translateY(-40px) scaleY(0.8);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.35s cubic-bezier(.4,1.4,.6,1), opacity 0.3s;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0 16px 16px 0;
-        overflow-y: auto;
-        margin-top: 0;
-    }
-    .nav-hamburguesa-menu.open {
-        transform: translateY(0) scaleY(1);
-        opacity: 1;
-        pointer-events: auto;
-    }
-    .nav-hamburguesa-btn {
-        transition: transform 0.3s;
-    }
-    .nav-hamburguesa-btn.active {
-        transform: rotate(90deg) scale(1.1);
-    }
-}
-@media (min-width: 901px) {
-    .nav-hamburguesa-menu {
-        display: none !important;
-    }
+.nav-hamburguesa-menu.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .nav-hamburguesa-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 1.5rem 0.7rem 1.5rem;
-    font-size: 1.3rem;
-    font-weight: 700;
-    border-bottom: 1px solid #1bffff44;
+    padding: 1.15rem 1rem 1rem;
+    border-bottom: 1px solid rgba(94, 164, 255, 0.14);
 }
 
-/* Lista del menú hamburguesa */
+.nav-hamburguesa-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-hamburguesa-brand img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(0, 183, 255, 0.82)) drop-shadow(0 0 16px rgba(191, 50, 255, 0.62));
+}
+
+.nav-hamburguesa-brand strong {
+    display: block;
+    color: #fff;
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+}
+
+.nav-hamburguesa-brand span {
+    display: block;
+    color: rgba(232, 241, 255, 0.7);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.nav-hamburguesa-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+}
+
 .nav-hamburguesa-list {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0.9rem 0.8rem 1rem;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    width: 100%;
+    gap: 0.55rem;
 }
 
-/* Estilo BASE para enlaces normales y el botón de logout */
 .nav-hamburguesa-link {
     display: flex;
     align-items: center;
-    gap: 1.1rem; /* ESTILO CORRECTO: 1.1rem */
-    font-size: 1.15rem; 
-    color: #fff;
-    text-decoration: none;
-    padding: 0.7rem 0.7rem; /* ESTILO CORRECTO: 1rem 1.5rem */
-    border-bottom: 1px solid #1bffff44;
-    transition: background 0.2s, color 0.2s;
+    gap: 0.9rem;
     width: 100%;
+    min-height: 52px;
     box-sizing: border-box;
-    /* Estilos para que el <button> de logout se vea como un <Link> */
-    background: none; 
-    border: none;
-    cursor: pointer;
+    padding: 0 1rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(248, 251, 255, 0.88);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 700;
     text-align: left;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.nav-hamburguesa-link:hover {
-    background: rgba(255, 255, 255, 0.1);
+.nav-hamburguesa-link:hover,
+.nav-hamburguesa-link.active {
+    transform: translateX(4px);
     color: #fff;
+    background: linear-gradient(90deg, rgba(0, 183, 255, 0.16), rgba(191, 50, 255, 0.24));
+    border-color: rgba(191, 50, 255, 0.52);
+    box-shadow: 0 0 20px rgba(191, 50, 255, 0.2);
 }
 
-.nav-hamburguesa-icon {
-    font-size: 1.3rem;
-    display: flex;
+.nav-hamburguesa-icon,
+.menu-item.logout {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: currentColor;
+    flex-shrink: 0;
 }
 
 .nav-hamburguesa-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(44,62,80,0.18);
+    inset: 0;
     z-index: 1250;
+    background: rgba(2, 7, 18, 0.62);
+    backdrop-filter: blur(5px);
 }
 
-/* Focus para accesibilidad (aplica a links y buttons) */
-/* Este bloque usa una selectividad alta, por eso se mantiene */
 .nav-hamburguesa-list li a:focus,
 .nav-hamburguesa-list li button:focus {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 183, 255, 0.45);
 }
 
-
-/* ####################################################### */
-/* --- ESTILOS PARA EL SEGUIMIENTO DESTACADO (CTA) --- */
-/* ####################################################### */
-
-/* Contenedor del elemento dentro del UL: Le da el espacio vertical */
 .nav-hamburguesa-tracking-item {
-    padding: 10px 0;
-    margin: 15px 0; 
-    border-bottom: none !important; 
+    padding: 0.25rem 0;
+    margin: 0.25rem 0;
 }
 
-/* El Link real: el botón destacado */
 .nav-hamburguesa-tracking-cta {
     display: flex;
     align-items: center;
-    gap: 1.1rem; 
-    padding: 12px 15px; 
-    margin: 0 15px; 
+    gap: 0.9rem;
+    margin: 0;
+    padding: 1rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0, 183, 255, 0.2), rgba(191, 50, 255, 0.2));
+    border: 1px solid rgba(0, 183, 255, 0.28);
+    color: #fff;
     text-decoration: none;
-    width: auto; 
-    
-    /* Colores y diseño llamativo y contrastante */
-    background-color: #4CAF50; 
-    border: 1px solid #388E3C; 
-    border-radius: 8px;
-    
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    
-    color: white; 
-    transition: all 0.2s ease;
+    box-shadow: 0 0 24px rgba(0, 183, 255, 0.15);
 }
 
-.nav-hamburguesa-tracking-cta:hover {
-    background-color: #388E3C; 
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px); 
-    color: white; 
+.nav-hamburguesa-tracking-cta:hover,
+.nav-hamburguesa-tracking-cta.active {
+    transform: translateX(4px);
+    border-color: rgba(191, 50, 255, 0.55);
 }
 
-/* Icono (FaTools) */
 .nav-hamburguesa-tracking-cta .tracking-icon {
-    font-size: 1.3rem;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    margin-right: 0; 
-    color: #FFEB3B; 
-    flex-shrink: 0; 
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #06101f;
+    background: linear-gradient(135deg, #00b7ff, #bf32ff);
+    flex-shrink: 0;
 }
 
-/* Contenedor del Título y Subtítulo */
 .nav-hamburguesa-tracking-cta .tracking-text-group {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    text-align: left;
-    min-width: 0; 
+    min-width: 0;
 }
 
 .nav-hamburguesa-tracking-cta .tracking-title {
-    font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
+    font-weight: 900;
     line-height: 1.2;
-    color: white; 
-    white-space: nowrap; 
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
 }
 
 .nav-hamburguesa-tracking-cta .tracking-subtitle {
-    font-size: 0.75rem;
-    color: #E0E0E0; 
-    line-height: 1.2;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
 }
 
+.nav-hamburguesa-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0.8rem 1rem;
+    padding: 12px;
+    border: 1px solid rgba(94, 164, 255, 0.18);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.035);
+}
 
+.nav-hamburguesa-profile > span {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(232, 241, 255, 0.22);
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 850;
+}
+
+.nav-hamburguesa-profile strong,
+.nav-hamburguesa-profile small {
+    display: block;
+}
+
+.nav-hamburguesa-profile strong {
+    max-width: 210px;
+    overflow: hidden;
+    color: #fff;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nav-hamburguesa-profile small {
+    color: rgba(232, 241, 255, 0.65);
+}
+
+@media (max-width: 900px) {
+    .nav-hamburguesa-btn {
+        display: inline-flex;
+    }
+}
+
+@media (min-width: 901px) {
+    .nav-hamburguesa-menu {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-hamburguesa-btn,
+    .nav-hamburguesa-menu,
+    .nav-hamburguesa-link,
+    .nav-hamburguesa-tracking-cta {
+        transition: none !important;
+    }
+}

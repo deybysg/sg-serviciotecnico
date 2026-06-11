@@ -60,7 +60,12 @@ function Carrito({ isOpen, onClose }) {
     const [showMPInfo, setShowMPInfo] = useState(false);
 
     // 💡 Obtiene el username o 'Invitado' si no hay usuario logueado
-    const displayUsername = user?.username || 'Invitado'; 
+    const displayUsername = user?.username || 'Invitado';
+
+    // Función para formatear números con puntos de miles
+    const formatNumber = (num) => {
+        return new Intl.NumberFormat('es-AR').format(num);
+    }; 
 
     if (!isOpen) {
         return null;
@@ -68,6 +73,11 @@ function Carrito({ isOpen, onClose }) {
 
     // 💳 FUNCIÓN MERCADO PAGO - API de pago real
     const handleMercadoPago = async () => {
+        // Verificar expiración del carrito
+        if (useCartStore.getState().checkExpiration()) {
+            return;
+        }
+
         // 1. Verificación de sesión
         if (!user || user.role === 'Invitado') {
             Swal.fire({
@@ -95,23 +105,63 @@ function Carrito({ isOpen, onClose }) {
             return;
         }
 
-        // TODO: Implementar integración con Mercado Pago API
-        Swal.fire({
-            icon: 'info',
-            title: 'Mercado Pago',
-            text: 'La integración con Mercado Pago estará disponible próximamente.',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000
+        // 2. Solicitar email de confirmación
+        const { value: email } = await Swal.fire({
+            title: 'Confirmar email',
+            input: 'email',
+            inputLabel: 'Ingresa tu email para recibir el comprobante',
+            inputPlaceholder: 'tu-email@ejemplo.com',
+            inputValue: user.email || '',
+            showCancelButton: true,
+            confirmButtonText: 'Continuar al pago',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Debes ingresar un email';
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    return 'Email inválido';
+                }
+            }
         });
-        
-        // Ejemplo de flujo futuro:
-        // const preference = await api.post('/mercadopago/create-preference', {
-        //     items: cartItems,
-        //     total: totalAmount
-        // });
-        // window.location.href = preference.init_point;
+
+        if (!email) return;
+
+        try {
+            // 3. Mostrar loading
+            Swal.fire({
+                title: 'Preparando pago...',
+                text: 'Redirigiendo a Mercado Pago',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // 4. Crear preferencia de pago
+            const response = await api.post('/mercadopago/create-preference', {
+                items: cartItems,
+                email: email,
+                userId: user._id || user.id,
+                username: user.username
+            });
+
+            // 5. Redirigir a Mercado Pago
+            window.location.href = response.initPoint;
+
+        } catch (error) {
+            console.error('Error creando preferencia:', error);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo iniciar el pago. Intenta nuevamente.',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+        }
     };
 
     // 🚨 FUNCIÓN handleCheckout MODIFICADA PARA SIMULAR COMPRA 🚨
@@ -178,6 +228,9 @@ function Carrito({ isOpen, onClose }) {
                     // 4. Vaciar el carrito después de la simulación y registro exitoso
                     // (updateStockOnPurchase ya lo vacía)
                     
+                    // Disparar evento para que Productos recargue
+                    window.dispatchEvent(new Event('purchaseCompleted'));
+                    
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -241,7 +294,11 @@ function Carrito({ isOpen, onClose }) {
                         <div className="carrito-left">
                             <div className="left-header">
                                 <h3 className="section-title">Mi carrito</h3>
-                                <button onClick={clearCart} className="btn-clear-top" disabled={totalItems === 0}>
+                                <button 
+                                    onClick={clearCart} 
+                                    className="btn-clear-top" 
+                                    disabled={totalItems === 0}
+                                >
                                     🗑️ Vaciar carrito
                                 </button>
                             </div>
@@ -257,7 +314,7 @@ function Carrito({ isOpen, onClose }) {
                                         </div>
                                         <div className="item-details">
                                             <h4 className="item-name">{item.nombre}</h4>
-                                            <p className="item-price">${item.precio.toFixed(2)}</p>
+                                            <p className="item-price">${formatNumber(item.precio)}</p>
                                         </div>
                                         <div className="item-controls">
                                             <div className="item-quantity-control">
@@ -280,7 +337,7 @@ function Carrito({ isOpen, onClose }) {
                                             </div>
                                         </div>
                                         <div className="item-total">
-                                            <p className="item-subtotal">${(item.precio * item.cantidad).toFixed(2)}</p>
+                                            <p className="item-subtotal">${formatNumber(item.precio * item.cantidad)}</p>
                                             <button 
                                                 onClick={() => removeItemTotally(item.id)} 
                                                 className="item-remove-btn"
@@ -308,7 +365,7 @@ function Carrito({ isOpen, onClose }) {
                             <div className="summary-details">
                                 <div className="summary-row">
                                     <span className="summary-label">Subtotal</span>
-                                    <span className="summary-value">${totalAmount.toFixed(2)}</span>
+                                    <span className="summary-value">${formatNumber(totalAmount)}</span>
                                 </div>
                                 <div className="summary-row">
                                     <span className="summary-label">Envío</span>
@@ -317,7 +374,7 @@ function Carrito({ isOpen, onClose }) {
                                 <div className="summary-divider"></div>
                                 <div className="summary-row summary-total">
                                     <span className="summary-label">Total</span>
-                                    <span className="summary-value">${totalAmount.toFixed(2)}</span>
+                                    <span className="summary-value">${formatNumber(totalAmount)}</span>
                                 </div>
 
                                 {/* Acordeón de Mercado Pago */}
@@ -386,21 +443,21 @@ function Carrito({ isOpen, onClose }) {
                                     className="btn-checkout btn-primary" 
                                     disabled={totalItems === 0}
                                 >
-                                    Finalizar compra
+                                    💳 Pagar con Mercado Pago
                                 </button>
                                 
-                                {/* <div className="payment-divider">
+                                <div className="payment-divider">
                                     <span>o</span>
-                                </div> */}
+                                </div>
                                 
-                                {/* Botón de Simulación - PUEDES ELIMINAR ESTO */}
-                                {/* <button 
+                                {/* Botón de Simulación */}
+                                <button 
                                     onClick={handleCheckout} 
                                     className="btn-checkout btn-simulate" 
                                     disabled={totalItems === 0}
                                 >
                                     🧪 Simular Compra (Test)
-                                </button> */}
+                                </button>
                                 
                                 <div className="payment-info">
                                     <p className="secure-payment">🔒 Pago seguro</p>

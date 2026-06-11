@@ -71,10 +71,10 @@ const HistorialAdmin = () => {
                         clienteId: s.clienteId || (s.cliente && (s.cliente._id || s.cliente.id)) || null
                     }));
 
-                    // Solo los entregados con fecha de salida
-                    const historial = serviciosData.filter(
-                        (s) => s.estado === "entregado" && s.fechaSalida
-                    );
+                    // Solo los entregados con fecha de salida, ordenados por fecha más reciente
+                    const historial = serviciosData
+                        .filter((s) => s.estado === "entregado" && s.fechaSalida)
+                        .sort((a, b) => new Date(b.fechaSalida) - new Date(a.fechaSalida));
 
                     setServiciosEntregados(historial);
                     setClientes(clientesData);
@@ -120,14 +120,16 @@ const HistorialAdmin = () => {
                 }))
             };
         } else {
-            // MODO CLIENTES: Agrupa por cliente al buscar (vista resumen)
-            const clientesMap = new Map();
-
             const filteredServices = baseServicios.filter((s) => {
                 const clienteNombre = getClienteName(s.clienteId, clientes).toLowerCase();
                 const fullServiceId = s.id ? String(s.id) : "";
                 const serviceIdLower = fullServiceId.toLowerCase();
                 const serviceShortLower = shortId(fullServiceId, 6).toLowerCase();
+                
+                // Número de servicio formateado (e.g., "102")
+                const servicioNum = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+                    ? String(s.servicioNumero) 
+                    : '';
 
                 const clienteFullId = s.clienteId ? String(s.clienteId) : "";
                 const clienteIdLower = clienteFullId.toLowerCase();
@@ -138,6 +140,8 @@ const HistorialAdmin = () => {
                 return (
                     // Por nombre de cliente
                     clienteNombre.includes(q) ||
+                    // Por número de servicio (102, 103, etc.)
+                    (servicioNum && servicioNum.includes(q)) ||
                     // Por ID de servicio
                     serviceIdLower.includes(q) ||
                     serviceShortLower.includes(q) ||
@@ -148,6 +152,37 @@ const HistorialAdmin = () => {
                     (q.length <= 6 && clienteIdLower.endsWith(q))
                 );
             });
+
+            // Detectar si la búsqueda es por número/ID de servicio
+            const q = query.replace(/[#\s]/g, "").toLowerCase();
+            const esBusquedaPorServicio = filteredServices.some((s) => {
+                const servicioNum = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+                    ? String(s.servicioNumero).toLowerCase() 
+                    : '';
+                const fullServiceId = s.id ? String(s.id).toLowerCase() : "";
+                const serviceShortLower = shortId(String(s.id || ''), 6).toLowerCase();
+                
+                return (
+                    (servicioNum && servicioNum === q) ||
+                    fullServiceId.includes(q) ||
+                    serviceShortLower === q ||
+                    fullServiceId.endsWith(q)
+                );
+            });
+
+            // Si busca por servicio, mostrar vista de servicios individuales
+            if (esBusquedaPorServicio) {
+                return {
+                    mode: 'servicios',
+                    data: filteredServices.map(s => ({
+                        servicio: s,
+                        clienteNombre: getClienteName(s.clienteId, clientes)
+                    }))
+                };
+            }
+
+            // MODO CLIENTES: Agrupa por cliente al buscar por nombre de cliente
+            const clientesMap = new Map();
 
             filteredServices.forEach(servicio => {
                 const clienteId = servicio.clienteId;
@@ -167,7 +202,7 @@ const HistorialAdmin = () => {
                 data: Array.from(clientesMap.values()) 
             };
         }
-    }, [serviciosEntregados, clientes, searchQuery]);
+    }, [serviciosPorPeriodo, clientes, searchQuery]);
     
     
     const handleVerHistorialCompleto = (clienteData) => {

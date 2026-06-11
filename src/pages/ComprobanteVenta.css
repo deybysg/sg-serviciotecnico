@@ -168,7 +168,7 @@
   gap: 10px;
 }
 
-.btn-print, .btn-download {
+.btn-print, .btn-download, .btn-volver {
   border: none;
   padding: 8px 14px;
   border-radius: 8px;
@@ -177,18 +177,60 @@
   transition: all 0.2s ease;
 }
 
+.btn-volver {
+  background: #6c757d;
+  color: #fff;
+}
+
+.btn-volver:hover {
+  background: #5a6268;
+}
+
 .btn-print {
   background: linear-gradient(90deg,#0b2545,#1f6f9f);
   color: #fff;
 }
 
 .btn-download {
-  background: #6c757d;
+  background: #28a745;
   color: #fff;
 }
 
-.btn-print:hover, .btn-download:hover {
+.btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-print:hover, .btn-download:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+/* Spinner de carga */
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-width: 0.12em;
+}
+
+.me-2 {
+  margin-right: 0.5rem;
+}
+
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 
@@ -245,7 +287,7 @@
     gap: 8px;
   }
 
-  .btn-print, .btn-download {
+  .btn-print, .btn-download, .btn-volver {
     width: 100%; /* Botones de ancho completo */
     text-align: center;
     padding: 10px 12px;

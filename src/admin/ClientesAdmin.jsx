@@ -69,9 +69,14 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
     // Función auxiliar para renderizar el detalle de cada servicio
     const renderServicioDetalle = (s) => {
     const servicioId = s._id || s.id;
+        // Formato de número de servicio: si existe servicioNumero, usarlo; si no, usar shortId
+        const numeroServicio = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+            ? `#${String(s.servicioNumero).padStart(3, '0')}`
+            : `#${shortId(servicioId, 6)}`;
+            
         return (
             <div key={servicioId} className="servicio-item-modal">
-        <h4 className="servicio-titulo-modal">Servicio ID: {shortId(servicioId, 6)} ({s.tipoServicio || 'N/A'})</h4>
+        <h4 className="servicio-titulo-modal">Servicio ID: {numeroServicio} ({s.tipoServicio || 'N/A'})</h4>
                 
                 <p>
                     <strong>Estado:</strong> 
@@ -129,7 +134,13 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
                 <h3 className="modal-titulo">
                     {/* El título se ajusta dinámicamente según la lógica del nuevo modal */}
                     {isSingleService && servicios.length === 1 
-                        ? `Detalle de Servicio #${servicios[0].id}` 
+                        ? (() => {
+                            const s = servicios[0];
+                            const numeroServicio = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+                                ? `#${String(s.servicioNumero).padStart(3, '0')}`
+                                : `#${shortId(s.id, 6)}`;
+                            return `Detalle de Servicio ${numeroServicio}`;
+                        })()
                         : `Historial de Servicios de ${cliente.nombreCompleto}`
                     }
                 </h3>

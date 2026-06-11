@@ -1,0 +1,21 @@
+.categoria-filtro {
+  width: 150px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.categoria-filtro select {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.categoria-filtro label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}

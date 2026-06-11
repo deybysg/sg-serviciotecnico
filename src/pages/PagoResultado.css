@@ -1,0 +1,149 @@
+/* src/pages/PagoResultado.css */
+
+.pago-resultado-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.pago-resultado-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.resultado-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: pulse 0.6s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.pago-resultado-card h1 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: #0c4a6e;
+}
+
+.pago-resultado-card.success h1 {
+    color: #059669;
+}
+
+.pago-resultado-card.error h1 {
+    color: #dc2626;
+}
+
+.pago-resultado-card.pending h1 {
+    color: #d97706;
+}
+
+.resultado-mensaje {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.resultado-info {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.info-item p {
+    margin: 0;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.resultado-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.resultado-acciones .btn-primary,
+.resultado-acciones .btn-secondary {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+}
+
+.resultado-acciones .btn-primary {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+}
+
+.resultado-acciones .btn-primary:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.resultado-acciones .btn-secondary {
+    background: white;
+    color: #0284c7;
+    border: 2px solid #0284c7;
+}
+
+.resultado-acciones .btn-secondary:hover {
+    background: #f0f9ff;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .pago-resultado-card {
+        padding: 30px 20px;
+    }
+
+    .pago-resultado-card h1 {
+        font-size: 1.5rem;
+    }
+
+    .resultado-mensaje {
+        font-size: 1rem;
+    }
+}

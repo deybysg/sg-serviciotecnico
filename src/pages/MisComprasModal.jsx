@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
 import { FaBoxes, FaCalendarAlt, FaDollarSign, FaFilePdf, FaReceipt, FaMapMarkerAlt } from 'react-icons/fa';
@@ -15,6 +16,7 @@ import './MisComprasModal.css';
  */
 function MisComprasModal({ isOpen, onClose }) {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [compras, setCompras] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -86,9 +88,9 @@ function MisComprasModal({ isOpen, onClose }) {
                             <div className="compra-actions">
                                 <button
                                     className="btn-comprobante"
-                                    onClick={() => window.open(`${window.location.origin}/comprobante/${compra._id || compra.id}`, '_blank')}
+                                    onClick={() => navigate(`/comprobante/${compra._id || compra.id}`)}
                                 >
-                                    <FaReceipt /> Ver comprobante
+                                    <FaReceipt /> Ver comprobante (opción de descargar PDF)
                                 </button>
                             </div>
                         </div>
@@ -105,17 +107,19 @@ function MisComprasModal({ isOpen, onClose }) {
             try {
                 setLoading(true);
                 setError(null);
-                
-                // Usar el endpoint del backend que filtra por usuario
-                const userId = user._id || user.id;
-                const data = await api.get(`/ventas/usuario/${userId}`);
-                
-                setCompras(data);
+
+                // El endpoint espera :username, no el _id
+                const username = user.username || user.nombreUsuario || user.email; // fallback razonable
+                if (!username) {
+                    throw new Error('No se pudo determinar el username del usuario.');
+                }
+                const data = await api.get(`/ventas/usuario/${encodeURIComponent(username)}`);
+                setCompras(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error("Error cargando compras:", err);
-                setError('Hubo un problema al cargar tu historial de compras.');
+                setError(err.message || 'Hubo un problema al cargar tu historial de compras.');
                 setCompras([]);
-                Swal.fire('Error', 'Hubo un problema al cargar tu historial de compras.', 'error');
+                Swal.fire('Error', err.message || 'Hubo un problema al cargar tu historial de compras.', 'error');
             } finally {
                 setLoading(false);
             }

@@ -4,17 +4,36 @@ import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import './Paneltrabajos.css';
+import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle } from 'react-icons/fi';
+import logoTech from '../assets/logo3.png';
 
 const ESTADO_OPTIONS = [
-  { value: "pendiente", label: "Pendiente" },
-  { value: "enRevision", label: "En Revisión" },
-  { value: "revisionTerminada", label: "En Reparacion" },
-  { value: "terminado", label: "Listo para Entrega" },
-  { value: "entregado", label: "Entregado" },
+  { value: "pendiente", label: "Pendiente" },
+  { value: "enRevision", label: "En Revisión" },
+  { value: "revisionTerminada", label: "En Reparacion" },
+  { value: "terminado", label: "Listo para Entrega" },
+  { value: "entregado", label: "Entregado" },
 ];
 
 const getEstadoLabel = (value) => {
-  return ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
+  return ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
+};
+
+const getEstadoIcon = (value) => {
+  switch (value) {
+    case 'pendiente':
+      return <FiClock />;
+    case 'enRevision':
+      return <FiTool />;
+    case 'revisionTerminada':
+      return <FiTool />;
+    case 'terminado':
+      return <FiTruck />;
+    case 'entregado':
+      return <FiCheckCircle />;
+    default:
+      return <FiBell />;
+  }
 };
 
 const getClienteName = (clienteId, clientes) => {
@@ -43,6 +62,8 @@ const PanelTrabajo = () => {
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [visibleTooltipId, setVisibleTooltipId] = useState(null);
   const tooltipTimer = useRef(null);
+  const [estadoMenuAbiertoId, setEstadoMenuAbiertoId] = useState(null);
+  const [estadoFocusIndex, setEstadoFocusIndex] = useState(0);
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
 
@@ -184,6 +205,41 @@ const PanelTrabajo = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const onMouseDown = (e) => {
+      if (estadoMenuAbiertoId && !e.target.closest('.dropdown-estado')) {
+        setEstadoMenuAbiertoId(null);
+      }
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [estadoMenuAbiertoId]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setEstadoMenuAbiertoId(null);
+        return;
+      }
+      if (!estadoMenuAbiertoId) return;
+      const lastIndex = ESTADO_OPTIONS.length - 1;
+      if (e.key === 'ArrowDown') {
+        setEstadoFocusIndex((i) => (i < lastIndex ? i + 1 : 0));
+      } else if (e.key === 'ArrowUp') {
+        setEstadoFocusIndex((i) => (i > 0 ? i - 1 : lastIndex));
+      } else if (e.key === 'Enter') {
+        const opt = ESTADO_OPTIONS[Math.max(0, Math.min(lastIndex, estadoFocusIndex))];
+        if (opt) {
+          const servicioIdOpen = estadoMenuAbiertoId;
+          setEstadoMenuAbiertoId(null);
+          handleCambiarEstado(servicioIdOpen, opt.value);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [estadoMenuAbiertoId, estadoFocusIndex]);
 
   const handleGuardarEdicion = async (idServicio, datosEditados) => {
     try {
@@ -338,7 +394,7 @@ const PanelTrabajo = () => {
   };
 
   // Botón en tarjeta: marcar equipo como sin solución y notificar al cliente
-  const handleMarcarSinSolucion = async (servicio) => {
+  const handleMarcarNotificacion = async (servicio) => {
     const { value: motivo, isConfirmed } = await Swal.fire({
       title: 'notificar al cliente',
       input: 'textarea',
@@ -372,13 +428,18 @@ const PanelTrabajo = () => {
 
     const payload = {
       mensaje: mensajeFinal,
-      tipo: 'sinSolucion',
+      tipo: 'notificacion',
       autor: 'taller',
-      marcarSinSolucion: true
+      // Mantener la propiedad histórica para compatibilidad en el backend
+      marcarSinSolucion: true,
+      // Nueva propiedad clara para futuras integraciones
+      marcarNotificacion: true
     };
 
     try {
       const idServicio = servicio._id || servicio.id;
+
+      // Agregar entrada de seguimiento; el backend actualizará también el estado/detalle cuando corresponda
       await api.patch(`/servicios/${idServicio}/seguimiento`, payload);
 
       const Toast = Swal.mixin({
@@ -393,207 +454,252 @@ const PanelTrabajo = () => {
         }
       });
 
-      Toast.fire({ icon: 'success', title: 'Marcado como sin solución y agregado a seguimiento' });
+      Toast.fire({ icon: 'success', title: 'Notificado al cliente y agregado a seguimiento' });
       cargarDatos();
     } catch (error) {
-      console.error('Error al marcar sin solución:', error);
+      console.error('Error al notificar al cliente:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.message || 'No se pudo marcar como sin solución.',
+        text: error.message || 'No se pudo notificar al cliente.',
         confirmButtonColor: '#3b82f6'
       });
     }
   };
 
-  if (isLoading) return <div className="panel-loading">Cargando Panel de Trabajo...</div>;
+  if (isLoading) return (
+    <div className="panel-loading">
+      <div className="tech-loader">
+        <img src={logoTech} alt="Logo" className="logo-spin" style={{ width: 60, marginBottom: 16 }} />
+        <span>Cargando Panel de Trabajo...</span>
+      </div>
+    </div>
+  );
+
+  const statusColumns = [
+    { key: 'pendiente', filter: 'pendiente', label: 'Pendiente', count: conteosEstado.pendiente, icon: <FiClock /> },
+    { key: 'enRevision', filter: 'enRevision', label: 'En Revisión', count: conteosEstado.enRevision, icon: <FiTool /> },
+    { key: 'revisionTerminada', filter: 'enReparacion', label: 'En Reparación', count: conteosEstado.enReparacion, icon: <FiTool /> },
+    { key: 'terminado', filter: 'listoParaEntrega', label: 'Listo para Entregar', count: conteosEstado.listoParaEntrega, icon: <FiCheckCircle /> },
+    { key: 'entregado', filter: 'entregado', label: 'Entregado', count: servicios.filter((s) => s.estado === 'entregado').length, icon: <FiCheckCircle /> },
+  ];
+
+  const trabajosAltaPrioridad = serviciosActivos.filter((s) => s.estado === 'terminado' || s.estado === 'revisionTerminada').length;
+  const trabajosPendientesViejos = serviciosActivos.filter((s) => {
+    if (!s.fechaEntrada || s.estado !== 'pendiente') return false;
+    const diffDays = (Date.now() - new Date(s.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays > 3;
+  }).length;
+
+  const formatFechaPanel = (fecha) => fecha ? new Date(fecha).toLocaleDateString('es-AR') : '—';
+  const getEquipoPanel = (servicio) => [servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || servicio.tipoServicio || 'Equipo sin nombre';
+  const getDetallePanel = (servicio) => servicio.detalles || servicio.detalle || servicio.tipoServicio || 'Servicio técnico';
 
   return (
-    <div className="panel-trabajo-container">
-      {/* 🔽 Filtros de estado con conteo (Se mantiene) */}
-      <div className="filtros-container">
-        <button
-          className={`filtro-btn ${filtroEstado === "todos" ? "activo" : ""}`}
-          onClick={() => setFiltroEstado("todos")}
-        >
-          📋 Todos ({conteosEstado.todos})
-        </button>
-        <button
-          className={`filtro-btn ${filtroEstado === "pendiente" ? "activo" : ""}`}
-          onClick={() => setFiltroEstado("pendiente")}
-        >
-          ⏱️ Pendientes ({conteosEstado.pendiente})
-        </button>
-        <button
-          className={`filtro-btn ${filtroEstado === "enRevision" ? "activo" : ""}`}
-          onClick={() => setFiltroEstado("enRevision")}
-        >
-          🧰 En Revisión ({conteosEstado.enRevision})
-        </button>
-        <button
-          className={`filtro-btn ${filtroEstado === "enReparacion" ? "activo" : ""}`}
-          onClick={() => setFiltroEstado("enReparacion")}
-        >
-          🔨 En Reparación ({conteosEstado.enReparacion})
-        </button>
-        <button
-          className={`filtro-btn ${filtroEstado === "listoParaEntrega" ? "activo" : ""}`}
-          onClick={() => setFiltroEstado("listoParaEntrega")}
-        >
-          🎁 Listo para Entrega ({conteosEstado.listoParaEntrega})
-        </button>
-      </div>
+    <div className="panel-trabajo-container tech-bg workboard-page">
+      <section className="workboard-shell">
+        <header className="workboard-header">
+          <div>
+            <h1>Panel de Trabajo</h1>
+            <p>Gestiona y controla todos los trabajos de servicio técnico desde un solo lugar.</p>
+          </div>
+          <div className="workboard-actions">
+            <button className="workboard-primary-btn" onClick={() => navigate('/admin/servicios')}>
+              <span>+</span> Nuevo Trabajo
+            </button>
+            <button className="workboard-icon-btn" aria-label="Alertas">
+              <FiBell />
+              {(trabajosAltaPrioridad + trabajosPendientesViejos) > 0 && <strong>{trabajosAltaPrioridad + trabajosPendientesViejos}</strong>}
+            </button>
+          </div>
+        </header>
 
-      {/* 🔎 Buscador (Se mantiene) */}
-      <div className="panel-buscador">
-        <input
-          type="text"
-          placeholder="Buscar por cliente o ID..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+        <section className="workboard-summary">
+          <article className="summary-card featured">
+            <span className="summary-icon"><FiClipboard /></span>
+            <div>
+              <p>Total Trabajos</p>
+              <strong>{serviciosActivos.length}</strong>
+              <small>Este mes</small>
+            </div>
+          </article>
+          <article className="summary-card warning">
+            <span className="summary-icon"><FiClock /></span>
+            <div><p>Pendientes</p><strong>{conteosEstado.pendiente}</strong><small>{serviciosActivos.length ? Math.round((conteosEstado.pendiente / serviciosActivos.length) * 100) : 0}% del total</small></div>
+          </article>
+          <article className="summary-card cyan">
+            <span className="summary-icon"><FiTool /></span>
+            <div><p>En Revisión</p><strong>{conteosEstado.enRevision}</strong><small>{serviciosActivos.length ? Math.round((conteosEstado.enRevision / serviciosActivos.length) * 100) : 0}% del total</small></div>
+          </article>
+          <article className="summary-card purple">
+            <span className="summary-icon"><FiTool /></span>
+            <div><p>En Reparación</p><strong>{conteosEstado.enReparacion}</strong><small>{serviciosActivos.length ? Math.round((conteosEstado.enReparacion / serviciosActivos.length) * 100) : 0}% del total</small></div>
+          </article>
+          <article className="summary-card amber">
+            <span className="summary-icon"><FiCheckCircle /></span>
+            <div><p>Listo para Entregar</p><strong>{conteosEstado.listoParaEntrega}</strong><small>{serviciosActivos.length ? Math.round((conteosEstado.listoParaEntrega / serviciosActivos.length) * 100) : 0}% del total</small></div>
+          </article>
+          <article className="alerts-card">
+            <h2>Alertas <span>{trabajosAltaPrioridad + trabajosPendientesViejos}</span></h2>
+            <p><FiBell /> {trabajosAltaPrioridad} trabajos con alta prioridad</p>
+            <p><FiClock /> {trabajosPendientesViejos} trabajos pendientes por más de 3 días</p>
+            <button onClick={() => setFiltroEstado('todos')}>Ver todas</button>
+          </article>
+        </section>
 
-      {/* 🔽 Lista (Se mantiene) */}
-      <div className="servicios-lista">
-        {serviciosFiltrados.length === 0 ? (
-          <p className="mensaje-vacio">🎉 ¡No hay trabajos con el filtro/búsqueda actual! 🎉</p>
-        ) : (
-          serviciosFiltrados.map((servicio) => {
-            // Manejar tanto cliente populado como clienteId
-            const clienteData = servicio.cliente || servicio.clienteId;
-            const clienteNombre = getClienteName(clienteData, clientes);
-            // Mostrar marca y modelo (equipo) en la lista principal
-            const equipoStr = [servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || '—';
-            const estadoLabel = getEstadoLabel(servicio.estado);
-            const esPrioridad =
-              servicio.estado === "terminado" ||
-              servicio.estado === "revisionTerminada";
-            const servicioId = servicio._id || servicio.id;
+        <section className="workboard-filters">
+          <label className="workboard-search">
+            <input
+              type="text"
+              placeholder="Buscar por cliente, dispositivo, IMEI, número de orden..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <FiSearch />
+          </label>
+          <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+            <option value="todos">Estado: Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="enRevision">En Revisión</option>
+            <option value="enReparacion">En Reparación</option>
+            <option value="listoParaEntrega">Listo para Entregar</option>
+          </select>
+          <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); }}>
+            <FiSearch /> Filtros
+          </button>
+        </section>
 
+        <section className="workboard-kanban">
+          {statusColumns.map((column) => {
+            const sourceItems = column.key === 'entregado'
+              ? servicios.filter((servicio) => servicio.estado === 'entregado')
+              : serviciosFiltrados;
+            const columnItems = sourceItems.filter((servicio) => servicio.estado === column.key).slice(0, 3);
             return (
-              <div
-                key={servicioId}
-                className={`tarjeta-servicio ${esPrioridad ? "prioridad-entrega" : ""}`}
-              >
-                <div className="info-resumen">
-                  <p>
-                    <strong>N° Orden:</strong>{' '}
-                    {servicio.servicioNumero ? (
-                      <>
-                        <span className="servicio-numero">#{formatServicioNumero(servicio.servicioNumero)}</span>{' '}
-                        <span
-                          title="Copiar Número de Servicio"
-                          onClick={() => handleCopyId(formatServicioNumero(servicio.servicioNumero))}
-                          style={{ cursor: 'pointer', marginLeft: 6 }}
-                        >📋</span>,{' '}
-                      </>
-                    ): (
-                      <>
-                        {shortId(servicioId)}{' '}
-                        <span
-                          title="Copiar ID completo"
-                          onClick={() => handleCopyId(servicioId)}
-                          style={{ cursor: 'pointer', marginLeft: 6 }}
-                        >📋</span>,{' '}
-                      </>
-                    )}
-                    <strong>Cliente:</strong> {clienteNombre},{" "}
-                    <strong>Equipo:</strong> {equipoStr},{" "}
-                    
-                   
-                  </p>
+              <article className={`kanban-column column-${column.key}`} key={column.key}>
+                <button className="kanban-title" onClick={() => setFiltroEstado(column.filter)}>
+                  <span>{column.icon}</span>
+                  {column.label}
+                  <strong>{column.count}</strong>
+                </button>
+                <div className="kanban-items">
+                  {columnItems.length === 0 ? (
+                    <p className="kanban-empty">Sin trabajos en este estado.</p>
+                  ) : columnItems.map((servicio) => {
+                    const clienteData = servicio.cliente || servicio.clienteId;
+                    const clienteNombre = getClienteName(clienteData, clientes);
+                    const servicioId = servicio._id || servicio.id;
+                    const numero = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(servicioId, 6)}`;
+                    return (
+                      <div className="kanban-card" key={servicioId}>
+                        <div className="kanban-card-top">
+                          <button className="kanban-id" onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : servicioId)}>{numero}</button>
+                          <span className="priority-pill">{servicio.estado === 'pendiente' ? 'Alta Prioridad' : servicio.estado === 'revisionTerminada' ? 'Media Prioridad' : 'Baja Prioridad'}</span>
+                        </div>
+                        <h3>{getEquipoPanel(servicio)}</h3>
+                        <p>{getDetallePanel(servicio)}</p>
+                        <p>Cliente: {clienteNombre}</p>
+                        <p>{servicio.fechaSalida ? 'Entrega' : 'Ingreso'}: {formatFechaPanel(servicio.fechaSalida || servicio.fechaEntrada)}</p>
+                        <div className="kanban-card-actions">
+                          <div className="dropdown-estado">
+                            <button
+                              type="button"
+                              className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
+                              aria-haspopup="listbox"
+                              aria-expanded={estadoMenuAbiertoId === servicioId}
+                              onClick={() => {
+                                const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
+                                setEstadoMenuAbiertoId(open);
+                                if (open) {
+                                  const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
+                                  setEstadoFocusIndex(idx >= 0 ? idx : 0);
+                                }
+                              }}
+                            >
+                              <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
+                              <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
+                            </button>
+                            {estadoMenuAbiertoId === servicioId && (
+                              <ul className="estado-menu" role="listbox">
+                                {ESTADO_OPTIONS.map((opt, idx) => (
+                                  <li
+                                    key={opt.value}
+                                    role="option"
+                                    aria-selected={opt.value === servicio.estado}
+                                    className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
+                                    onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
+                                  >
+                                    <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
+                                    <span className="estado-label">{opt.label}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                          <button className="detail-link" onClick={() => handleVerDetalles(servicio)}>Ver detalle</button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                <div className="acciones">
-                  {/* Select de estado colocado junto al ojo */}
-                  <div className="estado-visor-group">
-                    <select
-                      className={`estado-select estado-${servicio.estado}`}
-                      value={servicio.estado}
-                      onChange={(e) => handleCambiarEstado(servicioId, e.target.value)}
-                      title="Cambiar estado"
-                    >
-                      {ESTADO_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Ojo con tooltip de detalles al pasar el cursor */}
-                  <div
-                    className={`visor-wrapper ${visibleTooltipId === servicioId ? 'show' : ''}`}
-                    onMouseEnter={() => handleTooltipEnter(servicioId)}
-                    onMouseLeave={handleTooltipLeave}
-                    aria-hidden
-                  >
-                    <button
-                      className="btn-visor"
-                      title="Vista rápida: Detalles del servicio"
-                      type="button"
-                    >
-                      👁️
-                    </button>
-
-                    
-                    <div className="tooltip">
-                      <div className="tooltip-row">
-                        <strong>Orden:</strong>
-                        <span>{servicio.servicioNumero ? `#${formatServicioNumero(servicio.servicioNumero)}` : shortId(servicioId)}</span>
-                      </div>
-                      <div className="tooltip-row">
-                        <strong>Cliente:</strong>
-                        <span>{clienteNombre}</span>
-                      </div>
-                      <div className="tooltip-row">
-                        <strong>Equipo:</strong>
-                        <span>{[servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || '—'}</span>
-                      </div>
-                      <div className="tooltip-row">
-                        <strong>Estado:</strong>
-                        <span>{estadoLabel}</span>
-                      </div>
-                      <div className="tooltip-row">
-                        <strong>Entrada:</strong>
-                        <span>{servicio.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleString() : '—'}</span>
-                      </div>
-                  
-                      <div className="tooltip-actions">
-                        <button
-                          className="btn-sinsolucion"
-                          onClick={() => { setVisibleTooltipId(null); handleMarcarSinSolucion(servicio); }}
-                          title="Notificar al cliente"
-                        >
-                          Notificar
-                        </button>
-                        <button
-                          className="btn-entregar"
-                          onClick={() => { setVisibleTooltipId(null); handleEntregarServicio(servicioId); }}
-                        >
-                          Entregar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Botón de entrega (mantener para accesibilidad/tap) */}
-                 
-                </div>
-              </div>
+                <button className="kanban-see-all" onClick={() => setFiltroEstado(column.filter)}>Ver todos ({column.count})</button>
+              </article>
             );
-          })
-        )}
-      </div>      <ModalDetalles
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        servicio={servicioSeleccionado}
-        clientes={clientes}
-        onSave={handleGuardarEdicion}
-      />
-    </div>
-  );
+          })}
+        </section>
+      </section>
+      {modalOpen && servicioSeleccionado && (
+        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, margin: 'auto', padding: 24 }}>
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', fontSize: 24, cursor: 'pointer' }}
+              aria-label="Cerrar modal"
+            >
+              &times;
+            </button>
+            <h3>Detalle de Servicio</h3>
+            <div style={{ marginBottom: 16 }}>
+              <strong>Orden:</strong> {servicioSeleccionado.servicioNumero ? `#${formatServicioNumero(servicioSeleccionado.servicioNumero)}` : shortId(servicioSeleccionado._id || servicioSeleccionado.id)}<br />
+              <strong>Estado:</strong> {getEstadoLabel(servicioSeleccionado.estado)}<br />
+              <strong>Entrada:</strong> {servicioSeleccionado.fechaEntrada ? new Date(servicioSeleccionado.fechaEntrada).toLocaleString() : '—'}<br />
+              <strong>Fecha de Salida:</strong> {servicioSeleccionado.fechaSalida ? new Date(servicioSeleccionado.fechaSalida).toLocaleString() : '—'}<br />
+              <hr />
+              <strong>Datos del Cliente:</strong><br />
+              {(() => {
+                const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
+                  ? servicioSeleccionado.cliente
+                  : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
+                if (!clienteObj) return <span>Cliente no encontrado</span>;
+                return (
+                  <div style={{ marginBottom: 8 }}>
+                    <div><strong>Nombre:</strong> {clienteObj.nombreCompleto}</div>
+                    <div><strong>Teléfono:</strong> {clienteObj.telefono || '—'}</div>
+                    <div><strong>Email:</strong> {clienteObj.email || '—'}</div>
+                    <div><strong>DNI:</strong> {clienteObj.dni || '—'}</div>
+                    <div><strong>Dirección:</strong> {clienteObj.direccion || '—'}</div>
+                  </div>
+                );
+              })()}
+              <hr />
+              <strong>Datos del Producto:</strong><br />
+              <div style={{ marginBottom: 8 }}>
+                <div><strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}</div>
+                <div><strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}</div>
+                <div><strong>Tipo de Servicio:</strong> {servicioSeleccionado.tipoServicio || '—'}</div>
+                <div><strong>Detalles:</strong> {servicioSeleccionado.detalles || '—'}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button className="btn-sinsolucion" onClick={() => { setModalOpen(false); handleMarcarNotificacion(servicioSeleccionado); }}>Notificar</button>
+              <button className="btn-entregar" onClick={() => { setModalOpen(false); handleEntregarServicio(servicioSeleccionado._id || servicioSeleccionado.id); }}>Entregar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default PanelTrabajo;

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { 
     FaBars, FaTimes, FaHome, FaServicestack, FaSignInAlt, 
     FaShoppingCart, FaUsers, FaChartBar, FaHistory, FaTools, FaShoppingBag
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import logoTech from '../assets/logo3.png';
 import './NavHamburguesa.css';
 
 function NavHamburguesa() {
@@ -88,7 +89,13 @@ function NavHamburguesa() {
 
             <div className={`nav-hamburguesa-menu${open ? ' open' : ''}`}>
                 <div className="nav-hamburguesa-header">
-                    <span>Menú</span>
+                    <div className="nav-hamburguesa-brand">
+                        <img src={logoTech} alt="TECHFIX" />
+                        <div>
+                            <strong>TECHFIX</strong>
+                            <span>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Servicio técnico'}</span>
+                        </div>
+                    </div>
                     <button className="nav-hamburguesa-close" onClick={() => setOpen(false)}>
                         <FaTimes size={24} />
                     </button>
@@ -100,9 +107,9 @@ function NavHamburguesa() {
                             key={item.to}
                             className={item.isCta ? 'nav-hamburguesa-tracking-item' : ''}
                         >
-                            <Link 
+                            <NavLink 
                                 to={item.to} 
-                                className={item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'} 
+                                className={({ isActive }) => `${item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'}${isActive ? ' active' : ''}`}
                                 onClick={() => setOpen(false)}
                             >
                                 {item.isCta ? (
@@ -119,7 +126,7 @@ function NavHamburguesa() {
                                         {item.nombre}
                                     </>
                                 )}
-                            </Link>
+                            </NavLink>
                         </li>
                     ))}
 
@@ -137,6 +144,15 @@ function NavHamburguesa() {
                         </li>
                     )}
                 </ul>
+                {user && (
+                    <div className="nav-hamburguesa-profile">
+                        <span>{(user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
+                        <div>
+                            <strong>{user?.username || 'Admin'}</strong>
+                            <small>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Usuario'}</small>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {open && <div className="nav-hamburguesa-overlay" onClick={() => setOpen(false)}></div>}

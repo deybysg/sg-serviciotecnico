@@ -57,7 +57,12 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
         
                 return (
 			<div key={s.id} className="servicio-item-modal">
-				<h4 className="servicio-titulo-modal">Servicio ID: {shortId(toIdString(s.id), 6)} ({s.tipoServicio || 'N/A'})</h4>
+				<h4 className="servicio-titulo-modal">Servicio ID: {(() => {
+                    const numeroServicio = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+                        ? `#${String(s.servicioNumero).padStart(3, '0')}`
+                        : `#${shortId(toIdString(s.id), 6)}`;
+                    return numeroServicio;
+                })()} ({s.tipoServicio || 'N/A'})</h4>
                 
                 <p>
                     <strong>Estado:</strong> 
@@ -116,7 +121,13 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
                 <button className="modal-close-btn" onClick={onClose}>&times;</button>
                 
                 <h3 className="modal-titulo">
-                    {isSingleService ? `Detalle de Servicio #${shortId(toIdString(servicios[0].id), 6)}` : `Historial Completo de ${cliente.nombreCompleto}`}
+                    {isSingleService ? (() => {
+                        const s = servicios[0];
+                        const numeroServicio = s.servicioNumero !== undefined && s.servicioNumero !== null && s.servicioNumero !== '' 
+                            ? `#${String(s.servicioNumero).padStart(3, '0')}`
+                            : `#${shortId(toIdString(s.id), 6)}`;
+                        return `Detalle de Servicio ${numeroServicio}`;
+                    })() : `Historial Completo de ${cliente.nombreCompleto}`}
                 </h3>
                 
                 <div className="modal-body">

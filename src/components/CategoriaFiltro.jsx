@@ -1,7 +1,10 @@
+  
+import './CategoriaFiltro.css';
+
 function CategoriaFiltro() {
   // Aquí iría la lógica para filtrar por categoría
   return (
-    <div>
+    <div className="categoria-filtro">
       <label>Filtrar por categoría:</label>
       <select>
         <option value="todos">Todos</option>

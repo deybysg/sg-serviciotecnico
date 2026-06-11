@@ -92,14 +92,16 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
     const monthlyRevenueMap = {};
     const monthlyServiceDetails = {};
 
-    calculableServices
+    // Usar filteredServices en lugar de calculableServices para incluir todos los servicios entregados
+    filteredServices
         .filter(s => s.estado === 'entregado' && s.fechaSalida)
         .forEach(s => {
             const date = new Date(s.fechaSalida);
             const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             const monthLabel = date.toLocaleString('es-ES', { month: 'short', year: '2-digit' });
 
-            monthlyRevenueMap[yearMonthKey] = (monthlyRevenueMap[yearMonthKey] || 0) + s.presupuesto.total;
+            const precioServicio = s.presupuesto?.total || 0;
+            monthlyRevenueMap[yearMonthKey] = (monthlyRevenueMap[yearMonthKey] || 0) + precioServicio;
 
             if (!monthlyServiceDetails[yearMonthKey]) {
                 monthlyServiceDetails[yearMonthKey] = {
@@ -108,11 +110,11 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
                     services: []
                 };
             }
-            monthlyServiceDetails[yearMonthKey].revenue += s.presupuesto.total;
+            monthlyServiceDetails[yearMonthKey].revenue += precioServicio;
             monthlyServiceDetails[yearMonthKey].services.push({
                 id: s.id,
                 tipo: s.tipoServicio || 'Otros',
-                precio: s.presupuesto.total,
+                precio: precioServicio,
                 fecha: s.fechaSalida,
                 marca: s.marcaProducto || 'N/A'
             });
@@ -354,13 +356,6 @@ const EstadisticasServiciosView = ({
                         ))}
                     </select>
                 </div>
-                <button
-                    type="button"
-                    className="estdash-apply-btn"
-                    onClick={() => Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Filtros aplicados', showConfirmButton:false, timer:1200 })}
-                >
-                    Aplicar filtros
-                </button>
             </div>
 
             {/* --- Key Metrics Grid --- */}
@@ -514,13 +509,6 @@ const EstadisticasVentasView = ({
                         ))}
                     </select>
                 </div>
-                <button
-                    type="button"
-                    className="estdash-apply-btn"
-                    onClick={() => Swal.fire({ toast:true, position:'top-end', icon:'success', title:'Filtros aplicados', showConfirmButton:false, timer:1200 })}
-                >
-                    Aplicar filtros
-                </button>
             </div>
             
             <div className="estdash-kpi-grid kpi-sales-grid">

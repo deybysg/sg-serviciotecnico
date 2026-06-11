@@ -3,6 +3,13 @@ import Swal from 'sweetalert2';
 import { getCartByUsername, upsertCartByUsername, clearCart as clearCartAPI } from '../services/cartService';
 import { toIdString } from '../utils/id';
 import { api } from '../services/api';
+import { 
+  checkCartExpiration, 
+  setCartExpiration, 
+  clearCartExpiration,
+  showFirstItemAlert,
+  showExpirationWarning
+} from '../utils/cartExpiration';
 
 // Store de carrito con Zustand - Sin localStorage, solo API como fuente de verdad
 const useCartStore = create((set, get) => ({
@@ -11,6 +18,18 @@ const useCartStore = create((set, get) => ({
   isLoading: false,
   currentUser: null,
   currentToken: null,
+
+  // Utilidades
+  /**
+   * Verificar expiración del carrito y limpiar si corresponde
+   * Retorna true si expiró.
+   */
+  checkExpiration: () => {
+    return checkCartExpiration(() => {
+      set({ cartItems: [] });
+      get().persistCart();
+    });
+  },
 
   // Acciones de sincronización
   
@@ -33,6 +52,18 @@ const useCartStore = create((set, get) => ({
       // Usuario guest - carrito vacío (sin localStorage)
       console.log('🛒 [CartStore INIT] Guest - carrito vacío');
       set({ cartItems: [], isLoading: false });
+      clearCartExpiration();
+      return;
+    }
+
+    // Verificar expiración del carrito
+    const expired = checkCartExpiration(() => {
+      set({ cartItems: [] });
+      get().persistCart();
+    });
+
+    if (expired) {
+      set({ cartItems: [], isLoading: false });
       return;
     }
 
@@ -54,6 +85,11 @@ const useCartStore = create((set, get) => ({
       const items = serverCart?.items || [];
       console.log('✅ [CartStore INIT] Items cargados:', items.length);
       set({ cartItems: items, isLoading: false });
+      
+      // Si hay items, asegurarse de que hay timestamp de expiración
+      if (items.length > 0) {
+        setCartExpiration();
+      }
     } catch (error) {
       console.error('❌ [CartStore INIT] Error:', error);
       set({ cartItems: [], isLoading: false });
@@ -85,6 +121,14 @@ const useCartStore = create((set, get) => ({
    * Agregar producto al carrito
    */
   addToCart: (product) => {
+    // Verificar expiración antes de agregar
+    const expired = checkCartExpiration(() => {
+      set({ cartItems: [] });
+      get().persistCart();
+    });
+    
+    if (expired) return;
+
     const { cartItems } = get();
     const pid = toIdString(product?.id ?? product?._id);
     const existingItem = cartItems.find(item => toIdString(item.id) === pid);
@@ -112,21 +156,37 @@ const useCartStore = create((set, get) => ({
           : item
       );
       set({ cartItems: updatedItems });
+      
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `¡${product.nombre} agregado!`,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
     } else {
       // Agregar nuevo item
       const newItem = { ...product, id: pid, cantidad: 1 };
       set({ cartItems: [...cartItems, newItem] });
+      
+      // Establecer expiración si es el primer item
+      if (cartItems.length === 0) {
+        setCartExpiration();
+        showFirstItemAlert();
+      } else {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: `¡${product.nombre} agregado!`,
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true
+        });
+      }
     }
-
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title: `¡${product.nombre} agregado!`,
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true
-    });
 
     // Persistir después de agregar
     get().persistCart();
@@ -218,6 +278,7 @@ const useCartStore = create((set, get) => ({
           }
           
           set({ cartItems: [] });
+          clearCartExpiration();
           
           Swal.fire({
             toast: true,
@@ -231,6 +292,7 @@ const useCartStore = create((set, get) => ({
         } catch (err) {
           console.warn('Error al vaciar en servidor, vaciando localmente', err);
           set({ cartItems: [] });
+          clearCartExpiration();
         }
       }
     });
@@ -253,13 +315,14 @@ const useCartStore = create((set, get) => ({
 
     try {
       const updatePromises = updates.map(update =>
-        api.put(`/productos/${update.id}`, { stock: update.newStock })
+        api.patch(`/productos/${update.id}/stock`, { stock: update.newStock })
       );
 
       await Promise.all(updatePromises);
       
       // Vaciar carrito tras compra exitosa
       set({ cartItems: [] });
+      clearCartExpiration();
       
       // Persistir carrito vacío
       await get().persistCart();

@@ -3,13 +3,13 @@
     {
       "id": "1",
       "username": "admin",
-      "password": "1234",
+      "password": "1234567",
       "role": "admin"
     },
     {
       "id": "root",
       "username": "superadmin",
-      "password": "1234",
+      "password": "1234567",
       "role": "superadmin",
       "isProtected": true
     },

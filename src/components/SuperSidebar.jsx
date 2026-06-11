@@ -3,12 +3,15 @@ import { NavLink } from 'react-router-dom';
 import { FaUsersCog, FaTools, FaUserFriends, FaBoxOpen, FaWrench, FaChartBar, FaHistory, FaFileInvoiceDollar, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import logoTech from '../assets/logo3.png';
 import './SuperSidebar.css';
 
 // Barra lateral colapsada por defecto (64px) y expandible al hover (240px)
 // Visible solo para usuarios con rol 'superadmin' (control en AppBody)
 export default function SuperSidebar() {
   const [isResetting, setIsResetting] = useState(false);
+  const { user } = useAuth();
 
   const handleResetCarts = async () => {
     if (isResetting) return;
@@ -49,6 +52,13 @@ export default function SuperSidebar() {
 
   return (
     <aside className="super-sidebar" aria-label="Menú SuperAdmin">
+      <div className="super-sidebar__brand">
+        <img src={logoTech} alt="TECHFIX" />
+        <div>
+          <strong>TECHFIX</strong>
+          <span>Servicio técnico</span>
+        </div>
+      </div>
       <nav className="super-sidebar__nav">
         <NavLink to="/admin/paneltrabajos" className="super-sidebar__item">
           <span className="super-sidebar__icon"><FaTools /></span>
@@ -97,6 +107,13 @@ export default function SuperSidebar() {
           <span className="super-sidebar__label">Limpiar carritos (todos)</span> */}
         </button>
       </nav>
+      <div className="super-sidebar__profile">
+        <span>{(user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
+        <div>
+          <strong>{user?.username || 'Admin'}</strong>
+          <small>{user?.role === 'superadmin' ? 'Super Admin' : 'Administrador'}</small>
+        </div>
+      </div>
     </aside>
   );
 }

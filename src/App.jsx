@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import SuperSidebar from "./components/SuperSidebar";
+import "./App.css";
 
 // Páginas públicas
 import Home from "./pages/Home";
@@ -12,6 +13,9 @@ import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ConsultaServicio from "./pages/ConsultaServicio"; 
+import PagoExitoso from "./pages/PagoExitoso";
+import PagoFallido from "./pages/PagoFallido";
+import PagoPendiente from "./pages/PagoPendiente";
 
 // Panel Admin
 import ClientesAdmin from "./admin/ClientesAdmin";
@@ -38,7 +42,7 @@ function AppBody() {
     return (
         <>
             {isSuperAdmin && <SuperSidebar />}
-            <div style={{ marginLeft: isSuperAdmin ? 64 : 0 }}>
+            <div className={isSuperAdmin ? "app-content with-super-sidebar" : "app-content"}>
                 <Routes>
             {/* Rutas públicas */}
             <Route path="/" element={<Home />} />
@@ -47,6 +51,10 @@ function AppBody() {
             <Route path="/servicios" element={<Servicios />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Resultados de pago (Mercado Pago) */}
+            <Route path="/pago-exitoso" element={<PagoExitoso />} />
+            <Route path="/pago-fallido" element={<PagoFallido />} />
+            <Route path="/pago-pendiente" element={<PagoPendiente />} />
               
             {/* ✅ RUTAS PÚBLICAS PARA SEGUIMIENTO DE SERVICIO */}
             <Route path="/seguimiento" element={<ConsultaServicio />} />
