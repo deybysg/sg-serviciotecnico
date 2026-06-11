@@ -4,7 +4,7 @@ import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import './Paneltrabajos.css';
-import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle } from 'react-icons/fi';
+import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle, FiSmartphone, FiTag, FiCalendar, FiHash } from 'react-icons/fi';
 import logoTech from '../assets/logo3.png';
 
 const ESTADO_OPTIONS = [
@@ -41,11 +41,24 @@ const getClienteName = (clienteId, clientes) => {
   if (typeof clienteId === 'object' && clienteId !== null) {
     return clienteId.nombreCompleto || "Cliente Desconocido";
   }
-  
+
   // Si es un ID, buscar en el array de clientes
   const cliente = clientes.find(c => String(c._id || c.id) === String(clienteId));
   return cliente?.nombreCompleto || "Cliente Desconocido";
 };
+
+// Helper para obtener datos del equipo de forma segura
+const getEquipoPanel = (servicio) =>
+  [servicio?.marcaProducto, servicio?.modeloProducto].filter(Boolean).join(' ') ||
+  servicio?.tipoServicio ||
+  'Equipo sin nombre';
+
+// Helper para obtener el detalle del servicio de forma segura
+const getDetallePanel = (servicio) =>
+  servicio?.detalles ||
+  servicio?.detalle ||
+  servicio?.tipoServicio ||
+  'Servicio técnico';
 
 // Helper para mostrar IDs cortos en la UI (últimos 8 caracteres)
 const shortId = (id, length = 8) => String(id || "").slice(-length).toUpperCase();
@@ -56,10 +69,11 @@ const PanelTrabajo = () => {
   const [servicios, setServicios] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
-  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("todos"); // 'todos', 'cliente', 'equipo', 'servicio'
+  const [modalOpen, setModalOpen] = useState(false);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
+  const [filtroEstado, setFiltroEstado] = useState("todos");
   const [visibleTooltipId, setVisibleTooltipId] = useState(null);
   const tooltipTimer = useRef(null);
   const [estadoMenuAbiertoId, setEstadoMenuAbiertoId] = useState(null);
@@ -125,17 +139,45 @@ const PanelTrabajo = () => {
     return counts;
   }, [serviciosActivos]);
 
-  // Lógica de filtrado (se mantiene)
+  // Lógica de filtrado mejorada con tipo de búsqueda
   const serviciosFiltrados = serviciosOrdenados.filter((s) => {
-    const query = searchQuery.toLowerCase();
-    // Manejar tanto cliente populado como clienteId
-    const clienteData = s.cliente || s.clienteId;
-    const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
-    const servicioId = String(s._id || s.id);
-    const servicioIdCorto = shortId(servicioId).toLowerCase();
-    const servicioNumeroStr = String(s.servicioNumero || "").toLowerCase();
-    const coincideBusqueda =
-      servicioId.includes(query) || servicioIdCorto.includes(query) || servicioNumeroStr.includes(query) || clienteNombre.includes(query);
+    const query = searchQuery.toLowerCase().trim();
+    let coincideBusqueda = true;
+
+    if (query) {
+      // Manejar tanto cliente populado como clienteId
+      const clienteData = s.cliente || s.clienteId;
+      const clienteNombre = getClienteName(clienteData, clientes).toLowerCase();
+      const servicioId = String(s._id || s.id);
+      const servicioIdCorto = shortId(servicioId).toLowerCase();
+      const servicioNumeroStr = String(s.servicioNumero || "").toLowerCase();
+      const equipoStr = getEquipoPanel(s).toLowerCase();
+      const servicioStr = (s.tipoServicio || "").toLowerCase();
+      const detalleStr = (s.detalles || s.detalle || "").toLowerCase();
+
+      switch (searchType) {
+        case "cliente":
+          coincideBusqueda = clienteNombre.includes(query);
+          break;
+        case "equipo":
+          coincideBusqueda = equipoStr.includes(query);
+          break;
+        case "servicio":
+          coincideBusqueda = servicioStr.includes(query) || detalleStr.includes(query);
+          break;
+        case "todos":
+        default:
+          coincideBusqueda =
+            servicioId.includes(query) ||
+            servicioIdCorto.includes(query) ||
+            servicioNumeroStr.includes(query) ||
+            clienteNombre.includes(query) ||
+            equipoStr.includes(query) ||
+            servicioStr.includes(query) ||
+            detalleStr.includes(query);
+          break;
+      }
+    }
 
     let coincideFiltro = true;
     if (filtroEstado !== "todos") {
@@ -157,8 +199,8 @@ const PanelTrabajo = () => {
           break;
       }
     }
-    return coincideBusqueda && coincideFiltro;
-  });
+    return coincideBusqueda && coincideFiltro;
+  });
   // Las funciones handleVerDetalles y handleGuardarEdicion se mantienen...
   const handleVerDetalles = (servicio) => {
     setServicioSeleccionado(servicio);
@@ -492,8 +534,113 @@ const PanelTrabajo = () => {
   }).length;
 
   const formatFechaPanel = (fecha) => fecha ? new Date(fecha).toLocaleDateString('es-AR') : '—';
-  const getEquipoPanel = (servicio) => [servicio.marcaProducto, servicio.modeloProducto].filter(Boolean).join(' ') || servicio.tipoServicio || 'Equipo sin nombre';
-  const getDetallePanel = (servicio) => servicio.detalles || servicio.detalle || servicio.tipoServicio || 'Servicio técnico';
+
+  // Determinar si hay filtros activos
+  const hayFiltrosActivos = searchQuery.trim() !== '' || filtroEstado !== 'todos';
+
+  // Renderizar una tarjeta de servicio (reutilizable)
+  const renderTarjetaServicio = (servicio) => {
+    const clienteData = servicio.cliente || servicio.clienteId;
+    const clienteNombre = getClienteName(clienteData, clientes);
+    const servicioId = servicio._id || servicio.id;
+    const numero = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(servicioId, 6)}`;
+    const equipo = getEquipoPanel(servicio);
+    const detalle = getDetallePanel(servicio);
+    const fechaIngreso = formatFechaPanel(servicio.fechaEntrada);
+    const diasEnTaller = servicio.fechaEntrada ? Math.floor((Date.now() - new Date(servicio.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    return (
+      <div className={`kanban-card card-estado-${servicio.estado}`} key={servicioId}>
+        {/* HEADER: ID + Prioridad */}
+        <div className="kanban-card-header">
+          <div className="kanban-card-id">
+            <FiHash size={12} />
+            <button onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : servicioId)}>{numero}</button>
+          </div>
+          <span className={`priority-pill priority-${servicio.estado}`}>
+            {servicio.estado === 'pendiente' ? 'Alta' : servicio.estado === 'revisionTerminada' ? 'Media' : 'Normal'}
+          </span>
+        </div>
+
+        {/* BODY: Cliente */}
+        <div className="kanban-card-section">
+          <div className="section-icon"><FiUser /></div>
+          <div className="section-content">
+            <span className="section-label">Cliente</span>
+            <span className="section-value">{clienteNombre}</span>
+          </div>
+        </div>
+
+        {/* BODY: Equipo */}
+        <div className="kanban-card-section">
+          <div className="section-icon"><FiSmartphone /></div>
+          <div className="section-content">
+            <span className="section-label">Equipo</span>
+            <span className="section-value">{equipo}</span>
+          </div>
+        </div>
+
+        {/* BODY: Servicio / Detalle */}
+        <div className="kanban-card-section">
+          <div className="section-icon"><FiTool /></div>
+          <div className="section-content">
+            <span className="section-label">Servicio</span>
+            <span className="section-value">{detalle}</span>
+          </div>
+        </div>
+
+        {/* BODY: Fecha + Días */}
+        <div className="kanban-card-section">
+          <div className="section-icon"><FiCalendar /></div>
+          <div className="section-content">
+            <span className="section-label">Ingreso</span>
+            <span className="section-value">{fechaIngreso} <span className="dias-badge">{diasEnTaller}d</span></span>
+          </div>
+        </div>
+
+        {/* FOOTER: Acciones */}
+        <div className="kanban-card-actions">
+          <div className="dropdown-estado">
+            <button
+              type="button"
+              className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
+              aria-haspopup="listbox"
+              aria-expanded={estadoMenuAbiertoId === servicioId}
+              onClick={() => {
+                const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
+                setEstadoMenuAbiertoId(open);
+                if (open) {
+                  const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
+                  setEstadoFocusIndex(idx >= 0 ? idx : 0);
+                }
+              }}
+            >
+              <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
+              <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
+            </button>
+            {estadoMenuAbiertoId === servicioId && (
+              <ul className="estado-menu" role="listbox">
+                {ESTADO_OPTIONS.map((opt, idx) => (
+                  <li
+                    key={opt.value}
+                    role="option"
+                    aria-selected={opt.value === servicio.estado}
+                    className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
+                    onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
+                  >
+                    <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
+                    <span className="estado-label">{opt.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button className="detail-link" onClick={() => handleVerDetalles(servicio)}>
+            <FiEye size={14} /> Ver
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="panel-trabajo-container tech-bg workboard-page">
@@ -539,24 +686,36 @@ const PanelTrabajo = () => {
             <span className="summary-icon"><FiCheckCircle /></span>
             <div><p>Listo para Entregar</p><strong>{conteosEstado.listoParaEntrega}</strong><small>{serviciosActivos.length ? Math.round((conteosEstado.listoParaEntrega / serviciosActivos.length) * 100) : 0}% del total</small></div>
           </article>
-          <article className="alerts-card">
-            <h2>Alertas <span>{trabajosAltaPrioridad + trabajosPendientesViejos}</span></h2>
-            <p><FiBell /> {trabajosAltaPrioridad} trabajos con alta prioridad</p>
-            <p><FiClock /> {trabajosPendientesViejos} trabajos pendientes por más de 3 días</p>
-            <button onClick={() => setFiltroEstado('todos')}>Ver todas</button>
-          </article>
         </section>
 
         <section className="workboard-filters">
-          <label className="workboard-search">
-            <input
-              type="text"
-              placeholder="Buscar por cliente, dispositivo, IMEI, número de orden..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <FiSearch />
-          </label>
+          <div className="workboard-search-group">
+            <label className="workboard-search">
+              <input
+                type="text"
+                placeholder={
+                  searchType === 'cliente' ? "Buscar por nombre de cliente..." :
+                  searchType === 'equipo' ? "Buscar por marca o modelo de equipo..." :
+                  searchType === 'servicio' ? "Buscar por tipo de servicio o detalle..." :
+                  "Buscar por cliente, equipo, servicio o número de orden..."
+                }
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <FiSearch />
+            </label>
+            <select
+              className="search-type-select"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              title="Tipo de búsqueda"
+            >
+              <option value="todos">🔍 Todos</option>
+              <option value="cliente">👤 Cliente</option>
+              <option value="equipo">📱 Equipo</option>
+              <option value="servicio">🔧 Servicio</option>
+            </select>
+          </div>
           <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
             <option value="todos">Estado: Todos</option>
             <option value="pendiente">Pendiente</option>
@@ -564,89 +723,65 @@ const PanelTrabajo = () => {
             <option value="enReparacion">En Reparación</option>
             <option value="listoParaEntrega">Listo para Entregar</option>
           </select>
-          <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); }}>
-            <FiSearch /> Filtros
+          <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); setSearchType('todos'); }}>
+            <FiSearch /> Limpiar Filtros
           </button>
         </section>
 
-        <section className="workboard-kanban">
-          {statusColumns.map((column) => {
-            const sourceItems = column.key === 'entregado'
-              ? servicios.filter((servicio) => servicio.estado === 'entregado')
-              : serviciosFiltrados;
-            const columnItems = sourceItems.filter((servicio) => servicio.estado === column.key).slice(0, 3);
-            return (
-              <article className={`kanban-column column-${column.key}`} key={column.key}>
-                <button className="kanban-title" onClick={() => setFiltroEstado(column.filter)}>
-                  <span>{column.icon}</span>
-                  {column.label}
-                  <strong>{column.count}</strong>
+        {/* VISTA FILTRADA: Grid ordenado cuando hay filtros activos */}
+        {hayFiltrosActivos && (
+          <section className="workboard-filtered-results">
+            <div className="filtered-results-header">
+              <h2>
+                <FiSearch /> Resultados
+                {searchQuery && (
+                  <span className="filtered-tag">"{searchQuery}"</span>
+                )}
+                {filtroEstado !== 'todos' && (
+                  <span className="filtered-tag">{getEstadoLabel(filtroEstado)}</span>
+                )}
+                <span className="filtered-count">{serviciosFiltrados.length} encontrados</span>
+              </h2>
+            </div>
+            {serviciosFiltrados.length === 0 ? (
+              <div className="filtered-empty">
+                <FiSearch size={48} />
+                <p>No se encontraron trabajos con los filtros aplicados.</p>
+                <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); setSearchType('todos'); }}>
+                  Limpiar filtros
                 </button>
-                <div className="kanban-items">
-                  {columnItems.length === 0 ? (
-                    <p className="kanban-empty">Sin trabajos en este estado.</p>
-                  ) : columnItems.map((servicio) => {
-                    const clienteData = servicio.cliente || servicio.clienteId;
-                    const clienteNombre = getClienteName(clienteData, clientes);
-                    const servicioId = servicio._id || servicio.id;
-                    const numero = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(servicioId, 6)}`;
-                    return (
-                      <div className="kanban-card" key={servicioId}>
-                        <div className="kanban-card-top">
-                          <button className="kanban-id" onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : servicioId)}>{numero}</button>
-                          <span className="priority-pill">{servicio.estado === 'pendiente' ? 'Alta Prioridad' : servicio.estado === 'revisionTerminada' ? 'Media Prioridad' : 'Baja Prioridad'}</span>
-                        </div>
-                        <h3>{getEquipoPanel(servicio)}</h3>
-                        <p>{getDetallePanel(servicio)}</p>
-                        <p>Cliente: {clienteNombre}</p>
-                        <p>{servicio.fechaSalida ? 'Entrega' : 'Ingreso'}: {formatFechaPanel(servicio.fechaSalida || servicio.fechaEntrada)}</p>
-                        <div className="kanban-card-actions">
-                          <div className="dropdown-estado">
-                            <button
-                              type="button"
-                              className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
-                              aria-haspopup="listbox"
-                              aria-expanded={estadoMenuAbiertoId === servicioId}
-                              onClick={() => {
-                                const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
-                                setEstadoMenuAbiertoId(open);
-                                if (open) {
-                                  const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
-                                  setEstadoFocusIndex(idx >= 0 ? idx : 0);
-                                }
-                              }}
-                            >
-                              <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
-                              <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
-                            </button>
-                            {estadoMenuAbiertoId === servicioId && (
-                              <ul className="estado-menu" role="listbox">
-                                {ESTADO_OPTIONS.map((opt, idx) => (
-                                  <li
-                                    key={opt.value}
-                                    role="option"
-                                    aria-selected={opt.value === servicio.estado}
-                                    className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
-                                    onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
-                                  >
-                                    <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
-                                    <span className="estado-label">{opt.label}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                          <button className="detail-link" onClick={() => handleVerDetalles(servicio)}>Ver detalle</button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <button className="kanban-see-all" onClick={() => setFiltroEstado(column.filter)}>Ver todos ({column.count})</button>
-              </article>
-            );
-          })}
-        </section>
+              </div>
+            ) : (
+              <div className="filtered-grid">
+                {serviciosFiltrados.map((servicio) => renderTarjetaServicio(servicio))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* VISTA KANBAN: Solo cuando NO hay filtros activos */}
+        {!hayFiltrosActivos && (
+          <section className="workboard-kanban">
+            {statusColumns.map((column) => {
+              const columnItems = serviciosOrdenados.filter((servicio) => servicio.estado === column.key).slice(0, 3);
+              return (
+                <article className={`kanban-column column-${column.key}`} key={column.key}>
+                  <button className="kanban-title" onClick={() => setFiltroEstado(column.filter)}>
+                    <span>{column.icon}</span>
+                    {column.label}
+                    <strong>{column.count}</strong>
+                  </button>
+                  <div className="kanban-items">
+                    {columnItems.length === 0 ? (
+                      <p className="kanban-empty">Sin trabajos en este estado.</p>
+                    ) : columnItems.map((servicio) => renderTarjetaServicio(servicio))}
+                  </div>
+                  <button className="kanban-see-all" onClick={() => setFiltroEstado(column.filter)}>Ver todos ({column.count})</button>
+                </article>
+              );
+            })}
+          </section>
+        )}
       </section>
       {modalOpen && servicioSeleccionado && (
         <div className="modal-backdrop" onClick={() => setModalOpen(false)}>

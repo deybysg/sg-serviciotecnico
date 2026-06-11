@@ -3,12 +3,19 @@ import { api } from "../services/api";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { QRCodeSVG } from "qrcode.react";
-import html2canvas from "html2canvas"; 
-import jsPDF from "jspdf"; 
-import ComprobantePDF from "./ComprobantePDF"; 
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import ComprobantePDF from "./ComprobantePDF";
 import ModalDetalles from "./ModalDetalles";
 import "./ServiciosAdmin.css";
 import { toIdString } from "../utils/id";
+import {
+  FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiCheckSquare,
+  FiTool, FiSmartphone, FiTag, FiList, FiFileText, FiDollarSign,
+  FiCreditCard, FiActivity, FiPlus, FiSave, FiX, FiSearch,
+  FiEye, FiFile, FiTrash2, FiClipboard, FiClock, FiCheckCircle,
+  FiAlertTriangle, FiTruck, FiSettings, FiCalendar
+} from "react-icons/fi";
 
 const TIPO_SERVICIO_OPTIONS = [
     { value: "reparacion", label: "Reparación" },
@@ -61,8 +68,8 @@ function ServiciosAdmin() {
 
     const initialClientState = {
         nombreCompleto: "",
-        telefono: "",
-        email: "",
+        celular: "",
+        correo: "",
         direccion: "",
         dni: "",
     };
@@ -82,6 +89,7 @@ function ServiciosAdmin() {
     };
 
     const [clientes, setClientes] = useState([]);
+    const [clientesOptions, setClientesOptions] = useState([]);
     const [servicios, setServicios] = useState([]);
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [isNewClient, setIsNewClient] = useState(false);
@@ -100,11 +108,13 @@ function ServiciosAdmin() {
         const loadData = async () => {
             try {
                 const clientesData = await api.get('/clientes');
+                setClientes(clientesData);
                 const options = clientesData.map((c) => ({
                     value: c._id || c.id,
                     label: c.nombreCompleto,
+                    data: c, // Guardar datos completos del cliente
                 }));
-                setClientes(options);
+                setClientesOptions(options);
 
                 const serviciosData = await api.get('/servicios');
                 setServicios(serviciosData);
@@ -164,6 +174,18 @@ function ServiciosAdmin() {
 
     const handleClienteSelect = (selectedOption) => {
         setClienteSeleccionado(selectedOption);
+        if (selectedOption && selectedOption.data) {
+            const c = selectedOption.data;
+            setClientData({
+                nombreCompleto: c.nombreCompleto || '',
+                celular: c.celular || '',
+                correo: c.correo || '',
+                direccion: c.direccion || '',
+                dni: c.dni || '',
+            });
+        } else {
+            setClientData(initialClientState);
+        }
     };
 
     const handleLimpiarFormulario = () => {
@@ -173,27 +195,36 @@ function ServiciosAdmin() {
         setIsNewClient(false);
     };
 
+    // Función para obtener datos del cliente del estado (usado en la lista de servicios)
+    const getClienteData = (clienteId) => {
+        if (typeof clienteId === 'object' && clienteId !== null) {
+            return clienteId;
+        }
+        return clientes.find(c => String(c._id || c.id) === String(clienteId));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         let clienteIdToUse = null;
 
         if (isNewClient) {
-            if (!clientData.nombreCompleto || !clientData.telefono) {
-                Swal.fire("Atención", "Nombre y teléfono son requeridos para el nuevo cliente.", "warning");
+            if (!clientData.nombreCompleto || !clientData.celular) {
+                Swal.fire("Atención", "Nombre y celular son requeridos para el nuevo cliente.", "warning");
                 return;
             }
             try {
                 const nuevoCliente = await api.post('/clientes', {
                     nombreCompleto: clientData.nombreCompleto,
-                    celular: clientData.telefono,
-                    correo: clientData.email,
+                    celular: clientData.celular,
+                    correo: clientData.correo,
                     direccion: clientData.direccion,
                     dni: clientData.dni,
                 });
                 clienteIdToUse = nuevoCliente._id;
-                const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto };
-                setClientes((prev) => [...prev, newClientOption]);
+                const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
+                setClientes((prev) => [...prev, nuevoCliente]);
+                setClientesOptions((prev) => [...prev, newClientOption]);
                 setClienteSeleccionado(newClientOption);
             } catch (err) {
                 Swal.fire("Error", `No se pudo crear el cliente: ${err.message}`, "error");
@@ -362,27 +393,27 @@ function ServiciosAdmin() {
                         {/* SECCION 1: Datos del Cliente */}
                         <div className="sn-card">
                             <h2 className="sn-card-title">
-                                <span className="sn-icon sn-icon-info">ℹ</span>
+                                <span className="sn-icon sn-icon-info"><FiUser /></span>
                                 Datos del Cliente
                             </h2>
 
                             <div className="sn-field">
-                                <label className="sn-label">Nombre completo <span className="sn-required">*</span></label>
+                                <label className="sn-label"><FiUser size={12} /> Nombre completo <span className="sn-required">*</span></label>
                                 <input
                                     type="text"
                                     className="sn-input"
                                     placeholder="Ej: Juan Perez"
                                     disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={isNewClient ? clientData.nombreCompleto : ''}
+                                    value={clientData.nombreCompleto}
                                     onChange={(e) => setClientData({ ...clientData, nombreCompleto: e.target.value })}
                                 />
                             </div>
 
                             {!isNewClient && (
                                 <div className="sn-field">
-                                    <label className="sn-label">Seleccionar cliente existente</label>
+                                    <label className="sn-label"><FiSearch size={12} /> Seleccionar cliente existente</label>
                                     <Select
-                                        options={clientes}
+                                        options={clientesOptions}
                                         onChange={handleClienteSelect}
                                         value={clienteSeleccionado}
                                         placeholder="Buscar cliente..."
@@ -392,56 +423,56 @@ function ServiciosAdmin() {
                             )}
 
                             <div className="sn-field">
-                                <label className="sn-label">Teléfono <span className="sn-required">*</span></label>
+                                <label className="sn-label"><FiPhone size={12} /> Celular <span className="sn-required">*</span></label>
                                 <div className="sn-input-with-icon">
                                     <input
                                         type="text"
-                                        name="telefono"
+                                        name="celular"
                                         className="sn-input"
                                         placeholder="Ej: 11 1234 5678"
                                         disabled={!isNewClient && !!clienteSeleccionado}
-                                        value={isNewClient ? clientData.telefono : ''}
-                                        onChange={(e) => setClientData({ ...clientData, telefono: e.target.value })}
+                                        value={clientData.celular}
+                                        onChange={(e) => setClientData({ ...clientData, celular: e.target.value })}
                                     />
-                                    <span className="sn-input-icon-right">💬</span>
+                                    <span className="sn-input-icon-right"><FiPhone size={14} /></span>
                                 </div>
                             </div>
 
                             <div className="sn-field">
-                                <label className="sn-label">Email</label>
+                                <label className="sn-label"><FiMail size={12} /> Correo</label>
                                 <input
                                     type="email"
-                                    name="email"
+                                    name="correo"
                                     className="sn-input"
                                     placeholder="Ej: juanperez@email.com"
                                     disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={isNewClient ? clientData.email : ''}
-                                    onChange={(e) => setClientData({ ...clientData, email: e.target.value })}
+                                    value={clientData.correo}
+                                    onChange={(e) => setClientData({ ...clientData, correo: e.target.value })}
                                 />
                             </div>
 
                             <div className="sn-field">
-                                <label className="sn-label">Dirección</label>
+                                <label className="sn-label"><FiMapPin size={12} /> Dirección</label>
                                 <input
                                     type="text"
                                     name="direccion"
                                     className="sn-input"
                                     placeholder="Ej: Av. Siempre Viva 123, CABA"
                                     disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={isNewClient ? clientData.direccion : ''}
+                                    value={clientData.direccion}
                                     onChange={(e) => setClientData({ ...clientData, direccion: e.target.value })}
                                 />
                             </div>
 
                             <div className="sn-field">
-                                <label className="sn-label">DNI (opcional)</label>
+                                <label className="sn-label"><FiHash size={12} /> DNI (opcional)</label>
                                 <input
                                     type="text"
                                     name="dni"
                                     className="sn-input"
                                     placeholder="Ej: 12.345.678"
                                     disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={isNewClient ? clientData.dni : ''}
+                                    value={clientData.dni}
                                     onChange={(e) => setClientData({ ...clientData, dni: e.target.value })}
                                 />
                             </div>
@@ -454,23 +485,24 @@ function ServiciosAdmin() {
                                         setIsNewClient(!isNewClient);
                                         if (!isNewClient) {
                                             setClienteSeleccionado(null);
+                                            setClientData(initialClientState);
                                         }
                                     }}
                                 />
-                                <span>Crear nuevo cliente</span>
+                                <span><FiUser size={14} /> Crear nuevo cliente</span>
                             </label>
                         </div>
 
                         {/* SECCION 2: Datos del Servicio */}
                         <div className="sn-card">
                             <h2 className="sn-card-title">
-                                <span className="sn-icon sn-icon-service">🔧</span>
+                                <span className="sn-icon sn-icon-service"><FiTool /></span>
                                 Datos del Servicio
                             </h2>
 
                             <div className="sn-field-row-2">
                                 <div className="sn-field">
-                                    <label className="sn-label">Tipo de Servicio <span className="sn-required">*</span></label>
+                                    <label className="sn-label"><FiTool size={12} /> Tipo de Servicio <span className="sn-required">*</span></label>
                                     <select name="tipoServicio" className="sn-select" value={serviceData.tipoServicio} onChange={handleServiceChange}>
                                         <option value="">Seleccionar tipo de servicio</option>
                                         {TIPO_SERVICIO_OPTIONS.map((o) => (
@@ -479,7 +511,7 @@ function ServiciosAdmin() {
                                     </select>
                                 </div>
                                 <div className="sn-field">
-                                    <label className="sn-label">Tipo de Equipo <span className="sn-required">*</span></label>
+                                    <label className="sn-label"><FiSmartphone size={12} /> Tipo de Equipo <span className="sn-required">*</span></label>
                                     <select name="tipoEquipo" className="sn-select" value={serviceData.tipoEquipo} onChange={handleServiceChange}>
                                         <option value="">Seleccionar tipo de equipo</option>
                                         {TIPO_EQUIPO_OPTIONS.map((o) => (
@@ -491,7 +523,7 @@ function ServiciosAdmin() {
 
                             <div className="sn-field-row-2">
                                 <div className="sn-field">
-                                    <label className="sn-label">Marca <span className="sn-required">*</span></label>
+                                    <label className="sn-label"><FiTag size={12} /> Marca <span className="sn-required">*</span></label>
                                     {serviceData.tipoEquipo === 'otros' || !BRAND_OPTIONS[serviceData.tipoEquipo] ? (
                                         <input type="text" name="marcaProducto" className="sn-input" placeholder="Ej: Apple, Samsung, HP, Dell..." value={serviceData.marcaProducto} onChange={handleServiceChange} />
                                     ) : (
@@ -504,7 +536,7 @@ function ServiciosAdmin() {
                                     )}
                                 </div>
                                 <div className="sn-field">
-                                    <label className="sn-label">Modelo <span className="sn-required">*</span></label>
+                                    <label className="sn-label"><FiSettings size={12} /> Modelo <span className="sn-required">*</span></label>
                                     {serviceData.tipoEquipo === 'otros' || !MODEL_OPTIONS[serviceData.tipoEquipo] ? (
                                         <input type="text" name="modeloProducto" className="sn-input" placeholder="Ej: iPhone 13, Galaxy S21, Inspiron 15..." value={serviceData.modeloProducto} onChange={handleServiceChange} />
                                     ) : (
@@ -529,7 +561,7 @@ function ServiciosAdmin() {
                             </div>
 
                             <div className="sn-field">
-                                <label className="sn-label">Falla Reportada <span className="sn-required">*</span></label>
+                                <label className="sn-label"><FiAlertTriangle size={12} /> Falla Reportada <span className="sn-required">*</span></label>
                                 <textarea
                                     name="fallaReportada"
                                     className="sn-textarea"
@@ -541,7 +573,7 @@ function ServiciosAdmin() {
                             </div>
 
                             <div className="sn-field">
-                                <label className="sn-label">Asunto / Detalle del Servicio <span className="sn-required">*</span></label>
+                                <label className="sn-label"><FiFileText size={12} /> Asunto / Detalle del Servicio <span className="sn-required">*</span></label>
                                 <textarea
                                     name="asunto"
                                     className="sn-textarea"
@@ -558,12 +590,12 @@ function ServiciosAdmin() {
                         {/* SECCION 3: Información Adicional */}
                         <div className="sn-card">
                             <h2 className="sn-card-title">
-                                <span className="sn-icon sn-icon-notes">📝</span>
+                                <span className="sn-icon sn-icon-notes"><FiFileText /></span>
                                 Información Adicional
                             </h2>
 
                             <div className="sn-field">
-                                <label className="sn-label">Notas adicionales</label>
+                                <label className="sn-label"><FiFileText size={12} /> Notas adicionales</label>
                                 <div className="sn-textarea-wrapper">
                                     <textarea
                                         name="notasAdicionales"
@@ -582,13 +614,13 @@ function ServiciosAdmin() {
                         {/* SECCION 4: Costos y Pago */}
                         <div className="sn-card">
                             <h2 className="sn-card-title">
-                                <span className="sn-icon sn-icon-payment">💰</span>
+                                <span className="sn-icon sn-icon-payment"><FiDollarSign /></span>
                                 Costos y Pago
                             </h2>
 
                             <div className="sn-field-row-2">
                                 <div className="sn-field">
-                                    <label className="sn-label">Seña / Anticipo</label>
+                                    <label className="sn-label"><FiDollarSign size={12} /> Seña / Anticipo</label>
                                     <div className="sn-input-prefix">
                                         <span className="sn-prefix">$</span>
                                         <input
@@ -603,7 +635,7 @@ function ServiciosAdmin() {
                                     <span className="sn-help-text">Monto recibido como señal o anticipo</span>
                                 </div>
                                 <div className="sn-field">
-                                    <label className="sn-label">Total Estimado</label>
+                                    <label className="sn-label"><FiDollarSign size={12} /> Total Estimado</label>
                                     <div className="sn-input-prefix">
                                         <span className="sn-prefix">$</span>
                                         <input
@@ -621,7 +653,7 @@ function ServiciosAdmin() {
 
                             <div className="sn-field-row-2">
                                 <div className="sn-field">
-                                    <label className="sn-label">Método de Pago</label>
+                                    <label className="sn-label"><FiCreditCard size={12} /> Método de Pago</label>
                                     <select name="metodoPago" className="sn-select" value={serviceData.metodoPago} onChange={handleServiceChange}>
                                         <option value="">Seleccionar método de pago</option>
                                         {METODO_PAGO_OPTIONS.map((o) => (
@@ -630,7 +662,7 @@ function ServiciosAdmin() {
                                     </select>
                                 </div>
                                 <div className="sn-field">
-                                    <label className="sn-label">Estado Inicial</label>
+                                    <label className="sn-label"><FiActivity size={12} /> Estado Inicial</label>
                                     <select name="estado" className="sn-select" value={serviceData.estado} onChange={handleServiceChange}>
                                         {ESTADO_OPTIONS.map((o) => (
                                             <option key={o.value} value={o.value}>{o.label}</option>
@@ -644,14 +676,14 @@ function ServiciosAdmin() {
                     {/* BOTONES DE ACCION */}
                     <div className="sn-actions-bottom">
                         <button type="button" className="sn-btn sn-btn-clear" onClick={handleLimpiarFormulario}>
-                            🗑 Limpiar Formulario
+                            <FiX size={14} /> Limpiar Formulario
                         </button>
                         <div className="sn-actions-right">
                             <button type="button" className="sn-btn sn-btn-cancel" onClick={handleLimpiarFormulario}>
-                                Cancelar
+                                <FiX size={14} /> Cancelar
                             </button>
                             <button type="submit" className="sn-btn sn-btn-save">
-                                💾 Guardar Servicio
+                                <FiSave size={14} /> Guardar Servicio
                             </button>
                         </div>
                     </div>
@@ -659,61 +691,99 @@ function ServiciosAdmin() {
 
                 {/* BOTON MOSTRAR/OCULTAR SERVICIOS */}
                 <button className="sn-btn-toggle" onClick={() => setShowListaServicios(!showListaServicios)}>
-                    {showListaServicios ? "Ocultar Servicios" : "Mostrar Servicios"}
+                    <FiClipboard size={16} /> {showListaServicios ? "Ocultar Servicios" : "Mostrar Servicios"}
                 </button>
 
                 {showListaServicios && (
-                    <div className="sn-buscador">
-                        <input
-                            type="text"
-                            placeholder="Buscar por N° Orden, cliente, marca o tipo..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                    <div className="sn-filters">
+                        <div className="sn-buscador">
+                            <FiSearch size={16} />
+                            <input
+                                type="text"
+                                placeholder="Buscar por N° Orden, cliente, marca o tipo..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
                 )}
 
                 {showListaServicios && (
-                    <div className="sn-servicios-lista">
-                        <div className="sn-servicios-cards">
-                            {serviciosOrdenados.map((s) => {
-                                const clienteId = (s.cliente && typeof s.cliente === 'object') ? (s.cliente._id || s.cliente.id || '') : (s.cliente || '');
-                                const clienteObj = clientes.find(c => c.value === clienteId);
-                                const clienteNombre = (s.cliente && typeof s.cliente === 'object') ? (s.cliente.nombreCompleto || '') : (clienteObj?.label || "Cliente desconocido");
-                                const servicioId = s._id || s.id;
-                                const servicioNumero = s.servicioNumero || 'N/A';
-                                const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
+                    <div className="sn-servicios-grid">
+                        {serviciosOrdenados.map((s) => {
+                            const clienteData = getClienteData(s.cliente);
+                            const clienteNombre = clienteData?.nombreCompleto || "Cliente desconocido";
+                            const servicioId = s._id || s.id;
+                            const servicioNumero = s.servicioNumero || 'N/A';
+                            const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
+                            const estadoClass = s.estado || 'pendiente';
+                            const iniciales = clienteNombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                            const fechaEntrada = s.fechaEntrada ? new Date(s.fechaEntrada).toLocaleDateString('es-AR') : 'N/A';
+                            const equipo = [s.marcaProducto, s.modeloProducto].filter(Boolean).join(' ') || 'Sin equipo';
 
-                                return (
-                                    <div key={servicioId} className="sn-servicio-card">
-                                        <div className="sn-card-qr">
-                                            <h4>N° Orden: {servicioNumero}</h4>
-                                            <QRCodeSVG value={qrUrl} size={70} level="H" />
+                            return (
+                                <div key={servicioId} className="sn-servicio-card">
+                                    <div className="sn-servicio-card-header">
+                                        <div className="sn-servicio-card-avatar">
+                                            {iniciales}
                                         </div>
-                                        <div className="sn-card-info">
-                                            <div className="sn-card-grid">
-                                                <div className="sn-card-label">Cliente</div>
-                                                <div className="sn-card-label">Tipo</div>
-                                                <div className="sn-card-label">Marca</div>
-                                                <div className="sn-card-label">Modelo</div>
-                                                <div className="sn-card-label">Entrada</div>
-                                                <div className="sn-card-value">{clienteNombre}</div>
-                                                <div className="sn-card-value">{TIPO_EQUIPO_OPTIONS.find(o => o.value === s.tipoEquipo)?.label || s.tipoServicio}</div>
-                                                <div className="sn-card-value">{s.marcaProducto || 'N/A'}</div>
-                                                <div className="sn-card-value">{s.modeloProducto || 'N/A'}</div>
-                                                <div className="sn-card-value">{s.fechaEntrada ? new Date(s.fechaEntrada).toLocaleDateString() : 'N/A'}</div>
-                                            </div>
-                                            <div className="sn-card-actions">
-                                                <button onClick={() => openModal(s)} className="sn-btn sn-btn-detail">Ver más</button>
-                                                <button onClick={() => generarComprobante(s)} className="sn-btn sn-btn-pdf">PDF</button>
-                                                <button onClick={() => handleDeleteServicio(servicioId)} className="sn-btn sn-btn-delete">Eliminar</button>
-                                            </div>
+                                        <div className="sn-servicio-card-header-info">
+                                            <h4>{clienteNombre}</h4>
+                                            <span className="sn-servicio-card-orden">Orden #{servicioNumero}</span>
+                                        </div>
+                                        <div className={`sn-servicio-card-estado ${estadoClass}`}>
+                                            {ESTADO_OPTIONS.find(o => o.value === s.estado)?.label || s.estado}
                                         </div>
                                     </div>
-                                );
-                            })}
-                            {serviciosFiltrados.length === 0 && <p className="sn-no-results">No se encontraron servicios.</p>}
-                        </div>
+
+                                    <div className="sn-servicio-card-body">
+                                        <div className="sn-servicio-data-row">
+                                            <span className="sn-servicio-data-icon"><FiSmartphone size={14} /></span>
+                                            <span className="sn-servicio-data-label">Equipo</span>
+                                            <span className="sn-servicio-data-value">{equipo}</span>
+                                        </div>
+                                        <div className="sn-servicio-data-row">
+                                            <span className="sn-servicio-data-icon"><FiTool size={14} /></span>
+                                            <span className="sn-servicio-data-label">Tipo</span>
+                                            <span className="sn-servicio-data-value">{TIPO_EQUIPO_OPTIONS.find(o => o.value === s.tipoEquipo)?.label || s.tipoServicio || 'N/A'}</span>
+                                        </div>
+                                        <div className="sn-servicio-data-row">
+                                            <span className="sn-servicio-data-icon"><FiTag size={14} /></span>
+                                            <span className="sn-servicio-data-label">Marca</span>
+                                            <span className="sn-servicio-data-value">{s.marcaProducto || 'N/A'}</span>
+                                        </div>
+                                        <div className="sn-servicio-data-row">
+                                            <span className="sn-servicio-data-icon"><FiSettings size={14} /></span>
+                                            <span className="sn-servicio-data-label">Modelo</span>
+                                            <span className="sn-servicio-data-value">{s.modeloProducto || 'N/A'}</span>
+                                        </div>
+                                        <div className="sn-servicio-data-row">
+                                            <span className="sn-servicio-data-icon"><FiCalendar size={14} /></span>
+                                            <span className="sn-servicio-data-label">Entrada</span>
+                                            <span className="sn-servicio-data-value">{fechaEntrada}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="sn-servicio-card-footer">
+                                        <button onClick={() => openModal(s)} className="sn-servicio-card-btn sn-servicio-btn-detail">
+                                            <FiEye size={14} /> Ver
+                                        </button>
+                                        <button onClick={() => generarComprobante(s)} className="sn-servicio-card-btn sn-servicio-btn-pdf">
+                                            <FiFile size={14} /> PDF
+                                        </button>
+                                        <button onClick={() => handleDeleteServicio(servicioId)} className="sn-servicio-card-btn sn-servicio-btn-delete">
+                                            <FiTrash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {serviciosOrdenados.length === 0 && (
+                            <div className="sn-no-results">
+                                <FiSearch size={48} />
+                                <p>No se encontraron servicios.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

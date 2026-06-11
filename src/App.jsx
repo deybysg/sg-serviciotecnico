@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 import SuperSidebar from "./components/SuperSidebar";
 import "./App.css";
@@ -38,11 +39,12 @@ import { useAuth } from "./context/AuthContext";
 function AppBody() {
     const { user } = useAuth();
     const isSuperAdmin = user?.role === 'superadmin';
+    const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
     return (
         <>
-            {isSuperAdmin && <SuperSidebar />}
-            <div className={isSuperAdmin ? "app-content with-super-sidebar" : "app-content"}>
+            {isSuperAdmin && <SuperSidebar onExpandChange={setSidebarExpanded} />}
+            <div className={isSuperAdmin ? `app-content with-super-sidebar${sidebarExpanded ? ' sidebar-expanded' : ''}` : "app-content"}>
                 <Routes>
             {/* Rutas públicas */}
             <Route path="/" element={<Home />} />

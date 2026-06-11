@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import { shortId } from "../utils/id";
 import "./clientes.css";
 import Swal from "sweetalert2";
+import { FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiTool, FiEdit3, FiTrash2, FiEye, FiSearch, FiPlus, FiUsers, FiGrid, FiList } from "react-icons/fi";
 
 // ------------------------------------------------------------------
 // NUEVO COMPONENTE MODAL DE SERVICIOS
@@ -175,6 +176,7 @@ function Clientes() {
         celular: "",
         correo: "",
         direccion: "",
+        dni: "",
         serviciosRealizados: [], 
     });
 
@@ -323,7 +325,7 @@ function Clientes() {
                 title: editId ? '✅ Cliente editado exitosamente' : '✅ Cliente agregado exitosamente'
             });
 
-            setFormData({ nombreCompleto: "", celular: "", correo: "", direccion: "", serviciosRealizados: [] });
+            setFormData({ nombreCompleto: "", celular: "", correo: "", direccion: "", dni: "", serviciosRealizados: [] });
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -389,6 +391,7 @@ function Clientes() {
             celular: cliente.celular,
             correo: cliente.correo,
             direccion: cliente.direccion,
+            dni: cliente.dni || '',
             serviciosRealizados: cliente.serviciosRealizados || []
         }); 
         setEditId(cliente._id || cliente.id);
@@ -403,43 +406,106 @@ function Clientes() {
     return (
         <div className="clientes-full">
             <div className="clientes-container">
-                <h2>Gestión de Clientes</h2>
+                <h1>Gestión de Clientes</h1>
 
-                {/* Formulario */}
-                <form className="cliente-form" onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        name="nombreCompleto"
-                        placeholder="Apellido y Nombre"
-                        value={formData.nombreCompleto}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="celular"
-                        placeholder="Celular"
-                        value={formData.celular}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="email"
-                        name="correo"
-                        placeholder="Correo"
-                        value={formData.correo}
-                        onChange={handleChange}
-                    />
-                    <input
-                        type="text"
-                        name="direccion"
-                        placeholder="Dirección"
-                        value={formData.direccion}
-                        onChange={handleChange}
-                    />
-                    <button type="submit" className="btn-primary">
-                        {editId ? "Guardar cambios " : "Agregar Cliente +"}
-                    </button>
+                {/* Formulario moderno compacto */}
+                <form className="cliente-form-compact" onSubmit={handleSubmit}>
+                    <div className="cliente-card-form">
+                        {/* Header */}
+                        <div className="cliente-form-header">
+                            <div className="cliente-form-avatar">
+                                <FiUser size={18} />
+                            </div>
+                            <div className="cliente-form-header-info">
+                                <h3>{editId ? "Editar Cliente" : "Nuevo Cliente"}</h3>
+                                <span>{editId ? "Modificá los datos del cliente" : "Completá los datos del nuevo cliente"}</span>
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="cliente-form-body">
+                            <div className="cliente-form-row">
+                                <div className="cliente-form-field">
+                                    <label className="cliente-form-label">
+                                        <FiUser size={12} /> Nombre completo <span className="cliente-form-required">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="nombreCompleto"
+                                        className="cliente-form-input"
+                                        placeholder="Ej: Juan Perez"
+                                        value={formData.nombreCompleto}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="cliente-form-field">
+                                    <label className="cliente-form-label">
+                                        <FiPhone size={12} /> Celular <span className="cliente-form-required">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="celular"
+                                        className="cliente-form-input"
+                                        placeholder="Ej: 11 1234 5678"
+                                        value={formData.celular}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="cliente-form-row">
+                                <div className="cliente-form-field">
+                                    <label className="cliente-form-label">
+                                        <FiMail size={12} /> Correo
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="correo"
+                                        className="cliente-form-input"
+                                        placeholder="Ej: juanperez@email.com"
+                                        value={formData.correo}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="cliente-form-field">
+                                    <label className="cliente-form-label">
+                                        <FiHash size={12} /> DNI
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="dni"
+                                        className="cliente-form-input"
+                                        placeholder="Ej: 12.345.678"
+                                        value={formData.dni}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="cliente-form-field">
+                                <label className="cliente-form-label">
+                                    <FiMapPin size={12} /> Dirección
+                                </label>
+                                <input
+                                    type="text"
+                                    name="direccion"
+                                    className="cliente-form-input"
+                                    placeholder="Ej: Av. Siempre Viva 123, CABA"
+                                    value={formData.direccion}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="cliente-form-footer">
+                            <button type="submit" className="cliente-form-btn">
+                                <FiPlus size={14} /> {editId ? "Guardar cambios" : "Agregar Cliente"}
+                            </button>
+                        </div>
+                    </div>
                 </form>
 
                 {/* Toggle Lista */}
@@ -460,61 +526,102 @@ function Clientes() {
                 >
                     {mostrarLista && (
                         <div className="clientes-lista">
-                            <div className="buscador">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar cliente por nombre..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                            {/* Header de lista con stats */}
+                            <div className="clientes-lista-header">
+                                <div className="clientes-stats">
+                                    <span className="clientes-stat-badge">
+                                        <FiUsers /> {filteredClientes.length} clientes
+                                    </span>
+                                </div>
+                                <div className="buscador">
+                                    <FiSearch className="buscador-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar cliente por nombre, celular, correo..."
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
                             {filteredClientes.length === 0 ? (
-                                <p className="no-clientes">No hay clientes que coincidan</p>
+                                <div className="no-clientes">
+                                    <FiSearch size={40} />
+                                    <p>No se encontraron clientes</p>
+                                    <span>Intentá con otro término de búsqueda</span>
+                                </div>
                             ) : (
-                                filteredClientes.map((c) => (
-                                    <div key={c._id || c.id} className="cliente-card">
-                                        {/* Información principal */}
-                                        <div className="cliente-info">
-                                            <h4>{c.nombreCompleto}</h4>
-                                            <p>
-                                                <b>Celular:</b> {c.celular}
-                                            </p>
-                                            <p>
-                                                <b>Correo:</b> {c.correo}
-                                            </p>
-                                            <p>
-                                                <b>Dirección:</b> {c.direccion}
-                                            </p>
-                                        </div>
+                                <div className="clientes-grid">
+                                    {filteredClientes.map((c) => {
+                                        const iniciales = c.nombreCompleto
+                                            ? c.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                            : '??';
+                                        const serviciosCount = c.serviciosRealizados?.length || 0;
+                                        return (
+                                            <div key={c._id || c.id} className="cliente-card-modern">
+                                                {/* Header: Avatar + Nombre + Badge */}
+                                                <div className="cliente-card-header">
+                                                    <div className="cliente-avatar">
+                                                        {iniciales}
+                                                    </div>
+                                                    <div className="cliente-header-info">
+                                                        <h4>{c.nombreCompleto}</h4>
+                                                        {c.dni && (
+                                                            <span className="cliente-dni">
+                                                                <FiHash size={10} /> {c.dni}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="cliente-servicios-badge">
+                                                        <FiTool size={12} />
+                                                        {serviciosCount}
+                                                    </div>
+                                                </div>
 
-                                        {/* Botón de Historial (Abre el nuevo Modal) */}
-                                        <div className="historial-toggle-area">
-                                            <button
-                                                className="btn-historial"
-                                                onClick={() => handleOpenModal(c)}
-                                            >
-                                                Ver {c.serviciosRealizados.length || 0} Servicios Realizados 👁️
-                                            </button>
-                                        </div>
-                                        
-                                        {/* Acciones */}
-                                        <div className="acciones">
-                                            <button
-                                                className="btn-edit"
-                                                onClick={() => handleEdit(c)}
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                className="btn-delete"
-                                                onClick={() => handleDelete(c._id || c.id)}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
+                                                {/* Body: Datos con iconos */}
+                                                <div className="cliente-card-body">
+                                                    <div className="cliente-data-row">
+                                                        <span className="cliente-data-icon"><FiPhone size={14} /></span>
+                                                        <span className="cliente-data-label">Celular</span>
+                                                        <span className="cliente-data-value">{c.celular || '—'}</span>
+                                                    </div>
+                                                    <div className="cliente-data-row">
+                                                        <span className="cliente-data-icon"><FiMail size={14} /></span>
+                                                        <span className="cliente-data-label">Correo</span>
+                                                        <span className="cliente-data-value">{c.correo || '—'}</span>
+                                                    </div>
+                                                    <div className="cliente-data-row">
+                                                        <span className="cliente-data-icon"><FiMapPin size={14} /></span>
+                                                        <span className="cliente-data-label">Dirección</span>
+                                                        <span className="cliente-data-value">{c.direccion || '—'}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Footer: Acciones */}
+                                                <div className="cliente-card-footer">
+                                                    <button
+                                                        className="cliente-btn cliente-btn-historial"
+                                                        onClick={() => handleOpenModal(c)}
+                                                    >
+                                                        <FiEye size={14} /> Historial
+                                                    </button>
+                                                    <button
+                                                        className="cliente-btn cliente-btn-edit"
+                                                        onClick={() => handleEdit(c)}
+                                                    >
+                                                        <FiEdit3 size={14} /> Editar
+                                                    </button>
+                                                    <button
+                                                        className="cliente-btn cliente-btn-delete"
+                                                        onClick={() => handleDelete(c._id || c.id)}
+                                                    >
+                                                        <FiTrash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             )}
                         </div>
                     )}

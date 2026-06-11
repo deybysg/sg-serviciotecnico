@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { api } from "../services/api";
 import { shortId } from "../utils/id";
 import Swal from "sweetalert2";
-import "./ProductosAdmin.css"; 
+import "./ProductosAdmin.css";
+import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit3, FiTrash2, FiSearch, FiAlertTriangle, FiPackage, FiX, FiSave, FiUpload, FiLink } from "react-icons/fi"; 
 
 const CATEGORIAS_VALIDAS = ["celulares", "computadoras", "accesorios", "otros"];
 const UMBRAL_STOCK_BAJO = 5; // Constante para el umbral de stock bajo o crítico
@@ -17,55 +18,66 @@ function AlertaStockModal({ productosAAlertar, onClose }) {
     // Corregido: Solo productos con stock > 0 pero <= UMBRAL
     const productosCasiAgotados = productosAAlertar.filter(p => p.stock > 0 && p.stock <= UMBRAL_STOCK_BAJO);
 
-    return (
-        <div className="stock-alerta-modal-fondo" onClick={onClose}>
-            <div
-                className="stock-alerta-modal-contenido"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="modal-titulo"
-                // Evita que el clic en el contenido cierre el modal
-                onClick={(e) => e.stopPropagation()}
-            >
-                <h2 id="modal-titulo" className="stock-alerta-modal-titulo">
-                    ⚠️ Alerta de Stock ({productosAAlertar.length})
-                </h2>
-                <button onClick={onClose} className="stock-alerta-modal-cerrar-btn" aria-label="Cerrar">&times;</button>
-                
-                <ul className="stock-alerta-lista">
-                    {productosAgotados.length > 0 && (
-                        <li className="stock-alerta-grupo-titulo">🚨 Productos AGOTADOS ({productosAgotados.length})</li>
-                    )}
-                    {productosAgotados.map((prod) => (
-                                                <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--cero">
-                            <span className="stock-alerta-item-nombre">
-                                {prod.nombre} 
-                                <span className="stock-alerta-categoria">({prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)})</span>
-                            </span>
-                            <span className="stock-alerta-item-detalle">
-                                Stock: **0** (Crítico)
-                            </span>
-                        </li>
-                    ))}
-                    
-                    {productosCasiAgotados.length > 0 && (
-                        <li className="stock-alerta-grupo-titulo">⚠️ Productos BAJO Stock ({productosCasiAgotados.length})</li>
-                    )}
-                    {productosCasiAgotados.map((prod) => (
-                                                <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--bajo">
-                            <span className="stock-alerta-item-nombre">
-                                {prod.nombre}
-                                <span className="stock-alerta-categoria">({prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)})</span>
-                            </span>
-                            <span className="stock-alerta-item-detalle">
-                                Stock: **{prod.stock}** (Umbral: {UMBRAL_STOCK_BAJO})
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
-    );
+    return (
+        <div className="stock-alerta-modal-fondo" onClick={onClose}>
+            <div
+                className="stock-alerta-modal-contenido"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-titulo"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="stock-alerta-modal-header">
+                    <div className="stock-alerta-modal-avatar">
+                        <FiAlertTriangle size={20} />
+                    </div>
+                    <div className="stock-alerta-modal-header-info">
+                        <h2 id="modal-titulo">Alerta de Stock</h2>
+                        <span>{productosAAlertar.length} productos requieren atención</span>
+                    </div>
+                    <button onClick={onClose} className="stock-alerta-modal-cerrar-btn" aria-label="Cerrar">
+                        <FiX size={20} />
+                    </button>
+                </div>
+
+                <ul className="stock-alerta-lista">
+                    {productosAgotados.length > 0 && (
+                        <li className="stock-alerta-grupo-titulo stock-alerta-grupo--cero">
+                            <FiPackage size={14} /> Agotados ({productosAgotados.length})
+                        </li>
+                    )}
+                    {productosAgotados.map((prod) => (
+                        <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--cero">
+                            <span className="stock-alerta-item-nombre">
+                                {prod.nombre}
+                                <span className="stock-alerta-categoria">{prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)}</span>
+                            </span>
+                            <span className="stock-alerta-item-detalle">
+                                Stock: <strong>0</strong>
+                            </span>
+                        </li>
+                    ))}
+
+                    {productosCasiAgotados.length > 0 && (
+                        <li className="stock-alerta-grupo-titulo stock-alerta-grupo--bajo">
+                            <FiAlertTriangle size={14} /> Stock Bajo ({productosCasiAgotados.length})
+                        </li>
+                    )}
+                    {productosCasiAgotados.map((prod) => (
+                        <li key={prod._id || prod.id} className="stock-alerta-item stock-alerta-item--bajo">
+                            <span className="stock-alerta-item-nombre">
+                                {prod.nombre}
+                                <span className="stock-alerta-categoria">{prod.categoria.charAt(0).toUpperCase() + prod.categoria.slice(1)}</span>
+                            </span>
+                            <span className="stock-alerta-item-detalle">
+                                Stock: <strong>{prod.stock}</strong> / umbral {UMBRAL_STOCK_BAJO}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
 }
 
 // =================================================================
@@ -192,144 +204,176 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         }
 
         onGuardar(finalData);
-    };    return (
-        <div className="modal-producto-backdrop">
-            <div className="modal-producto-content">
-                <h3 className="modal-producto-title">
-                    {isEditing ? "Editar Producto" : "Crear Nuevo Producto"}
-                </h3>
-                
-                <button className="modal-producto-close" onClick={onClose} aria-label="Cerrar">&times;</button>
+    };    return (
+        <div className="modal-producto-backdrop">
+            <div className="modal-producto-content">
+                {/* Header */}
+                <div className="modal-producto-header">
+                    <div className="modal-producto-avatar">
+                        <FiBox size={20} />
+                    </div>
+                    <div className="modal-producto-header-info">
+                        <h3>{isEditing ? "Editar Producto" : "Nuevo Producto"}</h3>
+                        <span>{isEditing ? "Modificá los datos del producto" : "Completá los datos del nuevo producto"}</span>
+                    </div>
+                    <button className="modal-producto-close" onClick={onClose} aria-label="Cerrar">
+                        <FiX size={20} />
+                    </button>
+                </div>
 
-                <form onSubmit={handleSubmit} className="modal-producto-form">
-                    
-                    <div className="modal-producto-group">
-                        <label htmlFor="nombre">Nombre:</label>
-                        <input
-                            type="text"
-                            id="nombre"
-                            name="nombre"
-                            value={formData.nombre}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                <form onSubmit={handleSubmit} className="modal-producto-form">
+                    <div className="modal-producto-body">
+                        {/* Row 1: Nombre + Categoría */}
+                        <div className="modal-producto-row">
+                            <div className="modal-producto-field">
+                                <label className="modal-producto-label">
+                                    <FiTag size={12} /> Nombre <span className="modal-producto-required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="nombre"
+                                    className="modal-producto-input"
+                                    placeholder="Ej: iPhone 13 Pro"
+                                    value={formData.nombre}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="modal-producto-field">
+                                <label className="modal-producto-label">
+                                    <FiPackage size={12} /> Categoría <span className="modal-producto-required">*</span>
+                                </label>
+                                <select
+                                    name="categoria"
+                                    className="modal-producto-input modal-producto-select"
+                                    value={formData.categoria}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    {CATEGORIAS_VALIDAS.map((cat) => (
+                                        <option key={cat} value={cat}>
+                                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
 
-                    <div className="modal-producto-group">
-                        <label htmlFor="categoria">Categoría:</label>
-                        <select
-                            id="categoria"
-                            name="categoria"
-                            value={formData.categoria}
-                            onChange={handleChange}
-                            required
-                        >
-                            {CATEGORIAS_VALIDAS.map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    <div className="modal-producto-group-inline">
-                        <div className="modal-producto-group">
-                            <label htmlFor="precio">Precio ($):</label>
-                            <input
-                                type="number"
-                                id="precio"
-                                name="precio"
-                                value={formData.precio}
-                                onChange={handleChange}
-                                min="0.01"
-                                step="0.01"
-                                required
-                            />
-                        </div>
-                        <div className="modal-producto-group">
-                            <label htmlFor="stock">Stock:</label>
-                            <input
-                                type="number"
-                                id="stock"
-                                name="stock"
-                                value={formData.stock}
-                                onChange={handleChange}
-                                min="0"
-                                required
-                            />
-                        </div>
-                    </div>
-                
-                    {/* Lógica de Carga de Imagen */}
-                    <div className="modal-producto-group-image">
-                        <label>Carga de Imagen:</label>
-                        <div className="modal-producto-toggle-group">
-                            <button 
-                                type="button" 
-                                className={`btn-toggle ${!useFileMode ? 'active' : ''}`}
-                                onClick={() => setUseFileMode(false)}>
-                                Usar URL
-                            </button>
-                            <button 
-                                type="button" 
-                                className={`btn-toggle ${useFileMode ? 'active' : ''}`}
-                                onClick={() => setUseFileMode(true)}>
-                                Subir Archivo
-                            </button>
-                        </div>
+                        {/* Row 2: Precio + Stock */}
+                        <div className="modal-producto-row">
+                            <div className="modal-producto-field">
+                                <label className="modal-producto-label">
+                                    <FiDollarSign size={12} /> Precio ($) <span className="modal-producto-required">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="precio"
+                                    className="modal-producto-input"
+                                    placeholder="0.00"
+                                    value={formData.precio}
+                                    onChange={handleChange}
+                                    min="0.01"
+                                    step="0.01"
+                                    required
+                                />
+                            </div>
+                            <div className="modal-producto-field">
+                                <label className="modal-producto-label">
+                                    <FiHash size={12} /> Stock <span className="modal-producto-required">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    className="modal-producto-input"
+                                    placeholder="0"
+                                    value={formData.stock}
+                                    onChange={handleChange}
+                                    min="0"
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                        {!useFileMode ? (
-                            <input id="urlImagen-productos"
-                                type="text"
-                                name="imagen"
-                                placeholder="Pega la URL de la imagen aquí..."
-                                value={formData.imagen}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <div className="modal-producto-file-input-wrapper">
-                                <input
-                                    type="file"
-                                    id="fileUpload"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    style={{ display: 'none' }}
-                                />
-                                <label htmlFor="fileUpload" className="btn-file-upload">
-                                    {localFile ? `Archivo: ${localFile.name}` : "Seleccionar Imagen Local"}
-                                </label>
-                                {localFile && (
-                                    <span className="file-info-text">
-                                        Listo para guardar.
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                    {/* Fin Lógica de Carga de Imagen */}
+                        {/* Imagen */}
+                        <div className="modal-producto-field">
+                            <label className="modal-producto-label">
+                                <FiImage size={12} /> Imagen
+                            </label>
+                            <div className="modal-producto-toggle-group">
+                                <button
+                                    type="button"
+                                    className={`modal-producto-toggle-btn ${!useFileMode ? 'active' : ''}`}
+                                    onClick={() => setUseFileMode(false)}
+                                >
+                                    <FiLink size={12} /> URL
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`modal-producto-toggle-btn ${useFileMode ? 'active' : ''}`}
+                                    onClick={() => setUseFileMode(true)}
+                                >
+                                    <FiUpload size={12} /> Subir
+                                </button>
+                            </div>
 
-                    <div className="modal-producto-group">
-                        <label htmlFor="descripcion">Descripción:</label>
-                        <textarea
-                            id="descripcion"
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleChange}
-                        />
-                    </div>
+                            {!useFileMode ? (
+                                <input
+                                    type="text"
+                                    name="imagen"
+                                    className="modal-producto-input"
+                                    placeholder="https://ejemplo.com/imagen.jpg"
+                                    value={formData.imagen}
+                                    onChange={handleChange}
+                                />
+                            ) : (
+                                <div className="modal-producto-file-wrapper">
+                                    <input
+                                        type="file"
+                                        id="fileUpload"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <label htmlFor="fileUpload" className="modal-producto-file-btn">
+                                        <FiUpload size={14} />
+                                        {localFile ? localFile.name : "Seleccionar imagen"}
+                                    </label>
+                                    {localFile && (
+                                        <span className="modal-producto-file-info">Listo para guardar</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
-                    <div className="modal-producto-actions">
-                        <button type="button" className="btn-cancelar" onClick={onClose}>
-                            Cancelar
-                        </button>
-                        <button type="submit" className="btn-guardar">
-                            {isEditing ? "Guardar Cambios" : "Crear Producto"}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+                        {/* Descripción */}
+                        <div className="modal-producto-field">
+                            <label className="modal-producto-label">
+                                <FiFileText size={12} /> Descripción
+                            </label>
+                            <textarea
+                                name="descripcion"
+                                className="modal-producto-input modal-producto-textarea"
+                                placeholder="Descripción del producto..."
+                                value={formData.descripcion}
+                                onChange={handleChange}
+                                rows={3}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="modal-producto-footer">
+                        <button type="button" className="modal-producto-btn modal-producto-btn-cancel" onClick={onClose}>
+                            <FiX size={14} /> Cancelar
+                        </button>
+                        <button type="submit" className="modal-producto-btn modal-producto-btn-save">
+                            <FiSave size={14} /> {isEditing ? "Guardar" : "Crear"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 }
 
 
@@ -520,115 +564,162 @@ function ProductosAdmin() {
     if (loading) return <div className="admin-producto-loading">Cargando productos...</div>;
     if (error) return <div className="admin-producto-error">Error: {error}</div>;
 
-    return (
-        <div className="admin-producto-container">
-            <h2 className="admin-producto-header">Gestión de Inventario de Productos</h2>
-            
-            <div className="admin-producto-header-actions">
-                 <button className="admin-producto-btn-nuevo" onClick={handleCrear}>
-                     Crear Nuevo Producto
-                 </button>
-            </div>
-            
-            {/* --- 1. Buscador (NUEVO) --- */}
-            <div className="admin-producto-search-bar">
-                <input
-                    type="text"
-                    placeholder="Buscar por Nombre o Categoría..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="admin-producto-search-input"
-                />
-            </div>
+    return (
+        <div className="admin-producto-full">
+            <div className="admin-producto-shell">
+                {/* Header */}
+                <div className="admin-producto-workboard-header">
+                    <div>
+                        <h1>Gestión de Productos</h1>
+                        <p>Administra el inventario, stock y precios de todos los productos.</p>
+                    </div>
+                    <div className="admin-producto-workboard-actions">
+                        <button className="admin-producto-primary-btn" onClick={handleCrear}>
+                            <FiPlus size={18} /> Nuevo Producto
+                        </button>
+                        {totalAlertas > 0 && (
+                            <button
+                                className="admin-producto-icon-btn"
+                                onClick={() => setShowStockModal(true)}
+                                aria-label="Ver alertas de stock"
+                                title="Ver alertas de stock"
+                            >
+                                <FiAlertTriangle size={18} />
+                                <strong>{totalAlertas}</strong>
+                            </button>
+                        )}
+                    </div>
+                </div>
 
-            {/* --- 2. Aviso de Stock Resumido con Icono de Menú --- */}
-            {totalAlertas > 0 && (
-                <div className="stock-alerta-contenedor">
-                    <div className="stock-alerta-aviso stock-alerta-aviso--activo">
-                        <p dangerouslySetInnerHTML={{ __html: alertaTexto.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-                        <button
-                            onClick={() => setShowStockModal(true)}
-                            className="stock-alerta-boton-detalle" // Este es el botón ☰
-                            aria-label="Ver detalles de stock"
-                        >
-                            ☰ 
-                        </button>
-                    </div>
-                </div>
-            )}
-            
-            
-            {/* --- Tabla de Productos --- */}
-            <div className="admin-producto-tabla-wrapper">
-                <table className="admin-producto-tabla">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {productosFiltrados.length === 0 ? (
-                            <tr>
-                                <td colSpan="6" className="admin-producto-no-data">
-                                    No se encontraron productos con el término de búsqueda.
-                                </td>
-                            </tr>
-                        ) : (
-                            productosFiltrados.map((producto) => (
-                                <tr key={producto._id || producto.id} className={producto.stock <= UMBRAL_STOCK_BAJO ? 'fila-stock-bajo' : ''}>
-                                                    <td className="admin-producto-id">
-                                                        {shortId(producto._id || producto.id, 6)}
-                                                    </td>
-                                    <td>{producto.nombre}</td>
-                                    <td>{producto.categoria.charAt(0).toUpperCase() + producto.categoria.slice(1)}</td>
-                                    <td className="admin-producto-precio">${producto.precio.toLocaleString('es-AR')}</td>
-                                    <td>
-                                        <span className={`admin-producto-stock admin-producto-stock-${producto.stock > UMBRAL_STOCK_BAJO ? 'ok' : producto.stock === 0 ? 'cero' : 'alerta'}`}>
-                                            {producto.stock}
-                                        </span>
-                                    </td>
-                                    <td className="admin-producto-actions">
-                                        <button 
-                                            className="admin-producto-btn-editar" 
-                                            onClick={() => handleEditar(producto)}>
-                                                Editar
-                                        </button>
-                                        <button 
-                                            className="admin-producto-btn-eliminar" 
-                                                                                        onClick={() => handleEliminar(producto._id || producto.id, producto.nombre)}>
-                                                Eliminar
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                {/* Summary Stats */}
+                <div className="admin-producto-summary">
+                    <div className="admin-producto-summary-card featured">
+                        <span className="admin-producto-summary-icon"><FiBox /></span>
+                        <div>
+                            <p>Total Productos</p>
+                            <strong>{productos.length}</strong>
+                        </div>
+                    </div>
+                    <div className="admin-producto-summary-card warning">
+                        <span className="admin-producto-summary-icon"><FiAlertTriangle /></span>
+                        <div>
+                            <p>Stock Bajo</p>
+                            <strong>{productosCasiAgotados.length}</strong>
+                        </div>
+                    </div>
+                    <div className="admin-producto-summary-card danger">
+                        <span className="admin-producto-summary-icon"><FiPackage /></span>
+                        <div>
+                            <p>Agotados</p>
+                            <strong>{productosAgotados.length}</strong>
+                        </div>
+                    </div>
+                </div>
 
-            {/* --- Modal de Edición/Creación --- */}
-            {showModal && (
-                <ProductoFormModal
-                    productoInicial={productoSeleccionado}
-                    onClose={() => setShowModal(false)}
-                    onGuardar={handleGuardar}
-                />
-            )}
-            
-            {/* --- Modal de Alertas de Stock (Muestra los detalles) --- */}
-            {showStockModal && (
-                <AlertaStockModal
-                    productosAAlertar={productosAAlertar}
-                    onClose={() => setShowStockModal(false)}
-                />
-            )}
-        </div>
-    );
+                {/* Buscador */}
+                <div className="admin-producto-filters">
+                    <div className="admin-producto-search">
+                        <FiSearch size={16} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre o categoría..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Grid de Productos */}
+                <div className="admin-producto-grid">
+                    {productosFiltrados.length === 0 ? (
+                        <div className="admin-producto-empty">
+                            <FiSearch size={48} />
+                            <p>No se encontraron productos</p>
+                            <span>Intentá con otro término de búsqueda</span>
+                        </div>
+                    ) : (
+                        productosFiltrados.map((producto) => {
+                            const iniciales = producto.nombre
+                                ? producto.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                : '??';
+                            const stockClass = producto.stock === 0 ? 'cero' : producto.stock <= UMBRAL_STOCK_BAJO ? 'bajo' : 'ok';
+                            return (
+                                <div key={producto._id || producto.id} className={`admin-producto-card card-stock-${stockClass}`}>
+                                    {/* Header */}
+                                    <div className="admin-producto-card-header">
+                                        <div className="admin-producto-card-avatar">
+                                            {iniciales}
+                                        </div>
+                                        <div className="admin-producto-card-header-info">
+                                            <h4>{producto.nombre}</h4>
+                                            <span className="admin-producto-card-cat">
+                                                {producto.categoria.charAt(0).toUpperCase() + producto.categoria.slice(1)}
+                                            </span>
+                                        </div>
+                                        <div className={`admin-producto-stock-badge stock-${stockClass}`}>
+                                            {producto.stock} u
+                                        </div>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="admin-producto-card-body">
+                                        <div className="admin-producto-data-row">
+                                            <span className="admin-producto-data-icon"><FiDollarSign size={14} /></span>
+                                            <span className="admin-producto-data-label">Precio</span>
+                                            <span className="admin-producto-data-value">${producto.precio.toLocaleString('es-AR')}</span>
+                                        </div>
+                                        <div className="admin-producto-data-row">
+                                            <span className="admin-producto-data-icon"><FiHash size={14} /></span>
+                                            <span className="admin-producto-data-label">Stock</span>
+                                            <span className="admin-producto-data-value">{producto.stock} unidades</span>
+                                        </div>
+                                        <div className="admin-producto-data-row">
+                                            <span className="admin-producto-data-icon"><FiTag size={14} /></span>
+                                            <span className="admin-producto-data-label">ID</span>
+                                            <span className="admin-producto-data-value">{shortId(producto._id || producto.id, 6)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="admin-producto-card-footer">
+                                        <button
+                                            className="admin-producto-card-btn admin-producto-btn-edit"
+                                            onClick={() => handleEditar(producto)}
+                                        >
+                                            <FiEdit3 size={14} /> Editar
+                                        </button>
+                                        <button
+                                            className="admin-producto-card-btn admin-producto-btn-delete"
+                                            onClick={() => handleEliminar(producto._id || producto.id, producto.nombre)}
+                                        >
+                                            <FiTrash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+
+                {/* --- Modal de Edición/Creación --- */}
+                {showModal && (
+                    <ProductoFormModal
+                        productoInicial={productoSeleccionado}
+                        onClose={() => setShowModal(false)}
+                        onGuardar={handleGuardar}
+                    />
+                )}
+
+                {/* --- Modal de Alertas de Stock --- */}
+                {showStockModal && (
+                    <AlertaStockModal
+                        productosAAlertar={productosAAlertar}
+                        onClose={() => setShowStockModal(false)}
+                    />
+                )}
+            </div>
+        </div>
+    );
 }
 
 export default ProductosAdmin;

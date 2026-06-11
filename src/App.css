@@ -6,8 +6,12 @@
 }
 
 .app-content.with-super-sidebar {
-  margin-left: 230px;
-  transition: margin-left 0.2s ease;
+  margin-left: 70px;
+  transition: margin-left 0.3s ease;
+}
+
+.app-content.with-super-sidebar.sidebar-expanded {
+  margin-left: 240px;
 }
 
 @media (max-width: 900px) {

@@ -7,11 +7,17 @@ import { useAuth } from '../context/AuthContext';
 import logoTech from '../assets/logo3.png';
 import './SuperSidebar.css';
 
-// Barra lateral colapsada por defecto (64px) y expandible al hover (240px)
-// Visible solo para usuarios con rol 'superadmin' (control en AppBody)
-export default function SuperSidebar() {
+export default function SuperSidebar({ onExpandChange }) {
   const [isResetting, setIsResetting] = useState(false);
   const { user } = useAuth();
+
+  const handleMouseEnter = () => {
+    if (onExpandChange) onExpandChange(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (onExpandChange) onExpandChange(false);
+  };
 
   const handleResetCarts = async () => {
     if (isResetting) return;
@@ -30,7 +36,6 @@ export default function SuperSidebar() {
     try {
       setIsResetting(true);
       await api.patch('/carts/reset-all', {});
-      // Notificar globalmente (Navbar u otros listeners)
       try { window.dispatchEvent(new CustomEvent('CARTS_RESET_OK')); } catch {}
       Swal.fire({
         icon: 'success',
@@ -51,11 +56,16 @@ export default function SuperSidebar() {
   };
 
   return (
-    <aside className="super-sidebar" aria-label="Menú SuperAdmin">
+    <aside 
+      className="super-sidebar" 
+      aria-label="Menú SuperAdmin"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="super-sidebar__brand">
         <img src={logoTech} alt="TECHFIX" />
         <div>
-          <strong>TECHFIX</strong>
+          <strong>DEYBY</strong>
           <span>Servicio técnico</span>
         </div>
       </div>
