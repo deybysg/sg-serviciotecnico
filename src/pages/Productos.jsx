@@ -94,7 +94,7 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
     },
     {
       imagen: "/img/fondo4.png",
-      titulo: "Audio Premium",
+      titulo: "Musica y Sonido",
       subtitulo: "Sumergite en el sonido con cancelación de ruido.",
       cta: "Escuchar",
       categoria: "audio",

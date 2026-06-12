@@ -278,9 +278,7 @@ function ConsultaServicio() {
                                             </div>
                                             <span className={`timeline-label ${step.color}`}>{step.label}</span>
                                             <span className="timeline-desc">
-                                                {(showDiagnostico || showReparacion || showTerminado || showNotificacion) && (servicio?.detalles || servicio?.fallaReportada) 
-                                                    ? servicio.detalleCliente || servicio.detalles || servicio.fallaReportada
-                                                    : step.desc}
+                                                {step.desc}
                                             </span>
                                             <span className="timeline-time">
                                                 {isActive ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
