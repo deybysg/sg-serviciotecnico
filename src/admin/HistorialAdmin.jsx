@@ -8,21 +8,13 @@ import {
   FiBook, FiSearch, FiCalendar, FiX, FiUser, FiTool,
   FiCheckCircle, FiClock, FiHash, FiEye, FiMoreVertical
 } from "react-icons/fi";
+import { getEstadoLabel } from "../constants";
 
 const LOCALE = 'es-AR'; // Localización para las fechas
 const TIME_OPTIONS = { hour12: false }; // Opciones para el formato 24h
 
 // --- Funciones Auxiliares ---
-const getEstadoLabel = (value) => {
-    const ESTADO_OPTIONS = [
-        { value: "pendiente", label: "Pendiente" },
-        { value: "enRevision", label: "En Revisión" },
-        { value: "revisionTerminada", label: "En Reparacion" },
-        { value: "terminado", label: "Listo para Entrega" },
-        { value: "entregado", label: "Entregado" },
-    ];
-    return ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
-};
+// getEstadoLabel ahora viene de constants
 
 const getClienteName = (clienteId, clientes) => {
     if (!clienteId) return "Cliente Desconocido";

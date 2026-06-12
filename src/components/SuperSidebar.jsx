@@ -67,7 +67,7 @@ export default function SuperSidebar({ onExpandChange }) {
         <div>
           <strong>DEYBY</strong>
           <span>Servicio técnico</span>
-        </div>
+        </div> 
       </div>
       <nav className="super-sidebar__nav">
         <NavLink to="/admin/paneltrabajos" className="super-sidebar__item">

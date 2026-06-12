@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Asumiendo que las opciones de estado vienen de un archivo de configuración o del componente padre
-const ESTADO_OPTIONS = [
-    { value: "pendiente", label: "Pendiente" },
-    { value: "enRevision", label: "En Revisión" },
-    { value: "revisionTerminada", label: "En Reparacion" },
-    { value: "terminado", label: "Listo para Entrega" },
-    { value: "entregado", label: "Entregado" },
-];
-const TIPO_SERVICIO_OPTIONS = [
-    { value: "celulares", label: "Celulares" },
-    { value: "computadora", label: "Computadora" },
-    { value: "parlantes", label: "Parlantes" },
-    { value: "otros", label: "Otros" },
-];
+import { ESTADO_OPTIONS, TIPO_EQUIPO_OPTIONS } from '../constants';
 
 // Función Helper para calcular el total del presupuesto
 const calcularTotal = (items) => {
@@ -175,7 +162,7 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
                         
                         <label>Tipo de Equipo:</label>
                         <select name="tipoServicio" value={editData.tipoServicio} onChange={handleGeneralChange}>
-                            {TIPO_SERVICIO_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
+                            {TIPO_EQUIPO_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
                         </select>
                         
                         <label>Detalles:</label>

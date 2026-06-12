@@ -16,50 +16,14 @@ import {
   FiEye, FiFile, FiTrash2, FiClipboard, FiClock, FiCheckCircle,
   FiAlertTriangle, FiTruck, FiSettings, FiCalendar
 } from "react-icons/fi";
-
-const TIPO_SERVICIO_OPTIONS = [
-    { value: "reparacion", label: "Reparación" },
-    { value: "mantenimiento", label: "Mantenimiento" },
-    { value: "instalacion", label: "Instalación" },
-    { value: "otro", label: "Otro" },
-];
-
-const TIPO_EQUIPO_OPTIONS = [
-    { value: "celulares", label: "Celulares" },
-    { value: "computadora", label: "Computadora" },
-    { value: "parlantes", label: "Parlantes" },
-    { value: "otros", label: "Otros" },
-];
-
-const BRAND_OPTIONS = {
-    celulares: ["Samsung", "Apple", "Xiaomi", "Motorola", "Huawei", "Otro"],
-    computadora: ["HP", "Dell", "Lenovo", "Asus", "Acer", "Otro"],
-    parlantes: ["JBL", "Bose", "Sony", "Philips", "Otro"],
-    otros: []
-};
-
-const MODEL_OPTIONS = {
-    celulares: ["Galaxy S22", "iPhone 13", "Redmi Note 11", "Moto G Power", "Otro"],
-    computadora: ["Pavilion", "Inspiron", "ThinkPad", "ZenBook", "Aspire", "Otro"],
-    parlantes: ["Flip", "Charge", "SoundLink", "SRS-XB", "Otro"],
-    otros: []
-};
-
-const ESTADO_OPTIONS = [
-    { value: "pendiente", label: "Pendiente" },
-    { value: "enRevision", label: "En Revisión" },
-    { value: "revisionTerminada", label: "En Reparación" },
-    { value: "terminado", label: "Terminado" },
-    { value: "entregado", label: "Entregado" },
-];
-
-const METODO_PAGO_OPTIONS = [
-    { value: "efectivo", label: "Efectivo" },
-    { value: "transferencia", label: "Transferencia" },
-    { value: "tarjeta", label: "Tarjeta" },
-    { value: "mercadopago", label: "Mercado Pago" },
-    { value: "otro", label: "Otro" },
-];
+import {
+  TIPO_SERVICIO_OPTIONS,
+  TIPO_EQUIPO_OPTIONS,
+  BRAND_OPTIONS,
+  MODEL_OPTIONS,
+  ESTADO_OPTIONS,
+  METODO_PAGO_OPTIONS,
+} from "../constants";
 
 const URL_BASE_PUBLICA = "http://192.168.1.22:5173";
 

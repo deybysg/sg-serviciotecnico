@@ -6,18 +6,7 @@ import { api } from '../services/api';
 import './Paneltrabajos.css';
 import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle, FiSmartphone, FiTag, FiCalendar, FiHash } from 'react-icons/fi';
 import logoTech from '../assets/logo3.png';
-
-const ESTADO_OPTIONS = [
-  { value: "pendiente", label: "Pendiente" },
-  { value: "enRevision", label: "En Revisión" },
-  { value: "revisionTerminada", label: "En Reparacion" },
-  { value: "terminado", label: "Listo para Entrega" },
-  { value: "entregado", label: "Entregado" },
-];
-
-const getEstadoLabel = (value) => {
-  return ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
-};
+import { ESTADO_OPTIONS, getEstadoLabel } from '../constants';
 
 const getEstadoIcon = (value) => {
   switch (value) {
@@ -653,6 +642,9 @@ const PanelTrabajo = () => {
           <div className="workboard-actions">
             <button className="workboard-primary-btn" onClick={() => navigate('/admin/servicios')}>
               <span>+</span> Nuevo Trabajo
+            </button>
+            <button className="workboard-primary-btn" onClick={() => navigate('/seguimiento')}>
+              <FiSearch /> Seguimiento
             </button>
             <button className="workboard-icon-btn" aria-label="Alertas">
               <FiBell />

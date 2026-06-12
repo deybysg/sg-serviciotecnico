@@ -4,10 +4,11 @@ import { shortId } from "../utils/id";
 import "./clientes.css";
 import Swal from "sweetalert2";
 import { FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiTool, FiEdit3, FiTrash2, FiEye, FiSearch, FiPlus, FiUsers, FiGrid, FiList } from "react-icons/fi";
+import { getEstadoLabel } from "../constants";
 
 // ------------------------------------------------------------------
 // NUEVO COMPONENTE MODAL DE SERVICIOS
-// Se traslada aquí desde el código que proporcionaste como referencia.
+// Se trasladados aquí desde el código que proporcionaste como referencia.
 // Nota: También podrías mover esto a su propio archivo (p. ej., ServiciosModal.jsx) 
 // y simplemente importarlo.
 // ------------------------------------------------------------------
@@ -18,18 +19,7 @@ const TIME_OPTIONS = {
     hour12: false // Formato 24h
 }; 
 
-// Función auxiliar para obtener la etiqueta (Label) del estado
-const getEstadoLabel = (value) => {
-    const ESTADO_OPTIONS = [
-        { value: "pendiente", label: "Pendiente" },
-        { value: "enRevision", label: "En Revisión" },
-        { value: "revisionTerminada", label: "En Reparación" },
-        { value: "terminado", label: "Listo para Entrega" },
-        { value: "entregado", label: "Entregado" },
-    ];
-    // Asegurarse de que el estado exista, si no, usa el valor original
-    return ESTADO_OPTIONS.find(o => o.value === value)?.label || (value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Sin Estado');
-};
+// Función auxiliar para obtener la etiqueta (Label) del estado - ahora viene de constants
 
 // Función para formatear el valor a moneda
 const formatCurrency = (value) => {

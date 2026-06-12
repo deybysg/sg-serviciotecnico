@@ -1,6 +1,7 @@
 import React from 'react';
 import { shortId, toIdString } from "../utils/id";
 import { FiX, FiHash, FiTool, FiCheckCircle, FiClock, FiFileText, FiDollarSign } from "react-icons/fi";
+import { getEstadoLabel } from '../constants';
 // Asume que los estilos se cargan via HistorialAdmin.jsx
 
 const LOCALE = 'es-AR'; // Localización para las fechas
@@ -10,17 +11,8 @@ const TIME_OPTIONS = {
     hour12: false // Formato 24h
 }; 
 
-// Función auxiliar para obtener la etiqueta (Label) del estado
-const getEstadoLabel = (value) => {
-    const ESTADO_OPTIONS = [
-        { value: "pendiente", label: "Pendiente" },
-        { value: "enRevision", label: "En Revisión" },
-        { value: "revisionTerminada", label: "En Reparacion" },
-        { value: "terminado", label: "Listo para Entrega" },
-        { value: "entregado", label: "Entregado" },
-    ];
-    return ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
-};
+// Función auxiliar para obtener la etiqueta (Label) del estado - ahora viene de constants
+// El import getEstadoLabel está arriba
 
 // Función para formatear el valor a moneda
 const formatCurrency = (value) => {

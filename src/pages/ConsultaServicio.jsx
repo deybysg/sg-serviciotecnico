@@ -181,7 +181,7 @@ function ConsultaServicio() {
         if (isStepActive('P5_TERMINADO')) return { icon: "🎁", class: "glow-listo" };
         if (isStepActive('P4_REPARACION')) return { icon: "🔧", class: "glow-reparacion" };
         if (isStepActive('P3_DIAGNOSTICO')) return { icon: "🔬", class: "glow-diagnostico" };
-        if (isStepActive('P1_RECIBIDO')) return { icon: "📄", class: "glow-recibido" };
+        if (estado === 'pendiente' || estado === 'enRevision') return { icon: "📄", class: "glow-recibido" };
         return { icon: "❓", class: "glow-recibido" };
     };
 
@@ -191,7 +191,7 @@ function ConsultaServicio() {
     const timelineSteps = [
         { key: 'P1_RECIBIDO', label: 'RECIBIDO', desc: 'Tu equipo ha sido recibido correctamente.', icon: <FiFileText size={22} />, color: 'blue' },
         { key: 'P3_DIAGNOSTICO', label: 'DIAGNÓSTICO', desc: 'Estamos evaluando la falla reportada.', icon: <FiSearch size={22} />, color: 'cyan' },
-        { key: 'P2_5_SIN_SOLUCION', label: 'NOTIFICACIÓN', desc: 'Te notificaremos el presupuesto estimado.', icon: <FiBell size={22} />, color: 'amber' },
+        { key: 'P2_5_SIN_SOLUCION', label: 'NOTIFICACIÓN', desc: 'Te notificaremos si equipo no tiene solucion', icon: <FiBell size={22} />, color: 'amber' },
         { key: 'P4_REPARACION', label: 'REPARACIÓN', desc: 'Tu equipo está siendo reparado por nuestro equipo técnico.', icon: <FiTool size={22} />, color: 'magenta' },
         { key: 'P5_TERMINADO', label: 'LISTO PARA RETIRAR', desc: 'Tu equipo está listo para ser retirado.', icon: <FiPackage size={22} />, color: 'green' },
     ];
@@ -253,9 +253,16 @@ function ConsultaServicio() {
                         <div className="timeline-container">
                             {timelineSteps.map((step, index) => {
                                 const isActive = isStepActive(step.key);
-                                const isCurrent = servicio?.estado === PASOS[step.key];
+                                const isCurrent = (servicio?.estado === PASOS[step.key]) 
+                                    || (step.key === 'P3_DIAGNOSTICO' && servicio?.estado === 'enRevision')
+                                    || (step.key === 'P4_REPARACION' && (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada'))
+                                    || (step.key === 'P5_TERMINADO' && servicio?.estado === 'terminado')
+                                    || (step.key === 'P2_5_SIN_SOLUCION' && (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion'));
                                 const isPast = isActive && !isCurrent;
-                                console.log('DEBUG:', { stepKey: step.key, estado: servicio?.estado, pasosValue: PASOS[step.key], isActive, isCurrent });
+                                const showDiagnostico = servicio?.estado === 'enRevision' && step.key === 'P3_DIAGNOSTICO';
+                                const showReparacion = (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada') && step.key === 'P4_REPARACION';
+                                const showTerminado = servicio?.estado === 'terminado' && step.key === 'P5_TERMINADO';
+                                const showNotificacion = (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion') && step.key === 'P2_5_SIN_SOLUCION';
                                 return (
                                     <React.Fragment key={step.key}>
                                         {index > 0 && (
@@ -270,7 +277,11 @@ function ConsultaServicio() {
                                                 {step.icon}
                                             </div>
                                             <span className={`timeline-label ${step.color}`}>{step.label}</span>
-                                            <span className="timeline-desc">{step.desc}</span>
+                                            <span className="timeline-desc">
+                                                {(showDiagnostico || showReparacion || showTerminado || showNotificacion) && (servicio?.detalles || servicio?.fallaReportada) 
+                                                    ? servicio.detalleCliente || servicio.detalles || servicio.fallaReportada
+                                                    : step.desc}
+                                            </span>
                                             <span className="timeline-time">
                                                 {isActive ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
                                             </span>
