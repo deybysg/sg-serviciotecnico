@@ -54,6 +54,15 @@ const shortId = (id, length = 8) => String(id || "").slice(-length).toUpperCase(
 // Formatear/mostrar el número de servicio (3 dígitos) cuando exista
 const formatServicioNumero = (num) => (num !== undefined && num !== null && num !== "") ? String(num).padStart(3, '0') : null;
 
+// Flujo de estados para el stepper (avance lineal)
+const FLUJO_ESTADOS = [
+  'pendiente',
+  'enRevision',
+  'revisionTerminada',
+  'terminado',
+  'entregado'
+];
+
 const PanelTrabajo = () => {
   const [servicios, setServicios] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -67,6 +76,7 @@ const PanelTrabajo = () => {
   const tooltipTimer = useRef(null);
   const [estadoMenuAbiertoId, setEstadoMenuAbiertoId] = useState(null);
   const [estadoFocusIndex, setEstadoFocusIndex] = useState(0);
+  const [vistaModo, setVistaModo] = useState('kanban'); // 'kanban' | 'lista'
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
 
@@ -366,6 +376,22 @@ const PanelTrabajo = () => {
     }
   };
 
+  // 🚀 Función para avanzar al siguiente estado en el flujo
+  const handleAvanzarEstado = async (idServicio, estadoActual) => {
+    const idx = FLUJO_ESTADOS.indexOf(estadoActual);
+    if (idx === -1 || idx >= FLUJO_ESTADOS.length - 1) return;
+    const nuevoEstado = FLUJO_ESTADOS[idx + 1];
+    await handleCambiarEstado(idServicio, nuevoEstado);
+  };
+
+  // 🚀 Función para retroceder al estado anterior en el flujo
+  const handleRetrocederEstado = async (idServicio, estadoActual) => {
+    const idx = FLUJO_ESTADOS.indexOf(estadoActual);
+    if (idx <= 0) return;
+    const nuevoEstado = FLUJO_ESTADOS[idx - 1];
+    await handleCambiarEstado(idServicio, nuevoEstado);
+  };
+
   // 🚨 Función de Entrega modificada para redirigir 🚨
   const handleEntregarServicio = async (idServicio) => {
     const confirm = await Swal.fire({
@@ -586,42 +612,62 @@ const PanelTrabajo = () => {
           </div>
         </div>
 
-        {/* FOOTER: Acciones */}
+        {/* FOOTER: Acciones - Stepper de Estado */}
         <div className="kanban-card-actions">
-          <div className="dropdown-estado">
+          <div className="estado-stepper">
             <button
               type="button"
-              className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
-              aria-haspopup="listbox"
-              aria-expanded={estadoMenuAbiertoId === servicioId}
-              onClick={() => {
-                const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
-                setEstadoMenuAbiertoId(open);
-                if (open) {
-                  const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
-                  setEstadoFocusIndex(idx >= 0 ? idx : 0);
-                }
-              }}
+              className="stepper-btn stepper-prev"
+              title="Retroceder estado"
+              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) <= 0}
+              onClick={() => handleRetrocederEstado(servicioId, servicio.estado)}
             >
-              <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
-              <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
+              &#9664;
             </button>
-            {estadoMenuAbiertoId === servicioId && (
-              <ul className="estado-menu" role="listbox">
-                {ESTADO_OPTIONS.map((opt, idx) => (
-                  <li
-                    key={opt.value}
-                    role="option"
-                    aria-selected={opt.value === servicio.estado}
-                    className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
-                    onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
-                  >
-                    <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
-                    <span className="estado-label">{opt.label}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="dropdown-estado">
+              <button
+                type="button"
+                className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
+                aria-haspopup="listbox"
+                aria-expanded={estadoMenuAbiertoId === servicioId}
+                onClick={() => {
+                  const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
+                  setEstadoMenuAbiertoId(open);
+                  if (open) {
+                    const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
+                    setEstadoFocusIndex(idx >= 0 ? idx : 0);
+                  }
+                }}
+              >
+                <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
+                <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
+              </button>
+              {estadoMenuAbiertoId === servicioId && (
+                <ul className="estado-menu" role="listbox">
+                  {ESTADO_OPTIONS.map((opt, idx) => (
+                    <li
+                      key={opt.value}
+                      role="option"
+                      aria-selected={opt.value === servicio.estado}
+                      className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
+                      onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
+                    >
+                      <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
+                      <span className="estado-label">{opt.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button
+              type="button"
+              className="stepper-btn stepper-next"
+              title="Avanzar estado"
+              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) >= FLUJO_ESTADOS.length - 1}
+              onClick={() => handleAvanzarEstado(servicioId, servicio.estado)}
+            >
+              &#9654;
+            </button>
           </div>
           <button className="detail-link" onClick={() => handleVerDetalles(servicio)}>
             <FiEye size={14} /> Ver
@@ -718,6 +764,22 @@ const PanelTrabajo = () => {
           <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); setSearchType('todos'); }}>
             <FiSearch /> Limpiar Filtros
           </button>
+          <div className="vista-toggle-group">
+            <button
+              className={`vista-toggle-btn ${vistaModo === 'kanban' ? 'active' : ''}`}
+              onClick={() => setVistaModo('kanban')}
+              title="Vista Cuadros"
+            >
+              <span>&#9638;</span> Cuadros
+            </button>
+            <button
+              className={`vista-toggle-btn ${vistaModo === 'lista' ? 'active' : ''}`}
+              onClick={() => setVistaModo('lista')}
+              title="Vista Lista"
+            >
+              <span>&#9776;</span> Lista
+            </button>
+          </div>
         </section>
 
         {/* VISTA FILTRADA: Grid ordenado cuando hay filtros activos */}
@@ -751,28 +813,164 @@ const PanelTrabajo = () => {
           </section>
         )}
 
-        {/* VISTA KANBAN: Solo cuando NO hay filtros activos */}
-        {!hayFiltrosActivos && (
-          <section className="workboard-kanban">
-            {statusColumns.map((column) => {
-              const columnItems = serviciosOrdenados.filter((servicio) => servicio.estado === column.key).slice(0, 3);
-              return (
-                <article className={`kanban-column column-${column.key}`} key={column.key}>
-                  <button className="kanban-title" onClick={() => setFiltroEstado(column.filter)}>
-                    <span>{column.icon}</span>
-                    {column.label}
-                    <strong>{column.count}</strong>
-                  </button>
-                  <div className="kanban-items">
-                    {columnItems.length === 0 ? (
-                      <p className="kanban-empty">Sin trabajos en este estado.</p>
-                    ) : columnItems.map((servicio) => renderTarjetaServicio(servicio))}
+{/* VISTA KANBAN: Tarjetas individuales sin columnas */}
+        {!hayFiltrosActivos && vistaModo === 'kanban' && (
+          <section className="workboard-cards-grid">
+            <div className="cards-grid-header">
+              <h2>Todas las tarjetas</h2>
+              <span>{serviciosOrdenados.length} trabajos</span>
+            </div>
+            <div className="cards-grid">
+              {serviciosOrdenados.map((servicio) => {
+                const clienteData = servicio.cliente || servicio.clienteId;
+                const clienteNombre = getClienteName(clienteData, clientes);
+                const servicioId = servicio._id || servicio.id;
+                const numero = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(servicioId, 6)}`;
+                const equipo = getEquipoPanel(servicio);
+                const detalle = getDetallePanel(servicio);
+                const fechaIngreso = formatFechaPanel(servicio.fechaEntrada);
+                const diasEnTaller = servicio.fechaEntrada ? Math.floor((Date.now() - new Date(servicio.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                const estadoIdx = FLUJO_ESTADOS.indexOf(servicio.estado);
+                const estadoLabel = getEstadoLabel(servicio.estado);
+                const estadoIcon = getEstadoIcon(servicio.estado);
+                return (
+                  <div className={`card-item card-${servicio.estado}`} key={servicioId}>
+                    <div className="card-item-header">
+                      <div className="card-item-id-row">
+                        <button className="card-item-id" onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : servicioId)}>
+                          {numero}
+                        </button>
+                        <span className="card-item-dias">{diasEnTaller} días</span>
+                      </div>
+                      <span className={`card-item-badge badge-${servicio.estado}`}>
+                        {estadoIcon} {estadoLabel}
+                      </span>
+                    </div>
+                    <div className="card-item-body">
+                      <div className="card-item-cliente">
+                        <FiUser size={14} />
+                        <span>{clienteNombre}</span>
+                      </div>
+                      <div className="card-item-equipo">
+                        <FiSmartphone size={14} />
+                        <span>{equipo}</span>
+                      </div>
+                      <div className="card-item-detalle">
+                        <FiTool size={14} />
+                        <span>{detalle}</span>
+                      </div>
+                      <div className="card-item-fecha">
+                        <FiCalendar size={14} />
+                        <span>Ingreso: {fechaIngreso}</span>
+                      </div>
+                    </div>
+                    <div className="card-item-actions">
+                      <button
+                        className="stepper-btn stepper-prev"
+                        disabled={estadoIdx <= 0}
+                        onClick={() => handleRetrocederEstado(servicioId, servicio.estado)}
+                        title="Retroceder estado"
+                      >
+                        &#9664;
+                      </button>
+                      <button className="card-item-ver" onClick={() => handleVerDetalles(servicio)}>
+                        <FiEye size={15} /> Ver
+                      </button>
+                      <button
+                        className="stepper-btn stepper-next"
+                        disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
+                        onClick={() => handleAvanzarEstado(servicioId, servicio.estado)}
+                        title="Avanzar estado"
+                      >
+                        &#9654;
+                      </button>
+                    </div>
                   </div>
-                  <button className="kanban-see-all" onClick={() => setFiltroEstado(column.filter)}>Ver todos ({column.count})</button>
-                </article>
-              );
-            })}
-          </section>
+                );
+              })}
+            </div>
+</section>
+        )}
+
+{/* VISTA LISTA: Lista moderna tipo tracker */}
+        {!hayFiltrosActivos && vistaModo === 'lista' && (
+          <section className="workboard-lista-moderna">
+            <div className="lista-moderna-header">
+              <div className="lista-moderna-titulo">
+                <h2><FiClipboard /> Lista de Trabajos</h2>
+                <span>{serviciosOrdenados.length} trabajos</span>
+              </div>
+            </div>
+            <div className="lista-moderna-body">
+              {serviciosOrdenados.length === 0 ? (
+                <div className="lista-moderna-empty">
+                  <FiSearch size={48} />
+                  <p>No hay trabajos registrados</p>
+                </div>
+              ) : (
+                serviciosOrdenados.map((servicio) => {
+                  const sId = servicio._id || servicio.id;
+                  const sNum = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(sId, 6)}`;
+                  const sCliente = getClienteName(servicio.cliente || servicio.clienteId, clientes);
+                  const sEquipo = getEquipoPanel(servicio);
+                  const sDetalle = getDetallePanel(servicio);
+                  const sFecha = formatFechaPanel(servicio.fechaEntrada);
+                  const sDias = servicio.fechaEntrada ? Math.floor((Date.now() - new Date(servicio.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                  const estadoIdx = FLUJO_ESTADOS.indexOf(servicio.estado);
+                  return (
+                    <div key={sId} className={`lista-item item-${servicio.estado}`}>
+                      <div className="lista-item-left">
+                        <div className="lista-item-orden">
+                          <button onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : sId)}>{sNum}</button>
+                        </div>
+                        <div className="lista-item-info">
+                          <div className="lista-item-cliente">
+                            <FiUser size={15} />
+                            <span>{sCliente}</span>
+                          </div>
+                          <div className="lista-item-equipo">{sEquipo}</div>
+                          <div className="lista-item-detalle">{sDetalle}</div>
+                        </div>
+                      </div>
+                      <div className="lista-item-center">
+                        <div className="lista-item-fecha">
+                          <FiCalendar size={14} />
+                          <span>{sFecha}</span>
+                        </div>
+                        <div className="lista-item-dias">{sDias}d</div>
+                      </div>
+                      <div className="lista-item-right">
+                        <span className={`lista-item-badge badge-${servicio.estado}`}>
+                          {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
+                        </span>
+                        <div className="lista-item-actions">
+                          <button
+                            className="stepper-btn stepper-prev"
+                            title="Retroceder"
+                            disabled={estadoIdx <= 0}
+                            onClick={() => handleRetrocederEstado(sId, servicio.estado)}
+                          >
+                            &#9664;
+                          </button>
+                          <button className="lista-item-ver" onClick={() => handleVerDetalles(servicio)}>
+                            <FiEye size={15} />
+                          </button>
+                          <button
+                            className="stepper-btn stepper-next"
+                            title="Avanzar"
+                            disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
+                            onClick={() => handleAvanzarEstado(sId, servicio.estado)}
+                          >
+                            &#9654;
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+</section>
         )}
       </section>
       {modalOpen && servicioSeleccionado && (

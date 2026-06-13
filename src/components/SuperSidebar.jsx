@@ -103,19 +103,6 @@ export default function SuperSidebar({ onExpandChange }) {
           <span className="super-sidebar__icon"><FaUsersCog /></span>
           <span className="super-sidebar__label">Usuarios</span>
         </NavLink>
-
-        {/* Acción de mantenimiento: limpiar carritos */}
-        <button 
-          type="button"
-          className="super-sidebar__item"
-          onClick={handleResetCarts}
-          disabled={isResetting}
-          title="Vaciar carritos de todos los usuarios"
-          style={{ cursor: isResetting ? 'not-allowed' : 'pointer', background: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-        >
-          {/* <span className="super-sidebar__icon"><FaTrashAlt /></span>
-          <span className="super-sidebar__label">Limpiar carritos (todos)</span> */}
-        </button>
       </nav>
       <div className="super-sidebar__profile">
         <span>{(user?.username || 'AD').slice(0, 2).toUpperCase()}</span>

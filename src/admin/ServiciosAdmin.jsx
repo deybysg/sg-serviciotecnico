@@ -14,7 +14,7 @@ import {
   FiTool, FiSmartphone, FiTag, FiList, FiFileText, FiDollarSign,
   FiCreditCard, FiActivity, FiPlus, FiSave, FiX, FiSearch,
   FiEye, FiFile, FiTrash2, FiClipboard, FiClock, FiCheckCircle,
-  FiAlertTriangle, FiTruck, FiSettings, FiCalendar
+  FiAlertTriangle, FiTruck, FiSettings, FiCalendar, FiUserPlus
 } from "react-icons/fi";
 import {
   TIPO_SERVICIO_OPTIONS,
@@ -25,7 +25,7 @@ import {
   METODO_PAGO_OPTIONS,
 } from "../constants";
 
-const URL_BASE_PUBLICA = "http://192.168.1.22:5173";
+const URL_BASE_PUBLICA = window.location.origin;
 
 function ServiciosAdmin() {
     const comprobanteRef = useRef(null);
@@ -152,6 +152,27 @@ function ServiciosAdmin() {
         }
     };
 
+    const handleToggleNewClient = (checked) => {
+        setIsNewClient(checked);
+        if (checked) {
+            setClienteSeleccionado(null);
+            setClientData(initialClientState);
+        } else {
+            setClientData(initialClientState);
+        }
+    };
+
+    const handleCheckDuplicateClient = () => {
+        if (!clientData.celular && !clientData.dni) return null;
+        
+        const clienteExistente = clientes.find(c => 
+            (clientData.celular && c.celular === clientData.celular) ||
+            (clientData.dni && c.dni === clientData.dni)
+        );
+        
+        return clienteExistente || null;
+    };
+
     const handleLimpiarFormulario = () => {
         setClientData(initialClientState);
         setServiceData(initialServiceState);
@@ -177,22 +198,61 @@ function ServiciosAdmin() {
                 Swal.fire("Atención", "Nombre y celular son requeridos para el nuevo cliente.", "warning");
                 return;
             }
-            try {
-                const nuevoCliente = await api.post('/clientes', {
-                    nombreCompleto: clientData.nombreCompleto,
-                    celular: clientData.celular,
-                    correo: clientData.correo,
-                    direccion: clientData.direccion,
-                    dni: clientData.dni,
+
+            const clienteDuplicado = handleCheckDuplicateClient();
+            if (clienteDuplicado) {
+                const result = await Swal.fire({
+                    icon: 'question',
+                    title: 'Cliente ya existe',
+                    html: `Ya existe un cliente con esos datos:<br><strong>${clienteDuplicado.nombreCompleto}</strong><br>¿Deseas usar ese cliente en lugar de crear uno nuevo?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, usar existente',
+                    cancelButtonText: 'Crear nuevo',
+                    confirmButtonColor: '#22c55e',
+                    cancelButtonColor: '#8b5cf6',
                 });
-                clienteIdToUse = nuevoCliente._id;
-                const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
-                setClientes((prev) => [...prev, nuevoCliente]);
-                setClientesOptions((prev) => [...prev, newClientOption]);
-                setClienteSeleccionado(newClientOption);
-            } catch (err) {
-                Swal.fire("Error", `No se pudo crear el cliente: ${err.message}`, "error");
-                return;
+
+                if (result.isConfirmed && clienteDuplicado._id) {
+                    clienteIdToUse = clienteDuplicado._id;
+                    const clienteOption = { value: clienteDuplicado._id, label: clienteDuplicado.nombreCompleto, data: clienteDuplicado };
+                    setClienteSeleccionado(clienteOption);
+                } else {
+                    try {
+                        const nuevoCliente = await api.post('/clientes', {
+                            nombreCompleto: clientData.nombreCompleto,
+                            celular: clientData.celular,
+                            correo: clientData.correo,
+                            direccion: clientData.direccion,
+                            dni: clientData.dni,
+                        });
+                        clienteIdToUse = nuevoCliente._id;
+                        const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
+                        setClientes((prev) => [...prev, nuevoCliente]);
+                        setClientesOptions((prev) => [...prev, newClientOption]);
+                        setClienteSeleccionado(newClientOption);
+                    } catch (err) {
+                        Swal.fire("Error", `No se pudo crear el cliente: ${err.message}`, "error");
+                        return;
+                    }
+                }
+            } else {
+                try {
+                    const nuevoCliente = await api.post('/clientes', {
+                        nombreCompleto: clientData.nombreCompleto,
+                        celular: clientData.celular,
+                        correo: clientData.correo,
+                        direccion: clientData.direccion,
+                        dni: clientData.dni,
+                    });
+                    clienteIdToUse = nuevoCliente._id;
+                    const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
+                    setClientes((prev) => [...prev, nuevoCliente]);
+                    setClientesOptions((prev) => [...prev, newClientOption]);
+                    setClienteSeleccionado(newClientOption);
+                } catch (err) {
+                    Swal.fire("Error", `No se pudo crear el cliente: ${err.message}`, "error");
+                    return;
+                }
             }
         } else {
             if (!clienteSeleccionado) {
@@ -361,100 +421,100 @@ function ServiciosAdmin() {
                                 Datos del Cliente
                             </h2>
 
-                            <div className="sn-field">
-                                <label className="sn-label"><FiUser size={12} /> Nombre completo <span className="sn-required">*</span></label>
-                                <input
-                                    type="text"
-                                    className="sn-input"
-                                    placeholder="Ej: Juan Perez"
-                                    disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={clientData.nombreCompleto}
-                                    onChange={(e) => setClientData({ ...clientData, nombreCompleto: e.target.value })}
-                                />
+                            <div className="cliente-toggle-container">
+                                <button
+                                    type="button"
+                                    className={`cliente-toggle-btn ${!isNewClient ? 'active' : ''}`}
+                                    onClick={() => handleToggleNewClient(false)}
+                                >
+                                    <FiSearch size={14} /> Cliente Existente
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`cliente-toggle-btn ${isNewClient ? 'active' : ''}`}
+                                    onClick={() => handleToggleNewClient(true)}
+                                >
+                                    <FiUserPlus size={14} /> Nuevo Cliente
+                                </button>
                             </div>
 
-                            {!isNewClient && (
+                            {!isNewClient ? (
                                 <div className="sn-field">
-                                    <label className="sn-label"><FiSearch size={12} /> Seleccionar cliente existente</label>
+                                    <label className="sn-label"><FiSearch size={12} /> Buscar cliente</label>
                                     <Select
                                         options={clientesOptions}
                                         onChange={handleClienteSelect}
                                         value={clienteSeleccionado}
-                                        placeholder="Buscar cliente..."
+                                        placeholder="Escribe para buscar..."
                                         classNamePrefix="sn-react-select"
+                                        isClearable
                                     />
                                 </div>
+                            ) : (
+                                <>
+                                    <div className="sn-field">
+                                        <label className="sn-label"><FiUser size={12} /> Nombre completo <span className="sn-required">*</span></label>
+                                        <input
+                                            type="text"
+                                            className="sn-input"
+                                            placeholder="Ej: Juan Perez"
+                                            value={clientData.nombreCompleto}
+                                            onChange={(e) => setClientData({ ...clientData, nombreCompleto: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="sn-field">
+                                        <label className="sn-label"><FiPhone size={12} /> Celular <span className="sn-required">*</span></label>
+                                        <div className="sn-input-with-icon">
+                                            <input
+                                                type="text"
+                                                name="celular"
+                                                className="sn-input"
+                                                placeholder="Ej: 11 1234 5678"
+                                                value={clientData.celular}
+                                                onChange={(e) => setClientData({ ...clientData, celular: e.target.value })}
+                                            />
+                                            <span className="sn-input-icon-right"><FiPhone size={14} /></span>
+                                        </div>
+                                    </div>
+
+                                    <div className="sn-field">
+                                        <label className="sn-label"><FiMail size={12} /> Correo</label>
+                                        <input
+                                            type="email"
+                                            name="correo"
+                                            className="sn-input"
+                                            placeholder="Ej: juanperez@email.com"
+                                            value={clientData.correo}
+                                            onChange={(e) => setClientData({ ...clientData, correo: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="sn-field">
+                                        <label className="sn-label"><FiMapPin size={12} /> Dirección</label>
+                                        <input
+                                            type="text"
+                                            name="direccion"
+                                            className="sn-input"
+                                            placeholder="Ej: Av. Siempre Viva 123, CABA"
+                                            value={clientData.direccion}
+                                            onChange={(e) => setClientData({ ...clientData, direccion: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="sn-field">
+                                        <label className="sn-label"><FiHash size={12} /> DNI (opcional)</label>
+                                        <input
+                                            type="text"
+                                            name="dni"
+                                            className="sn-input"
+                                            placeholder="Ej: 12.345.678"
+                                            value={clientData.dni}
+                                            onChange={(e) => setClientData({ ...clientData, dni: e.target.value })}
+                                        />
+                                    </div>
+                                </>
                             )}
-
-                            <div className="sn-field">
-                                <label className="sn-label"><FiPhone size={12} /> Celular <span className="sn-required">*</span></label>
-                                <div className="sn-input-with-icon">
-                                    <input
-                                        type="text"
-                                        name="celular"
-                                        className="sn-input"
-                                        placeholder="Ej: 11 1234 5678"
-                                        disabled={!isNewClient && !!clienteSeleccionado}
-                                        value={clientData.celular}
-                                        onChange={(e) => setClientData({ ...clientData, celular: e.target.value })}
-                                    />
-                                    <span className="sn-input-icon-right"><FiPhone size={14} /></span>
-                                </div>
-                            </div>
-
-                            <div className="sn-field">
-                                <label className="sn-label"><FiMail size={12} /> Correo</label>
-                                <input
-                                    type="email"
-                                    name="correo"
-                                    className="sn-input"
-                                    placeholder="Ej: juanperez@email.com"
-                                    disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={clientData.correo}
-                                    onChange={(e) => setClientData({ ...clientData, correo: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="sn-field">
-                                <label className="sn-label"><FiMapPin size={12} /> Dirección</label>
-                                <input
-                                    type="text"
-                                    name="direccion"
-                                    className="sn-input"
-                                    placeholder="Ej: Av. Siempre Viva 123, CABA"
-                                    disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={clientData.direccion}
-                                    onChange={(e) => setClientData({ ...clientData, direccion: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="sn-field">
-                                <label className="sn-label"><FiHash size={12} /> DNI (opcional)</label>
-                                <input
-                                    type="text"
-                                    name="dni"
-                                    className="sn-input"
-                                    placeholder="Ej: 12.345.678"
-                                    disabled={!isNewClient && !!clienteSeleccionado}
-                                    value={clientData.dni}
-                                    onChange={(e) => setClientData({ ...clientData, dni: e.target.value })}
-                                />
-                            </div>
-
-                            <label className="sn-checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    checked={isNewClient}
-                                    onChange={() => {
-                                        setIsNewClient(!isNewClient);
-                                        if (!isNewClient) {
-                                            setClienteSeleccionado(null);
-                                            setClientData(initialClientState);
-                                        }
-                                    }}
-                                />
-                                <span><FiUser size={14} /> Crear nuevo cliente</span>
-                            </label>
                         </div>
 
                         {/* SECCION 2: Datos del Servicio */}
@@ -754,7 +814,7 @@ function ServiciosAdmin() {
 
             {serviceToPrint && isPrinting && (
                 <div ref={comprobanteRef} style={{ position: 'absolute', left: '-9999px', width: '210mm', minHeight: '297mm', padding: '10mm', backgroundColor: '#fff' }}>
-                    <ComprobantePDF service={serviceToPrint} TIPO_SERVICIO_OPTIONS={TIPO_EQUIPO_OPTIONS} ESTADO_OPTIONS={ESTADO_OPTIONS} />
+                    <ComprobantePDF service={serviceToPrint} TIPO_SERVICIO_OPTIONS={TIPO_SERVICIO_OPTIONS} ESTADO_OPTIONS={ESTADO_OPTIONS} />
                 </div>
             )}
 

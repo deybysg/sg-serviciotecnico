@@ -93,23 +93,33 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         precio: productoInicial?.precio || 0,
         stock: productoInicial?.stock || 0,
         imagen: productoInicial?.imagen || "",
-    });    const [useFileMode, setUseFileMode] = useState(false);
-    const [localFile, setLocalFile] = useState(null);
+    });    const [useFileMode, setUseFileMode] = useState(false);
+    const [localFile, setLocalFile] = useState(null);
+    const [localFileBase64, setLocalFileBase64] = useState(null);
 
-    const isEditing = !!productoInicial;
+    const isEditing = !!productoInicial;
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: name === 'precio' || name === 'stock' ? Number(value) : value,
-        }));
-    };
-    
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setLocalFile(file); 
-    }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: name === 'precio' || name === 'stock' ? Number(value) : value,
+        }));
+    };
+    
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setLocalFile(file);
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setLocalFileBase64(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setLocalFileBase64(null);
+        }
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -187,9 +197,9 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
 
         let finalData = { ...formData };
         
-        if (useFileMode && localFile) {
-            finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Imagen+Local"; 
-        } else if (useFileMode && !localFile && !isEditing) {
+        if (useFileMode && localFileBase64) {
+            finalData.imagen = localFileBase64;
+        } else if (useFileMode && !localFileBase64 && !isEditing) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Archivo requerido',

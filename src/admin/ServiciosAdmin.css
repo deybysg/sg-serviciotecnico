@@ -301,6 +301,45 @@
   cursor: pointer;
 }
 
+/* 12b. CLIENTE TOGGLE */
+.cliente-toggle-container {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 4px;
+  border: 1px solid var(--input-border);
+}
+
+.cliente-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cliente-toggle-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cliente-toggle-btn.active {
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.2), rgba(191, 50, 255, 0.15));
+  color: var(--text-primary);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.15), inset 0 0 15px rgba(0, 183, 255, 0.08);
+}
+
 /* 13. TEXTAREA WRAPPER */
 .sn-textarea-wrapper {
   position: relative;
@@ -721,8 +760,23 @@
 }
 
 /* 20. REACT SELECT */
+.sn-react-select,
+.sn-react-select__control,
+.sn-react-select__control--is-focused,
+.sn-react-select__value-container,
+.sn-react-select__placeholder,
+.sn-react-select__input-container,
+.sn-react-select__single-value,
+.sn-react-select__input,
+.sn-react-select__menu,
+.sn-react-select__menu-portal,
+.sn-react-select__menu-list {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 .sn-react-select__control {
-  background: var(--input-bg) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid var(--input-border) !important;
   border-radius: 7px !important;
   min-height: 44px;
@@ -737,28 +791,72 @@
   box-shadow: 0 0 20px rgba(0, 183, 255, 0.25) !important;
 }
 
-.sn-react-select__menu {
-  background: #060d1e;
-  border: 1px solid var(--input-border);
-  border-radius: 7px;
+.sn-react-select__value-container {
+  background: transparent !important;
 }
 
-.sn-react-select__option {
-  background: transparent;
-  color: var(--text-secondary);
-}
-
-.sn-react-select__option--is-focused {
-  background: rgba(0, 183, 255, 0.12);
+.sn-react-select__input-container {
+  background: transparent !important;
+  color: #ffffff !important;
 }
 
 .sn-react-select__single-value {
-  color: #fff;
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+input.sn-react-select__input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.sn-react-select__menu {
+  background: #060d1e !important;
+  border: 1px solid var(--neon-blue) !important;
+  border-radius: 7px;
+  box-shadow: 0 0 25px rgba(0, 183, 255, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.sn-react-select__option {
+  background: transparent !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sn-react-select__option:last-child {
+  border-bottom: none;
+}
+
+.sn-react-select__option--is-focused {
+  background: rgba(0, 183, 255, 0.2) !important;
+  border-left: 3px solid var(--neon-blue);
+}
+
+.sn-react-select__option--is-selected {
+  background: rgba(0, 183, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.sn-react-select__single-value {
+  color: #ffffff !important;
 }
 
 .sn-react-select__input-container,
 .sn-react-select__placeholder {
-  color: var(--text-muted);
+  color: var(--neon-blue) !important;
+  opacity: 0.8;
+}
+
+.sn-react-select__input {
+  color: #ffffff !important;
+}
+
+.sn-react-select__menu-list {
+  color: #ffffff !important;
+}
+
+.sn-react-select__no-options {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* 21. QR SECTION */

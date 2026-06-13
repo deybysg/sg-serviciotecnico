@@ -890,27 +890,50 @@ legend {
   color: #fff;
 }
 
-/* Tarjetas kanban mejoradas */
+/* ============================================================ */
+/* KANBAN MODERNO — Diseño visual premium 2026                  */
+/* ============================================================ */
+
+/* Tarjeta principal — Glassmorphism con profundidad */
 .kanban-card {
-  padding: 14px;
-  border-bottom: 1px solid rgba(210, 228, 255, 0.12);
-  background: linear-gradient(180deg, rgba(8, 16, 36, 0.82), rgba(3, 8, 20, 0.86));
-  border-radius: 10px;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-  border-left: 3px solid transparent;
+  position: relative;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(18, 28, 58, 0.92), rgba(10, 16, 38, 0.96));
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 4px solid transparent;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.kanban-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  opacity: 0.5;
 }
 
 .kanban-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Borde lateral según estado */
-.card-estado-pendiente { border-left-color: #ff7a00; }
-.card-estado-enRevision { border-left-color: #00b7ff; }
-.card-estado-revisionTerminada { border-left-color: #bf32ff; }
-.card-estado-terminado { border-left-color: #ffc400; }
-.card-estado-entregado { border-left-color: #23dd5f; }
+/* Borde lateral según estado — color neón vibrante */
+.card-estado-pendiente { border-left-color: #ff6b35; }
+.card-estado-enRevision { border-left-color: #38bdf8; }
+.card-estado-revisionTerminada { border-left-color: #a855f7; }
+.card-estado-terminado { border-left-color: #f59e0b; }
+.card-estado-entregado { border-left-color: #22c55e; }
 
 /* Header de tarjeta: ID + Prioridad */
 .kanban-card-header {
@@ -918,140 +941,156 @@ legend {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(210, 228, 255, 0.08);
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .kanban-card-id {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #78a7ff;
-  font-size: 0.85rem;
+  color: #60a5fa;
+  font-size: 0.82rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .kanban-card-id button {
-  background: transparent;
+  background: rgba(96, 165, 250, 0.08);
   border: none;
-  color: #78a7ff;
+  color: #60a5fa;
   font-weight: 800;
   cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0;
-  transition: color 180ms ease;
+  font-size: 0.82rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 180ms ease;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .kanban-card-id button:hover {
-  color: #a8c8ff;
+  color: #93c5fd;
+  background: rgba(96, 165, 250, 0.15);
   text-decoration: underline;
 }
 
-/* Badge de prioridad mejorado */
+/* Badge de prioridad — neón moderno */
 .priority-pill {
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
+  border: 1px solid;
 }
 
 .priority-pendiente {
-  background: rgba(255, 122, 0, 0.15);
-  color: #ff9d00;
-  border: 1px solid rgba(255, 122, 0, 0.3);
+  background: rgba(255, 107, 53, 0.12);
+  color: #ff6b35;
+  border-color: rgba(255, 107, 53, 0.25);
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.15);
 }
 
 .priority-enRevision {
-  background: rgba(0, 183, 255, 0.15);
-  color: #00b7ff;
-  border: 1px solid rgba(0, 183, 255, 0.3);
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.15);
 }
 
 .priority-revisionTerminada {
-  background: rgba(191, 50, 255, 0.15);
-  color: #bf32ff;
-  border: 1px solid rgba(191, 50, 255, 0.3);
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.25);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.15);
 }
 
 .priority-terminado {
-  background: rgba(255, 196, 0, 0.15);
-  color: #ffc400;
-  border: 1px solid rgba(255, 196, 0, 0.3);
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.15);
 }
 
 .priority-entregado {
-  background: rgba(35, 221, 95, 0.15);
-  color: #23dd5f;
-  border: 1px solid rgba(35, 221, 95, 0.3);
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.25);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);
 }
 
-/* Secciones de la tarjeta (Cliente, Equipo, Servicio, Fecha) */
+/* Secciones de la tarjeta — layout premium */
 .kanban-card-section {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 8px;
-  padding: 6px 8px;
-  border-radius: 6px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
-  transition: background 160ms ease;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 160ms ease;
 }
 
 .kanban-card-section:hover {
   background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .section-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  border-radius: 6px;
-  color: #78a7ff;
-  background: rgba(120, 167, 255, 0.1);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.08);
   font-size: 0.85rem;
+  border: 1px solid rgba(96, 165, 250, 0.12);
 }
 
 .section-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
 
 .section-label {
-  font-size: 0.68rem;
-  color: rgba(232, 241, 255, 0.5);
+  font-size: 0.65rem;
+  color: rgba(148, 163, 184, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-weight: 700;
 }
 
 .section-value {
   font-size: 0.85rem;
-  color: #e8f1ff;
+  color: #e2e8f0;
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.4;
   word-break: break-word;
 }
 
-/* Badge de días en taller */
+/* Badge de días en taller — moderno */
 .dias-badge {
   display: inline-flex;
   align-items: center;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(232, 241, 255, 0.65);
-  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 0.72rem;
   font-weight: 700;
   margin-left: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* Footer de tarjeta: acciones */
@@ -1060,20 +1099,20 @@ legend {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(210, 228, 255, 0.08);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .detail-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(120, 167, 255, 0.25);
-  color: #78a7ff;
-  background: rgba(120, 167, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.05);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
@@ -1081,9 +1120,10 @@ legend {
 }
 
 .detail-link:hover {
-  background: rgba(120, 167, 255, 0.15);
-  color: #a8c8ff;
-  border-color: rgba(120, 167, 255, 0.4);
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.15);
 }
 
 /* Responsive: filtros y tarjetas */
@@ -1100,8 +1140,13 @@ legend {
 }
 
 @media (max-width: 640px) {
+  .kanban-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
   .kanban-card-section {
-    padding: 4px 6px;
+    padding: 6px 8px;
   }
 
   .section-value {
@@ -1420,69 +1465,147 @@ legend {
   padding: 0 22px;
 }
 
+/* ============================================================ */
+/* KANBAN COLUMNS — Diseño visual por columnas con identidad    */
+/* ============================================================ */
+
 .workboard-kanban {
   display: grid;
-  grid-template-columns: repeat(5, minmax(230px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(5, minmax(260px, 1fr));
+  gap: 16px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
+  padding-top: 8px;
 }
 
 .kanban-column {
-  min-width: 230px;
-  border-radius: 10px;
+  min-width: 260px;
+  border-radius: 18px;
   overflow: visible;
+  background: linear-gradient(180deg, rgba(12, 20, 44, 0.7), rgba(8, 14, 32, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.kanban-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  opacity: 0.6;
+}
+
+/* Columna Pendiente — Naranja cálido */
+.column-pendiente {
+  border-top-color: rgba(255, 107, 53, 0.4);
+}
+.column-pendiente::before {
+  background: linear-gradient(90deg, #ff6b35, #ff8f5a);
+}
+.column-pendiente .kanban-title {
+  color: #ff6b35;
+  background: rgba(255, 107, 53, 0.06);
+}
+
+/* Columna En Revisión — Azul eléctrico */
+.column-enRevision {
+  border-top-color: rgba(56, 189, 248, 0.4);
+}
+.column-enRevision::before {
+  background: linear-gradient(90deg, #38bdf8, #60d5fa);
+}
+.column-enRevision .kanban-title {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.06);
+}
+
+/* Columna En Reparación — Violeta */
+.column-revisionTerminada {
+  border-top-color: rgba(168, 85, 247, 0.4);
+}
+.column-revisionTerminada::before {
+  background: linear-gradient(90deg, #a855f7, #c084fc);
+}
+.column-revisionTerminada .kanban-title {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.06);
+}
+
+/* Columna Listo — Ámbar */
+.column-terminado {
+  border-top-color: rgba(245, 158, 11, 0.4);
+}
+.column-terminado::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+.column-terminado .kanban-title {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+/* Columna Entregado — Verde */
+.column-entregado {
+  border-top-color: rgba(34, 197, 94, 0.4);
+}
+.column-entregado::before {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.column-entregado .kanban-title {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.06);
 }
 
 .kanban-title {
   width: 100%;
   justify-content: space-between;
   gap: 10px;
-  min-height: 62px;
-  padding: 0 14px;
+  min-height: 56px;
+  padding: 0 16px;
   border: 0;
-  border-bottom: 1px solid rgba(94, 164, 255, 0.18);
-  color: #fff;
-  background: rgba(0, 0, 0, 0.16);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 850;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  transition: all 200ms ease;
+  border-radius: 18px 18px 0 0;
+}
+
+.kanban-title:hover {
+  filter: brightness(1.2);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .kanban-title span {
   display: grid;
   place-items: center;
   color: currentColor;
+  font-size: 1.1rem;
 }
 
 .kanban-title strong {
   display: grid;
   place-items: center;
-  min-width: 36px;
-  height: 32px;
+  min-width: 32px;
+  height: 28px;
   border: 1px solid currentColor;
-  border-radius: 7px;
+  border-radius: 8px;
   color: currentColor;
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
 }
-
-.column-pendiente { border-color: rgba(255, 102, 0, 0.62); color: #ff7a00; }
-.column-enRevision { border-color: rgba(0, 183, 255, 0.62); color: #00b7ff; }
-.column-revisionTerminada { border-color: rgba(191, 50, 255, 0.62); color: #bf32ff; }
-.column-terminado { border-color: rgba(255, 196, 0, 0.62); color: #ffc400; }
-.column-entregado { border-color: rgba(35, 221, 95, 0.62); color: #23dd5f; }
 
 .kanban-items {
   display: grid;
-  gap: 10px;
-  padding: 10px;
-}
-
-.kanban-card {
+  gap: 12px;
   padding: 14px;
-  border-bottom: 1px solid rgba(210, 228, 255, 0.12);
-  background: linear-gradient(180deg, rgba(8, 16, 36, 0.82), rgba(3, 8, 20, 0.86));
+  min-height: 100px;
 }
 
 .kanban-card-top {
@@ -1499,14 +1622,6 @@ legend {
   font-weight: 800;
 }
 
-.priority-pill {
-  padding: 4px 7px;
-  border: 1px solid currentColor;
-  border-radius: 5px;
-  color: #ff9d00;
-  font-size: 0.72rem;
-}
-
 .kanban-card h3 {
   margin: 0 0 8px;
   color: #fff;
@@ -1516,12 +1631,6 @@ legend {
 .kanban-card p {
   margin-bottom: 8px;
   line-height: 1.35;
-}
-
-.kanban-card-actions {
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 12px;
 }
 
 .kanban-card .modern-estado-btn {
@@ -1534,27 +1643,34 @@ legend {
   font-size: 0.78rem;
 }
 
-.detail-link,
-.kanban-see-all {
-  border: 0;
-  color: currentColor;
-  background: transparent;
-  cursor: pointer;
-  font-weight: 800;
-}
-
 .kanban-see-all {
   width: 100%;
-  padding: 18px 10px;
-  font-size: 1rem;
+  padding: 14px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 0;
+  color: rgba(255, 255, 255, 0.4);
+  background: transparent;
+  cursor: pointer;
+  transition: all 180ms ease;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0 0 18px 18px;
+  letter-spacing: 0.02em;
+}
+
+.kanban-see-all:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .kanban-empty {
-  min-height: 120px;
+  min-height: 100px;
   display: grid;
   place-items: center;
-  color: rgba(232, 241, 255, 0.58);
+  color: rgba(255, 255, 255, 0.25);
   text-align: center;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .workboard-page .modal-content {
@@ -1819,4 +1935,1117 @@ legend {
 .filtro-ico { color: #0b1220; }
 .buscador-contenedor { display: flex; align-items: center; gap: 8px; }
 .buscador-ico { color: rgba(230,238,248,0.5); margin-left: 6px; }
+
+/* ============================== */
+/* TOGGLE DE VISTA (Cuadros / Lista) */
+/* ============================== */
+.vista-toggle-group {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.vista-toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.vista-toggle-btn span {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.vista-toggle-btn:hover {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.06);
+}
+
+.vista-toggle-btn.active {
+  background: var(--color-acento);
+  color: white;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+}
+
+/* ============================== */
+/* STEPPER DE ESTADO */
+/* ============================== */
+.estado-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border-color: rgba(255,255,255,0.3);
+  transform: scale(1.1);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.stepper-next {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stepper-next:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+}
+
+.stepper-prev {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.stepper-prev:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+}
+
+/* ============================== */
+/* VISTA LISTA (TABLA) */
+/* ============================== */
+/* ============================================================ */
+/* VISTA LISTA — Tabla moderna tipo Notion/Airtable            */
+/* ============================================================ */
+
+.workboard-lista {
+  margin-top: 1.5rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.lista-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.lista-header h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  letter-spacing: 0.01em;
+}
+
+.lista-header span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.04);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  font-weight: 600;
+}
+
+.lista-table-wrapper {
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(12, 20, 44, 0.6), rgba(8, 14, 32, 0.75));
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.lista-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  min-width: 800px;
+}
+
+.lista-table thead th {
+  text-align: left;
+  padding: 1rem 1.2rem;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(148, 163, 184, 0.6);
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+
+.lista-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.lista-table tbody tr:hover {
+  background: rgba(255,255,255,0.04);
+  transform: scale(1.003);
+  z-index: 1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.lista-table tbody td {
+  padding: 1rem 1.2rem;
+  color: rgba(226, 232, 240, 0.8);
+  vertical-align: middle;
+  font-weight: 500;
+}
+
+.lista-orden button {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  padding: 3px 8px;
+  border-radius: 6px;
+  transition: all 180ms ease;
+}
+
+.lista-orden button:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.lista-estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border: 1px solid;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.lista-estado-badge.estado-pendiente {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.lista-estado-badge.estado-enRevision {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.lista-estado-badge.estado-revisionTerminada {
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.lista-estado-badge.estado-terminado {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.lista-estado-badge.estado-entregado {
+  background: rgba(100, 116, 139, 0.12);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+.lista-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lista-ver-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.lista-ver-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+}
+
+.lista-empty {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.lista-empty p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Responsive Lista */
+@media (max-width: 768px) {
+  .lista-table {
+    min-width: 600px;
+  }
+  .lista-header h2 {
+    font-size: 1rem;
+  }
+}
+
+/* Responsive Toggle */
+@media (max-width: 640px) {
+  .vista-toggle-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  .vista-toggle-btn span {
+    font-size: 0.95rem;
+  }
+}
 .btn-visor svg { width: 18px; height: 18px; color: #e6eef8; }
+
+/* ============================================================ */
+/* CARDS GRID — Tarjetas individuales sin columnas              */
+/* ============================================================ */
+
+.workboard-cards-grid {
+  margin-top: 1.5rem;
+}
+
+.cards-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.cards-grid-header h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cards-grid-header span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 4px;
+}
+
+/* TARJETA INDIVIDUAL */
+.card-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.8;
+}
+
+.card-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Color superior según estado */
+.card-pendiente::before { background: linear-gradient(90deg, #ff6b35, #ff8f5a); }
+.card-enRevision::before { background: linear-gradient(90deg, #38bdf8, #60d5fa); }
+.card-revisionTerminada::before { background: linear-gradient(90deg, #a855f7, #c084fc); }
+.card-terminado::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.card-entregado::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+
+/* Header: ID + Badge estado */
+.card-item-header {
+  margin-bottom: 12px;
+}
+
+.card-item-id-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-item-id {
+  background: rgba(96, 165, 250, 0.08);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  transition: all 0.15s ease;
+}
+
+.card-item-id:hover {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+.card-item-dias {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Badge de estado */
+.card-item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  letter-spacing: 0.02em;
+}
+
+.badge-pendiente {
+  background: rgba(255, 107, 53, 0.1);
+  color: #ff6b35;
+  border-color: rgba(255, 107, 53, 0.25);
+}
+
+.badge-enRevision {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.badge-revisionTerminada {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+.badge-terminado {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.badge-entregado {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+/* Body: Cliente, Equipo, Detalle, Fecha */
+.card-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-item-cliente,
+.card-item-equipo,
+.card-item-detalle,
+.card-item-fecha {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.card-item-cliente svg,
+.card-item-equipo svg,
+.card-item-detalle svg,
+.card-item-fecha svg {
+  color: rgba(148, 163, 184, 0.5);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.card-item-cliente span {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.card-item-equipo span,
+.card-item-detalle span,
+.card-item-fecha span {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Acciones */
+.card-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card-item-ver {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.06);
+  color: #60a5fa;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.card-item-ver:hover {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.35);
+  color: #93c5fd;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================ */
+/* LISTA MODERNA — Tracker tipo Linear/Notion                   */
+/* ============================================================ */
+
+.workboard-lista-moderna {
+  margin-top: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.lista-moderna-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.lista-moderna-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lista-moderna-titulo h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lista-moderna-titulo span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lista-moderna-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-moderna-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.25);
+  gap: 0.5rem;
+}
+
+.lista-moderna-empty p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ITEM DE LISTA */
+.lista-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.lista-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.lista-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lista-item:hover::before {
+  opacity: 1;
+}
+
+/* Color por estado */
+.item-pendiente::before { background: linear-gradient(180deg, #ff6b35, #ff8f5a); }
+.item-enRevision::before { background: linear-gradient(180deg, #38bdf8, #60d5fa); }
+.item-revisionTerminada::before { background: linear-gradient(180deg, #a855f7, #c084fc); }
+.item-terminado::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+.item-entregado::before { background: linear-gradient(180deg, #22c55e, #4ade80); }
+
+/* Left section */
+.lista-item-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lista-item-orden button {
+  background: rgba(96, 165, 250, 0.08);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.lista-item-orden button:hover {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+.lista-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.lista-item-cliente {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lista-item-cliente svg {
+  color: rgba(148, 163, 184, 0.5);
+  flex-shrink: 0;
+}
+
+.lista-item-equipo {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lista-item-detalle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Center section */
+.lista-item-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.lista-item-fecha {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.lista-item-fecha svg {
+  color: rgba(148, 163, 184, 0.4);
+}
+
+.lista-item-dias {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Right section */
+.lista-item-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.lista-item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.badge-pendiente {
+  background: rgba(255, 107, 53, 0.1);
+  color: #ff6b35;
+  border-color: rgba(255, 107, 53, 0.2);
+}
+
+.badge-enRevision {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.badge-revisionTerminada {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.2);
+}
+
+.badge-terminado {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badge-entregado {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.lista-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lista-item-ver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lista-item-ver:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .lista-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .lista-item-left {
+    width: 100%;
+  }
+
+  .lista-item-center {
+    width: 100%;
+  }
+
+  .lista-item-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 640px) {
+  .lista-item {
+    padding: 14px 16px;
+  }
+
+  .lista-item-badge {
+    font-size: 0.68rem;
+    padding: 4px 8px;
+  }
+}
+
+/* ============================================================ */
+/* KANBAN MODERNO TIPO LINEAR/NOTION — Limpio y fácil          */
+/* ============================================================ */
+
+.workboard-kanban-moderno {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.kanban-board {
+  display: flex;
+  gap: 16px;
+  min-width: min-content;
+  padding: 4px;
+}
+
+/* LANE (Columna) */
+.kanban-lane {
+  width: 280px;
+  min-width: 280px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 280px);
+  overflow: hidden;
+}
+
+.lane-header {
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.lane-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lane-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lane-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.lane-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.lane-count {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Color de cada lane */
+.lane-pendiente .lane-icon { color: #ff6b35; }
+.lane-pendiente .lane-count { background: rgba(255, 107, 53, 0.15); color: #ff6b35; }
+.lane-pendiente { border-top: 3px solid #ff6b35; }
+
+.lane-enRevision .lane-icon { color: #38bdf8; }
+.lane-enRevision .lane-count { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.lane-enRevision { border-top: 3px solid #38bdf8; }
+
+.lane-revisionTerminada .lane-icon { color: #a855f7; }
+.lane-revisionTerminada .lane-count { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.lane-revisionTerminada { border-top: 3px solid #a855f7; }
+
+.lane-terminado .lane-icon { color: #f59e0b; }
+.lane-terminado .lane-count { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.lane-terminado { border-top: 3px solid #f59e0b; }
+
+.lane-entregado .lane-icon { color: #22c55e; }
+.lane-entregado .lane-count { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.lane-entregado { border-top: 3px solid #22c55e; }
+
+/* Cards container */
+.lane-cards {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lane-cards::-webkit-scrollbar {
+  width: 4px;
+}
+
+.lane-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lane-cards::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.lane-cards::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lane-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: center;
+}
+
+/* TARJETA NUEVA */
+.kanban-card-new {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.kanban-card-new::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  opacity: 0.7;
+}
+
+.kanban-card-new:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Borde lateral por estado */
+.card-pendiente::before { background: linear-gradient(180deg, #ff6b35, #ff8f5a); }
+.card-enRevision::before { background: linear-gradient(180deg, #38bdf8, #60d5fa); }
+.card-revisionTerminada::before { background: linear-gradient(180deg, #a855f7, #c084fc); }
+.card-terminado::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+.card-entregado::before { background: linear-gradient(180deg, #22c55e, #4ade80); }
+
+/* Header de tarjeta: ID + días */
+.card-header-new {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-id {
+  background: transparent;
+  border: none;
+  color: #60a5fa;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.card-id:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.card-dias {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Cliente y equipo */
+.card-cliente {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-equipo {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer con acciones */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-ver-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.card-ver-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Kanban moderno */
+@media (max-width: 900px) {
+  .kanban-lane {
+    width: 260px;
+    min-width: 260px;
+  }
+}

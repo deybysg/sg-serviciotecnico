@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { shortId } from "../utils/id";
-import "./clientes.css";
+import "./Clientes.css";
 import Swal from "sweetalert2";
 import { FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiTool, FiEdit3, FiTrash2, FiEye, FiSearch, FiPlus, FiUsers, FiGrid, FiList } from "react-icons/fi";
 import { getEstadoLabel } from "../constants";
