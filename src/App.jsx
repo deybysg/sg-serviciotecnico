@@ -8,6 +8,7 @@ import "./App.css";
 import Home from "./pages/Home";
 import Productos from "./pages/Productos";
 import Servicios from "./pages/Servicios";
+import NuestrosServicios from "./pages/NuestrosServicios";
 import Login from "./pages/Login";
 
 import NotFound from "./pages/NotFound";
@@ -50,7 +51,8 @@ function AppBody() {
             <Route path="/" element={<Home />} />
             <Route path="/productos" element={<Productos />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/servicios" element={<Servicios />} />
+            <Route path="/servicios" element={<Servicios />} />
+            <Route path="/nuestros-servicios" element={<NuestrosServicios />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             {/* Resultados de pago (Mercado Pago) */}

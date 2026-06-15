@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
 import { BsInfoCircleFill } from "react-icons/bs";
-import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser } from "react-icons/fi";
+import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser, FiBriefcase } from "react-icons/fi";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
@@ -119,6 +119,7 @@ function Navbar() {
             <>
               <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
               <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
+              <li><NavLink to="/nuestros-servicios"><FiBriefcase size={14} /> Servicios</NavLink></li>
               <li><NavLink to="/login"><FiLogIn size={14} /> Login</NavLink></li>
               <li><NavLink to="/servicios"><BsInfoCircleFill size={14} /> Info</NavLink></li>
             </>
@@ -128,6 +129,7 @@ function Navbar() {
             <>
               <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
               <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
+              <li><NavLink to="/nuestros-servicios"><FiBriefcase size={14} /> Servicios</NavLink></li>
               <li><NavLink to="/miscomprasmodal"><FiShoppingBag size={14} /> Mis compras</NavLink></li>
 
               {/* === CARRITO EN PC === */}

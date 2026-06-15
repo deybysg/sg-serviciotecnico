@@ -20,6 +20,7 @@ function NavHamburguesa() {
             { nombre: 'Seguimiento de tu servicio', to: '/seguimiento', icon: <FaTools />, isCta: true },
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
+            { nombre: 'Servicios', to: '/nuestros-servicios', icon: <FaServicestack /> },
             { nombre: 'Ayuda', to: '/servicios', icon: <FaServicestack /> },
             { nombre: 'Login', to: '/login', icon: <FaSignInAlt /> },
         ];
@@ -28,6 +29,7 @@ function NavHamburguesa() {
             { nombre: 'Seguimiento de tu servicio', to: '/seguimiento', icon: <FaTools />, isCta: true },
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
+            { nombre: 'Servicios', to: '/nuestros-servicios', icon: <FaServicestack /> },
             { nombre: 'Mis compras', to: '/miscomprasmodal', icon: <FaShoppingBag /> },
         ];
     } else if (user.role === 'admin') {
@@ -90,9 +92,9 @@ function NavHamburguesa() {
             <div className={`nav-hamburguesa-menu${open ? ' open' : ''}`}>
                 <div className="nav-hamburguesa-header">
                     <div className="nav-hamburguesa-brand">
-                        <img src={logoTech} alt="TECHFIX" />
+                        <img src={logoTech} alt="DEYBY" />
                         <div>
-                            <strong>TECHFIX</strong>
+                            <strong>DEYBY</strong>
                             <span>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Servicio técnico'}</span>
                         </div>
                     </div>

@@ -206,7 +206,7 @@ function Home() {
             </h1>
             <p>{activeHero.text}</p>
             <div className="hero-actions">
-              <Link className="neon-btn neon-btn-fill" to="/servicios">
+              <Link className="neon-btn neon-btn-fill" to="/nuestros-servicios">
                 Ver servicios <FaArrowRight />
               </Link>
               <Link className="neon-btn neon-btn-outline" to="/productos">
@@ -320,7 +320,7 @@ function Home() {
       </section>
 
       <footer className="tech-footer">
-        <p>© 2026 TECHFIX - Servicio técnico & ventas</p>
+        <p>© 2026 DEYBY - Servicio técnico & ventas</p>
       </footer>
     </main>
   );
