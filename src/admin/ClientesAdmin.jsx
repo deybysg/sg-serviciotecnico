@@ -346,10 +346,10 @@ function Clientes() {
                 result = await api.put(`/clientes/${editId}`, formData);
                 successMessage = "Cliente editado correctamente. ";
                 
-                // Actualizar en la lista local con el resultado del servidor
+                // Actualizar en la lista local con el resultado del servidor (normalizado)
                 setClientes(
                     clientes.map((c) =>
-                        String(c._id || c.id) === String(editId) ? result : c
+                        String(c._id || c.id) === String(editId) ? normalizeCliente(result) : c
                     )
                 );
                 setEditId(null);
@@ -360,8 +360,8 @@ function Clientes() {
                     serviciosRealizados: []
                 });
                 
-                // Agregar a la lista local
-                setClientes([...clientes, result]);
+                // Agregar a la lista local (normalizar el resultado del backend)
+                setClientes([...clientes, normalizeCliente(result)]);
             }
 
             // Toast notification
