@@ -1,0 +1,816 @@
+/* ============================================================
+   SWEETALERT2 - ULTRA MODERN DESIGN SYSTEM
+   Professional glassmorphism with dynamic effects
+   ============================================================ */
+
+/* ============================================================
+   POPUP CONTAINER - Dynamic glassmorphism
+   ============================================================ */
+
+.swal2-popup {
+  border-radius: 28px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, rgba(25, 25, 50, 0.95) 0%, rgba(15, 15, 35, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 100px rgba(0, 150, 255, 0.1) !important;
+  backdrop-filter: blur(40px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.2) !important;
+  color: #e0e0e0 !important;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+  max-width: 460px !important;
+  transform-origin: center center !important;
+  position: relative !important;
+}
+
+/* Animated gradient border effect */
+.swal2-popup::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 29px;
+  padding: 1px;
+  background: linear-gradient(135deg, 
+    rgba(0, 212, 255, 0.6) 0%, 
+    rgba(131, 56, 236, 0.6) 25%, 
+    rgba(255, 0, 110, 0.6) 50%, 
+    rgba(255, 190, 11, 0.6) 75%, 
+    rgba(0, 212, 255, 0.6) 100%
+  );
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderGradient 4s ease infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes borderGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Subtle glow behind popup */
+.swal2-popup::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(ellipse at center, rgba(0, 150, 255, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ============================================================
+   ENTRANCE & EXIT ANIMATIONS
+   ============================================================ */
+
+.swal-modern-show {
+  animation: swalUltraIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.swal-modern-show .swal2-header {
+  animation: contentReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both !important;
+}
+
+.swal-modern-show .swal2-icon {
+  animation: iconPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s both !important;
+}
+
+.swal-modern-show .swal2-content {
+  animation: contentReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both !important;
+}
+
+.swal-modern-show .swal2-actions {
+  animation: contentReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both !important;
+}
+
+.swal-modern-hide {
+  animation: swalUltraOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+/* Toast animations */
+.swal-toast-show {
+  animation: toastSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+.swal-toast-hide {
+  animation: toastSlideOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes swalUltraIn {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-8deg) scale(0.85) translateY(40px);
+    filter: blur(8px);
+  }
+  60% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0deg) scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes swalUltraOut {
+  0% {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0deg) scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(8deg) scale(0.9) translateY(-20px);
+    filter: blur(4px);
+  }
+}
+
+@keyframes contentReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  70% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(60px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(60px) scale(0.9);
+  }
+}
+
+/* ============================================================
+   HEADER & TITLE
+   ============================================================ */
+
+.swal2-header {
+  padding: 32px 32px 0 32px !important;
+  overflow: visible !important;
+}
+
+.swal2-title {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 50%, #a0aec0 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin-bottom: 8px !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.3 !important;
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.swal2-content {
+  padding: 0 32px 16px 32px !important;
+  font-size: 1rem !important;
+  color: #b0b8c8 !important;
+  line-height: 1.6 !important;
+}
+
+.swal2-html-container {
+  color: #b0b8c8 !important;
+  font-size: 1rem !important;
+  margin: 0 !important;
+  padding: 12px 0 !important;
+}
+
+/* ============================================================
+   ICONS - Modern badge style
+   ============================================================ */
+
+.swal2-icon {
+  margin: 15px auto 25px auto !important;
+  border: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  border-radius: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  padding: 24px !important;
+  overflow: visible !important;
+}
+
+.swal2-icon .swal2-icon-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 2.5rem !important;
+  transform: none !important;
+  position: static !important;
+}
+
+/* Success */
+.swal2-icon.swal2-success {
+  background: linear-gradient(135deg, rgba(6, 255, 165, 0.2), rgba(6, 255, 165, 0.05)) !important;
+  border: 2px solid rgba(6, 255, 165, 0.4) !important;
+  color: #06ffa5 !important;
+  box-shadow: 
+    0 8px 32px rgba(6, 255, 165, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(6, 255, 165, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-line-tip,
+.swal2-icon.swal2-success .swal2-success-line-long {
+  background-color: #06ffa5 !important;
+  box-shadow: 0 0 10px rgba(6, 255, 165, 0.8) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: transparent !important;
+}
+
+/* Error */
+.swal2-icon.swal2-error {
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.2), rgba(255, 0, 110, 0.05)) !important;
+  border: 2px solid rgba(255, 0, 110, 0.4) !important;
+  color: #ff006e !important;
+  box-shadow: 
+    0 8px 32px rgba(255, 0, 110, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(255, 0, 110, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line {
+  background-color: #ff006e !important;
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.8) !important;
+}
+
+/* Warning */
+.swal2-icon.swal2-warning {
+  background: linear-gradient(135deg, rgba(255, 190, 11, 0.2), rgba(255, 190, 11, 0.05)) !important;
+  border: 2px solid rgba(255, 190, 11, 0.4) !important;
+  color: #ffbe0b !important;
+  box-shadow: 
+    0 8px 32px rgba(255, 190, 11, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(255, 190, 11, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Info */
+.swal2-icon.swal2-info {
+  background: linear-gradient(135deg, rgba(58, 134, 255, 0.2), rgba(58, 134, 255, 0.05)) !important;
+  border: 2px solid rgba(58, 134, 255, 0.4) !important;
+  color: #3a86ff !important;
+  box-shadow: 
+    0 8px 32px rgba(58, 134, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(58, 134, 255, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Question */
+.swal2-icon.swal2-question {
+  background: linear-gradient(135deg, rgba(131, 56, 236, 0.2), rgba(131, 56, 236, 0.05)) !important;
+  border: 2px solid rgba(131, 56, 236, 0.4) !important;
+  color: #8338ec !important;
+  box-shadow: 
+    0 8px 32px rgba(131, 56, 236, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 60px rgba(131, 56, 236, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* ============================================================
+   ANIMACIONES DE ICONOS - ÉXITO Y ERROR
+   ============================================================ */
+
+/* Animación de ÉXITO - Anillo expansivo + check */
+.swal2-icon.swal2-success {
+  animation: successRingPulse 0.8s ease-out 0.1s both !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-line-tip,
+.swal2-icon.swal2-success .swal2-success-line-long {
+  animation: successCheckDraw 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.4s both !important;
+}
+
+/* Animación de ERROR - Sacudida + X con glow */
+.swal2-icon.swal2-error {
+  animation: errorShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) 0.1s both !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line {
+  animation: errorXAppear 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both !important;
+}
+
+/* Animación de WARNING - Pulso ámbar */
+.swal2-icon.swal2-warning {
+  animation: warningPulse 1.2s ease-in-out 0.1s both !important;
+}
+
+/* Animación de INFO - Ondas azules */
+.swal2-icon.swal2-info {
+  animation: infoRipple 1s ease-out 0.1s both !important;
+}
+
+/* Animación de QUESTION - Rebote suave */
+.swal2-icon.swal2-question {
+  animation: questionBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s both !important;
+}
+
+/* ============================================================
+   KEYFRAMES DE ANIMACIONES DE ICONOS
+   ============================================================ */
+
+/* ÉXITO - Anillo que se expande desde el centro */
+@keyframes successRingPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(6, 255, 165, 0.8);
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 0 20px rgba(6, 255, 165, 0.2);
+  }
+  60% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 10px rgba(6, 255, 165, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 60px rgba(6, 255, 165, 0.25);
+  }
+}
+
+/* ÉXITO - Check que se dibuja */
+@keyframes successCheckDraw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* ERROR - Sacudida vibrante */
+@keyframes errorShake {
+  0% {
+    transform: translateX(0) scale(0);
+    opacity: 0;
+  }
+  15% {
+    transform: translateX(-10px) scale(1.1);
+    opacity: 1;
+  }
+  30% {
+    transform: translateX(8px) scale(0.95);
+  }
+  45% {
+    transform: translateX(-8px) scale(1.05);
+  }
+  60% {
+    transform: translateX(5px) scale(0.98);
+  }
+  75% {
+    transform: translateX(-3px) scale(1.02);
+  }
+  90% {
+    transform: translateX(1px) scale(0.99);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* ERROR - X que aparece con rotación */
+@keyframes errorXAppear {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* WARNING - Pulso ámbar */
+@keyframes warningPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* INFO - Ondas que se expanden */
+@keyframes infoRipple {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(58, 134, 255, 0.6);
+  }
+  30% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 0 15px rgba(58, 134, 255, 0.3);
+  }
+  60% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 30px rgba(58, 134, 255, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 60px rgba(58, 134, 255, 0.2);
+  }
+}
+
+/* QUESTION - Rebote elástico */
+@keyframes questionBounce {
+  0% {
+    transform: scale(0) rotate(-20deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+  85% {
+    transform: scale(1.05) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ============================================================
+   BUTTONS - Ultra modern with gradient effects
+   ============================================================ */
+
+.swal2-actions {
+  padding: 16px 32px 32px 32px !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  position: relative;
+  z-index: 2;
+}
+
+.swal2-styled {
+  border-radius: 16px !important;
+  padding: 14px 28px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+  text-transform: none !important;
+  letter-spacing: 0.3px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+}
+
+/* Shine effect on hover */
+.swal2-styled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.swal2-styled:hover::before {
+  left: 100%;
+}
+
+.swal2-styled:hover {
+  transform: translateY(-2px) !important;
+}
+
+.swal2-styled:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* Confirm button - Cyan gradient */
+.swal2-confirm {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099ff 50%, #0066ff 100%) !important;
+  color: white !important;
+  box-shadow: 
+    0 4px 20px rgba(0, 153, 255, 0.4),
+    0 0 0 1px rgba(0, 212, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.swal2-confirm:hover {
+  box-shadow: 
+    0 8px 30px rgba(0, 153, 255, 0.6),
+    0 0 0 1px rgba(0, 212, 255, 0.5),
+    0 0 40px rgba(0, 153, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Deny button - Magenta gradient */
+.swal2-deny {
+  background: linear-gradient(135deg, #ff006e 0%, #ff006e 50%, #cc0058 100%) !important;
+  color: white !important;
+  box-shadow: 
+    0 4px 20px rgba(255, 0, 110, 0.4),
+    0 0 0 1px rgba(255, 0, 110, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.swal2-deny:hover {
+  box-shadow: 
+    0 8px 30px rgba(255, 0, 110, 0.6),
+    0 0 0 1px rgba(255, 0, 110, 0.5),
+    0 0 40px rgba(255, 0, 110, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Cancel button - Dark gradient */
+.swal2-cancel {
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%) !important;
+  color: white !important;
+  box-shadow: 
+    0 4px 20px rgba(74, 85, 104, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.swal2-cancel:hover {
+  box-shadow: 
+    0 8px 30px rgba(74, 85, 104, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(74, 85, 104, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================================
+   INPUT FIELDS
+   ============================================================ */
+
+.swal2-input {
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #e0e0e0 !important;
+  padding: 14px 18px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.swal2-input:focus {
+  border-color: #00d4ff !important;
+  box-shadow: 
+    0 0 0 3px rgba(0, 212, 255, 0.15),
+    inset 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.swal2-input::placeholder {
+  color: #6b7280 !important;
+  font-weight: 400 !important;
+}
+
+/* ============================================================
+   CLOSE BUTTON
+   ============================================================ */
+
+.swal2-close {
+  color: #a0aec0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-size: 1.6rem !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  top: 16px !important;
+  right: 16px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 3 !important;
+}
+
+.swal2-close:hover {
+  color: #ffffff !important;
+  background: rgba(255, 0, 110, 0.4) !important;
+  border-color: rgba(255, 0, 110, 0.6) !important;
+  transform: rotate(90deg) scale(1.1) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.5) !important;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+
+.swal2-timer-progress-bar {
+  background: linear-gradient(90deg, #00d4ff, #8338ec, #ff006e, #ffbe0b) !important;
+  background-size: 300% 100% !important;
+  animation: progressGradient 2s linear infinite !important;
+  height: 3px !important;
+  border-radius: 0 0 0 3px !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5) !important;
+}
+
+@keyframes progressGradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ============================================================
+   BACKDROP
+   ============================================================ */
+
+.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+
+.swal2-toast {
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, rgba(25, 25, 50, 0.95) 0%, rgba(15, 15, 35, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(30px) !important;
+  color: #e0e0e0 !important;
+  padding: 14px 24px !important;
+  font-size: 0.95rem !important;
+  position: relative !important;
+}
+
+.swal2-toast .swal2-title {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.swal2-toast .swal2-icon {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  margin: 0 14px 0 0 !important;
+  border-width: 2px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+}
+
+/* ============================================================
+   SCROLLBAR (for long content)
+   ============================================================ */
+
+.swal2-popup .swal2-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.swal2-popup .swal2-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.swal2-popup .swal2-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.swal2-popup .swal2-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .swal2-popup {
+    max-width: 90vw !important;
+    border-radius: 22px !important;
+  }
+  
+  .swal2-header {
+    padding: 24px 24px 0 24px !important;
+  }
+  
+  .swal2-content {
+    padding: 0 24px 12px 24px !important;
+  }
+  
+  .swal2-actions {
+    padding: 12px 24px 24px 24px !important;
+  }
+  
+  .swal2-title {
+    font-size: 1.3rem !important;
+  }
+  
+  .swal2-icon {
+    min-width: 80px !important;
+    min-height: 80px !important;
+    padding: 18px !important;
+  }
+}
