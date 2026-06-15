@@ -160,6 +160,68 @@ const ServiciosModal = ({ isOpen, onClose, cliente, servicios }) => {
 // ------------------------------------------------------------------
 
 
+// Normaliza las propiedades de snake_case a camelCase y asegura valores por defecto
+function normalizeCliente(c) {
+    if (!c) return c;
+    return {
+        id: c.id,
+        _id: c.id,
+        nombreCompleto: c.nombre_completo || c.nombreCompleto || '',
+        celular: c.celular || '',
+        correo: c.correo || c.email || '',
+        direccion: c.direccion || '',
+        dni: c.dni || '',
+        serviciosRealizados: c.serviciosRealizados || [],
+        createdAt: c.created_at || c.createdAt,
+        updatedAt: c.updated_at || c.updatedAt,
+    };
+}
+
+function normalizeServicio(s) {
+    if (!s) return s;
+    const id = s.id || s._id;
+    let clienteId;
+    if (s.cliente_id != null) {
+        clienteId = String(s.cliente_id);
+    } else if (s.clienteId != null) {
+        clienteId = String(s.clienteId);
+    } else if (s.cliente && typeof s.cliente === 'object') {
+        clienteId = String(s.cliente.id || s.cliente._id);
+    } else if (s.cliente != null) {
+        clienteId = String(s.cliente);
+    }
+    return {
+        id: id,
+        _id: id,
+        servicioNumero: s.servicio_numero ?? s.servicioNumero,
+        clienteId: clienteId,
+        cliente: clienteId,
+        tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+        marcaProducto: s.marca_producto ?? s.marcaProducto,
+        modeloProducto: s.modelo_producto ?? s.modeloProducto,
+        tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+        fallaReportada: s.falla_reportada ?? s.fallaReportada,
+        asunto: s.asunto,
+        detalles: s.detalles,
+        notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+        metodoPago: s.metodo_pago ?? s.metodoPago,
+        anticipo: s.anticipo,
+        presupuesto: s.presupuesto || {
+            items: s.presupuesto_items || [],
+            subtotal: s.presupuesto_subtotal || 0,
+            iva: s.presupuesto_iva || 0,
+            total: s.presupuesto_total || 0
+        },
+        estado: s.estado,
+        detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+        seguimiento: s.seguimiento || [],
+        fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+        fechaSalida: s.fecha_salida ?? s.fechaSalida,
+        createdAt: s.created_at ?? s.createdAt,
+        updatedAt: s.updated_at ?? s.updatedAt,
+    };
+}
+
 function Clientes() {
     const [formData, setFormData] = useState({
         nombreCompleto: "",
@@ -167,14 +229,14 @@ function Clientes() {
         correo: "",
         direccion: "",
         dni: "",
-        serviciosRealizados: [], 
+        serviciosRealizados: [],
     });
 
     const [clientes, setClientes] = useState([]);
     const [editId, setEditId] = useState(null);
     const [search, setSearch] = useState("");
     const [mostrarLista, setMostrarLista] = useState(false);
-    
+
     // ESTADOS para el Modal
     const [modalOpen, setModalOpen] = useState(false);
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
@@ -185,7 +247,8 @@ function Clientes() {
         const loadClientes = async () => {
             try {
                 const data = await api.get('/clientes');
-                setClientes(data);
+                const normalized = Array.isArray(data) ? data.map(normalizeCliente) : [];
+                setClientes(normalized);
             } catch (error) {
                 console.error("Error al cargar clientes:", error);
                 Swal.fire({
@@ -208,8 +271,9 @@ function Clientes() {
         // El backend ya devuelve los servicios populados en el array serviciosRealizados
         // Si son objetos completos, los usamos directamente
         if (typeof serviciosRealizados[0] === 'object' && serviciosRealizados[0]._id) {
-            // Ya están populados, ordenar por fecha de entrada más reciente primero
-            const serviciosOrdenados = [...serviciosRealizados]
+            // Ya están populados, normalizar y ordenar por fecha de entrada más reciente primero
+            const serviciosOrdenados = serviciosRealizados
+                .map(normalizeServicio)
                 .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
             setServiciosDetalle(serviciosOrdenados);
             return;
@@ -218,19 +282,22 @@ function Clientes() {
         // Si solo son IDs (fallback), traer todos y filtrar
         try {
             const todosLosServicios = await api.get('/servicios');
-            
+            const serviciosNormalizados = Array.isArray(todosLosServicios)
+                ? todosLosServicios.map(normalizeServicio)
+                : [];
+
             // Convertir IDs a strings para comparar
             const idsStrings = serviciosRealizados.map(id => String(id));
-            
+
             // Filtrar servicios que corresponden a los IDs del cliente
-            const serviciosFiltrados = todosLosServicios
+            const serviciosFiltrados = serviciosNormalizados
                 .filter(servicio => {
                     const servicioId = String(servicio._id || servicio.id);
                     return idsStrings.includes(servicioId);
                 })
                 // Ordenar por fecha de entrada más reciente primero
-                .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada)); 
-            
+                .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
+
             setServiciosDetalle(serviciosFiltrados);
         } catch (error) {
             console.error("Error al cargar detalles de servicios:", error);

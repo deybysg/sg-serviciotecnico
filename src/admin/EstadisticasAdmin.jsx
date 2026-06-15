@@ -34,7 +34,6 @@ const getCategoryColor = (cat) => CATEGORY_COLORS[cat.toLowerCase()] || '#3498db
 
 const LOCALE = 'es-AR';
 
-
 /**
  * Formatea un número como moneda.
  */
@@ -46,6 +45,69 @@ const formatCurrency = (value) => {
         minimumFractionDigits: 0
     }).format(Number(value));
 };
+
+// Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
+function normalizeServicio(s) {
+    if (!s) return s;
+    const id = s.id || s._id;
+    let presupuesto = s.presupuesto;
+    if (!presupuesto && (s.presupuesto_items || s.presupuesto_subtotal !== undefined || s.presupuesto_total !== undefined)) {
+        presupuesto = {
+            items: s.presupuesto_items || [],
+            subtotal: Number(s.presupuesto_subtotal || 0),
+            iva: Number(s.presupuesto_iva || 0),
+            total: Number(s.presupuesto_total || 0)
+        };
+    } else if (presupuesto) {
+        presupuesto = {
+            items: presupuesto.items || [],
+            subtotal: Number(presupuesto.subtotal || 0),
+            iva: Number(presupuesto.iva || 0),
+            total: Number(presupuesto.total || 0)
+        };
+    }
+    return {
+        id: id,
+        _id: id,
+        servicioNumero: s.servicio_numero ?? s.servicioNumero,
+        clienteId: s.cliente_id ?? s.clienteId ?? s.cliente,
+        tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+        marcaProducto: s.marca_producto ?? s.marcaProducto,
+        modeloProducto: s.modelo_producto ?? s.modeloProducto,
+        tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+        fallaReportada: s.falla_reportada ?? s.fallaReportada,
+        asunto: s.asunto,
+        detalles: s.detalles,
+        notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+        metodoPago: s.metodo_pago ?? s.metodoPago,
+        anticipo: Number(s.anticipo || 0),
+        presupuesto: presupuesto,
+        estado: s.estado,
+        detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+        seguimiento: s.seguimiento || [],
+        fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+        fechaSalida: s.fecha_salida ?? s.fechaSalida,
+        createdAt: s.created_at ?? s.createdAt,
+        updatedAt: s.updated_at ?? s.updatedAt,
+    };
+}
+
+function normalizeVenta(v) {
+    if (!v) return v;
+    const id = v.id || v._id;
+    return {
+        id: id,
+        _id: id,
+        username: v.username,
+        fechaCompra: v.fecha_compra ?? v.fechaCompra,
+        totalVenta: Number(v.total_venta ?? v.totalVenta ?? 0),
+        metodoPago: v.metodo_pago ?? v.metodoPago,
+        estado: v.estado,
+        productosComprados: v.productos_comprados ?? v.productosComprados ?? [],
+        createdAt: v.created_at ?? v.createdAt,
+        updatedAt: v.updated_at ?? v.updatedAt,
+    };
+}
 
 // =================================================================
 // 2. LÓGICA DE CÁLCULO DE SERVICIOS (Tu función original)
@@ -67,11 +129,11 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
         );
     }
 
-    const calculableServices = filteredServices.filter(s => s.presupuesto?.total > 0);
+    const calculableServices = filteredServices.filter(s => Number(s.presupuesto?.total || 0) > 0);
 
     const totalRevenue = calculableServices
         .filter(s => s.estado === 'entregado')
-        .reduce((sum, s) => sum + s.presupuesto.total, 0);
+        .reduce((sum, s) => sum + Number(s.presupuesto?.total || 0), 0);
 
     const deliveredServicesCount = filteredServices.filter(s => s.estado === 'entregado').length;
 
@@ -105,7 +167,7 @@ const analyzeServiceData = (services, filterYear, filterMonth) => {
             const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             const monthLabel = date.toLocaleString('es-ES', { month: 'short', year: '2-digit' });
 
-            const precioServicio = s.presupuesto?.total || 0;
+            const precioServicio = Number(s.presupuesto?.total || 0);
             monthlyRevenueMap[yearMonthKey] = (monthlyRevenueMap[yearMonthKey] || 0) + precioServicio;
 
             if (!monthlyServiceDetails[yearMonthKey]) {
@@ -207,7 +269,8 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
     const categoryDistributionMap = {};
 
     filteredSales.forEach(venta => {
-        totalVendido += venta.totalVenta || 0; 
+        const totalVentaNum = Number(venta.totalVenta || 0);
+        totalVendido += totalVentaNum; 
         
         // Agrupación mensual para el gráfico
         if (venta.fechaCompra) {
@@ -222,11 +285,11 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
                     details: []
                 };
             }
-            monthlyRevenueMap[yearMonthKey].revenue += venta.totalVenta || 0;
+            monthlyRevenueMap[yearMonthKey].revenue += totalVentaNum;
             monthlyRevenueMap[yearMonthKey].details.push({
                 id: venta.id,
                 username: venta.username,
-                total: venta.totalVenta,
+                total: totalVentaNum,
                 fecha: venta.fechaCompra,
                 productosComprados: venta.productosComprados || []
             });
@@ -637,17 +700,20 @@ function EstadisticasAdmin() {
     const [selectedMonthSalesData, setSelectedMonthSalesData] = useState(null);
 
     // --- Fetch de Datos con Backend Real y JWT ---
-    const fetchAllData = useCallback(async (endpoint, setter, errorSetter, loadingSetter, dataType) => {
+    const fetchAllData = useCallback(async (endpoint, setter, errorSetter, loadingSetter, dataType, normalizer) => {
         loadingSetter(true);
         errorSetter(null);
         try {
             const data = await api.get(endpoint);
             
-            // Normalizar _id a id
-            const normalizedData = (Array.isArray(data) ? data : []).map(item => ({
-                ...item,
-                id: item._id || item.id
-            }));
+            // Normalizar _id a id y aplicar normalizador específico (snake_case -> camelCase)
+            const normalizedData = (Array.isArray(data) ? data : []).map(item => {
+                const base = {
+                    ...item,
+                    id: item._id || item.id
+                };
+                return normalizer ? normalizer(base) : base;
+            });
             
             setter(normalizedData);
         } catch (err) {
@@ -669,13 +735,18 @@ function EstadisticasAdmin() {
     }, []);
 
     useEffect(() => {
-        fetchAllData('/servicios', setAllServices, setErrorServices, setLoadingServices, 'servicios');
-        fetchAllData('/ventas', setAllSales, setErrorSales, setLoadingSales, 'ventas');
+        fetchAllData('/servicios', setAllServices, setErrorServices, setLoadingServices, 'servicios', normalizeServicio);
+        fetchAllData('/ventas', setAllSales, setErrorSales, setLoadingSales, 'ventas', normalizeVenta);
         // Cargar usuarios para filtrar ventas huérfanas
         (async () => {
             try {
                 const users = await api.get('/usuarios');
-                setAllUsers(Array.isArray(users) ? users : []);
+                setAllUsers(Array.isArray(users) ? users.map(u => ({
+                    id: u.id || u._id,
+                    username: u.username,
+                    role: u.role,
+                    nombreCompleto: u.nombre_completo || u.nombreCompleto
+                })) : []);
             } catch (e) {
                 // Silenciar: si falla, se muestran todas las ventas
                 setAllUsers([]);
@@ -741,13 +812,13 @@ function EstadisticasAdmin() {
 
     
     const maxRevenueServicios = useMemo(() => {
-        if (!statsServicios) return 1000;
-        return Math.max(...statsServicios.monthlySalesData.map(d => d.revenue), 1000);
+        if (!statsServicios || !statsServicios.monthlySalesData.length) return 1000;
+        return Math.max(...statsServicios.monthlySalesData.map(d => Number(d.revenue) || 0), 1000);
     }, [statsServicios]);
     
     const maxRevenueVentas = useMemo(() => {
         if (!statsVentas || !statsVentas.monthlySalesData.length) return 1000;
-        return Math.max(...statsVentas.monthlySalesData.map(d => d.revenue), 1000);
+        return Math.max(...statsVentas.monthlySalesData.map(d => Number(d.revenue) || 0), 1000);
     }, [statsVentas]);
     
     
@@ -867,10 +938,10 @@ const MonthlyServiceDetailModal = ({ data, onClose }) => {
                                 {data.details.map((service) => (
                                     <tr key={service.id}>
                                         <td>
-                                            <span className="service-id">{service.id.substring(0, 4)}...</span>
+                                            <span className="service-id">{String(service.id).substring(0, 4)}...</span>
                                             <span className="service-date"> ({new Date(service.fecha).toLocaleDateString(LOCALE)})</span>
                                         </td>
-                                        <td><span className={`service-type-tag tag-${service.tipo.toLowerCase()}`}>{service.tipo}</span></td>
+                                        <td><span className={`service-type-tag tag-${String(service.tipo).toLowerCase()}`}>{service.tipo}</span></td>
                                         <td>{service.marca}</td>
                                         <td className="text-right">{formatCurrency(service.precio)}</td>
                                     </tr>

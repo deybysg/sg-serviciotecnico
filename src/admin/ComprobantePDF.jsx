@@ -18,8 +18,16 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     };
 
     // --- Lógica del Presupuesto ---
-    const presupuestoCero = service.presupuesto.total === 0 && service.presupuesto.items.every(item => (item.costo === 0 || !item.descripcion));
-    const itemsPresupuesto = service.presupuesto.items.filter(item => item.descripcion || item.costo > 0);
+    const presupuesto = service.presupuesto || {
+        items: service.presupuesto_items || [],
+        subtotal: Number(service.presupuesto_subtotal || 0),
+        iva: Number(service.presupuesto_iva || 0),
+        total: Number(service.presupuesto_total || 0)
+    };
+    const presupuestoTotal = Number(presupuesto.total || 0);
+    const presupuestoItems = presupuesto.items || [];
+    const presupuestoCero = presupuestoTotal === 0 && presupuestoItems.every(item => (Number(item.costo || 0) === 0 || !item.descripcion));
+    const itemsPresupuesto = presupuestoItems.filter(item => item.descripcion || Number(item.costo || 0) > 0);
     
     // Si el presupuesto es cero, crea filas vacías para completar a mano (3 líneas por defecto)
     const filasVacias = presupuestoCero ? Array(3).fill({ descripcion: '_________________________', costo: 0 }) : [];
@@ -69,16 +77,30 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
 
             <div style={styles.separator} />
 
-            {/* Sección de Datos del Cliente y Equipo */}
+            {/* Sección de Datos del Cliente */}
             <div style={styles.section}>
-                <h2 style={styles.sectionTitle}>DATOS DEL SERVICIO Y CLIENTE</h2>
+                <h2 style={styles.sectionTitle}>DATOS DEL CLIENTE</h2>
                 <div style={styles.grid}>
-                    <p style={styles.gridItem}><strong>Cliente:</strong> {service.clienteNombre}</p>
-                    <p style={styles.gridItem}><strong>Contacto:</strong> {service.clienteTelefono || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Equipo (Marca/Mod):</strong> {service.marcaProducto}</p>
-                    <p style={styles.gridItem}><strong>Tipo de Equipo:</strong> {getTipoLabel(service.tipoServicio)}</p>
+                    <p style={styles.gridItem}><strong>Cliente:</strong> {service.clienteNombre || service.cliente?.nombreCompleto || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Teléfono:</strong> {service.clienteTelefono || service.cliente?.celular || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>DNI:</strong> {service.clienteDni || service.cliente?.dni || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Correo:</strong> {service.clienteCorreo || service.cliente?.correo || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Dirección:</strong> {service.clienteDireccion || service.cliente?.direccion || 'N/A'}</p>
+                </div>
+            </div>
+
+            <div style={styles.separatorThin} />
+
+            {/* Sección de Datos del Equipo y Servicio */}
+            <div style={styles.section}>
+                <h2 style={styles.sectionTitle}>DATOS DEL SERVICIO Y EQUIPO</h2>
+                <div style={styles.grid}>
+                    <p style={styles.gridItem}><strong>Equipo:</strong> {service.tipoEquipo || service.tipo_equipo || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Marca:</strong> {service.marcaProducto || service.marca_producto || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Modelo:</strong> {service.modeloProducto || service.modelo_producto || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Tipo de Servicio:</strong> {getTipoLabel(service.tipoServicio || service.tipo_servicio)}</p>
                     <p style={styles.gridItem}><strong>Estado Actual:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></p>
-                    <p style={styles.gridItem}><strong>Nro. Serie:</strong> {service.serial || 'N/A'}</p>
+                    <p style={styles.gridItem}><strong>Nro. Orden:</strong> {service.servicioNumero || service.servicio_numero || 'N/A'}</p>
                 </div>
             </div>
 
@@ -86,9 +108,33 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
 
             {/* Problema Reportado */}
             <div style={styles.section}>
-                <h2 style={styles.sectionTitle}>PROBLEMA REPORTADO POR EL CLIENTE</h2>
-                <p style={styles.details}>{service.detalles || 'No se registraron detalles. (Revisión Pendiente)'}</p>
+                <h2 style={styles.sectionTitle}>PROBLEMA REPORTADO / FALLA</h2>
+                <p style={styles.details}>{service.fallaReportada || service.falla_reportada || service.detalles || 'No se registraron detalles. (Revisión Pendiente)'}</p>
             </div>
+
+            {/* Asunto y Detalles */}
+            {(service.asunto || service.notasAdicionales || service.notas_adicionales) && (
+                <>
+                    <div style={styles.separatorThin} />
+                    <div style={styles.section}>
+                        <h2 style={styles.sectionTitle}>INFORMACIÓN ADICIONAL</h2>
+                        <div style={styles.grid}>
+                            {service.asunto && (
+                                <p style={styles.gridItem}><strong>Asunto:</strong> {service.asunto}</p>
+                            )}
+                            {service.metodoPago && (
+                                <p style={styles.gridItem}><strong>Método de Pago:</strong> {service.metodoPago || service.metodo_pago}</p>
+                            )}
+                            {service.anticipo && Number(service.anticipo) > 0 && (
+                                <p style={styles.gridItem}><strong>Anticipo:</strong> ${Number(service.anticipo).toFixed(2)}</p>
+                            )}
+                        </div>
+                        {(service.notasAdicionales || service.notas_adicionales) && (
+                            <p style={styles.details}><strong>Notas:</strong> {service.notasAdicionales || service.notas_adicionales}</p>
+                        )}
+                    </div>
+                </>
+            )}
 
             <div style={styles.separatorThin} />
 
@@ -107,7 +153,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                             <tr key={index}>
                                 <td style={styles.td}>{item.descripcion}</td>
                                 <td style={styles.tdCosto}>
-                                    {presupuestoCero ? '' : `$${(item.costo || 0).toFixed(2)}`}
+                                    {presupuestoCero ? '' : `$${Number(item.costo || 0).toFixed(2)}`}
                                 </td>
                             </tr>
                         ))}
@@ -118,7 +164,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                                 {presupuestoCero ? 'COSTO TOTAL (A COMPLETAR):' : 'TOTAL ESTIMADO:'}
                             </td>
                             <td style={styles.tdTotalValue}>
-                                {presupuestoCero ? '___________' : `$${service.presupuesto.total.toFixed(2)}`}
+                                {presupuestoCero ? '___________' : `$${Number(presupuestoTotal).toFixed(2)}`}
                             </td>
                         </tr>
                     </tfoot>

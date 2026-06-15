@@ -18,10 +18,67 @@ const TIME_OPTIONS = { hour12: false }; // Opciones para el formato 24h
 
 const getClienteName = (clienteId, clientes) => {
     if (!clienteId) return "Cliente Desconocido";
-    // clientes normalizados con id = (_id || id)
     const found = clientes.find(c => (String(c.id) === String(clienteId)));
     return found ? (found.nombreCompleto || found.label || 'Cliente Desconocido') : "Cliente Desconocido";
 };
+
+// Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
+function normalizeServicio(s) {
+    if (!s) return s;
+    const id = s.id || s._id;
+    let clienteId;
+    if (s.cliente_id != null) {
+        clienteId = String(s.cliente_id);
+    } else if (s.clienteId != null) {
+        clienteId = String(s.clienteId);
+    } else if (s.cliente && typeof s.cliente === 'object') {
+        clienteId = String(s.cliente.id || s.cliente._id);
+    } else if (s.cliente != null) {
+        clienteId = String(s.cliente);
+    }
+    return {
+        id: id,
+        _id: id,
+        servicioNumero: s.servicio_numero ?? s.servicioNumero,
+        clienteId: clienteId,
+        cliente: clienteId,
+        tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+        marcaProducto: s.marca_producto ?? s.marcaProducto,
+        modeloProducto: s.modelo_producto ?? s.modeloProducto,
+        tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+        fallaReportada: s.falla_reportada ?? s.fallaReportada,
+        asunto: s.asunto,
+        detalles: s.detalles,
+        notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+        metodoPago: s.metodo_pago ?? s.metodoPago,
+        anticipo: s.anticipo,
+        presupuesto: s.presupuesto || {
+            items: s.presupuesto_items || [],
+            subtotal: s.presupuesto_subtotal || 0,
+            iva: s.presupuesto_iva || 0,
+            total: s.presupuesto_total || 0
+        },
+        estado: s.estado,
+        detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+        seguimiento: s.seguimiento || [],
+        fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+        fechaSalida: s.fecha_salida ?? s.fechaSalida,
+        createdAt: s.created_at ?? s.createdAt,
+        updatedAt: s.updated_at ?? s.updatedAt,
+    };
+}
+
+function normalizeCliente(c) {
+    if (!c) return c;
+    return {
+        id: c.id || c._id,
+        nombreCompleto: c.nombre_completo || c.nombreCompleto || '',
+        celular: c.celular || '',
+        correo: c.correo || c.email || '',
+        direccion: c.direccion || '',
+        dni: c.dni || '',
+    };
+}
 
 // Formatea el número de servicio a 3 dígitos si existe, si no muestra un shortId del id
 const formatServicioNumero = (servicio) => {
@@ -54,18 +111,9 @@ const HistorialAdmin = () => {
                         api.get('/servicios')
                     ]);
 
-                    // Normalizar clientes y servicios para tolerar _id/id y clienteId/cliente
-                    const clientesData = (clientesRaw || []).map(c => ({
-                        ...c,
-                        id: c._id || c.id
-                    }));
-
-                    const serviciosData = (serviciosRaw || []).map(s => ({
-                        ...s,
-                        id: s._id || s.id,
-                        // Unificar referencia de cliente siempre como string (evitar objeto completo)
-                        clienteId: s.clienteId || (s.cliente && (s.cliente._id || s.cliente.id)) || null
-                    }));
+                    // Normalizar clientes y servicios para tolerar _id/id y snake_case/camelCase
+                    const clientesData = (clientesRaw || []).map(normalizeCliente);
+                    const serviciosData = (serviciosRaw || []).map(normalizeServicio);
 
                     // Solo los entregados con fecha de salida, ordenados por fecha más reciente
                     const historial = serviciosData

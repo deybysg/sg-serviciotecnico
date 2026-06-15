@@ -27,6 +27,64 @@ import {
 
 const URL_BASE_PUBLICA = window.location.origin;
 
+// Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
+function normalizeServicio(s) {
+    if (!s) return s;
+    const id = s.id || s._id;
+    let clienteId;
+    if (s.cliente_id != null) {
+        clienteId = String(s.cliente_id);
+    } else if (s.clienteId != null) {
+        clienteId = String(s.clienteId);
+    } else if (s.cliente && typeof s.cliente === 'object') {
+        clienteId = String(s.cliente.id || s.cliente._id);
+    } else if (s.cliente != null) {
+        clienteId = String(s.cliente);
+    }
+    return {
+        id: id,
+        _id: id,
+        servicioNumero: s.servicio_numero ?? s.servicioNumero,
+        clienteId: clienteId,
+        cliente: clienteId,
+        tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+        marcaProducto: s.marca_producto ?? s.marcaProducto,
+        modeloProducto: s.modelo_producto ?? s.modeloProducto,
+        tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+        fallaReportada: s.falla_reportada ?? s.fallaReportada,
+        asunto: s.asunto,
+        detalles: s.detalles,
+        notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+        metodoPago: s.metodo_pago ?? s.metodoPago,
+        anticipo: s.anticipo,
+        presupuesto: s.presupuesto || {
+            items: s.presupuesto_items || [],
+            subtotal: s.presupuesto_subtotal || 0,
+            iva: s.presupuesto_iva || 0,
+            total: s.presupuesto_total || 0
+        },
+        estado: s.estado,
+        detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+        seguimiento: s.seguimiento || [],
+        fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+        fechaSalida: s.fecha_salida ?? s.fechaSalida,
+        createdAt: s.created_at ?? s.createdAt,
+        updatedAt: s.updated_at ?? s.updatedAt,
+    };
+}
+
+function normalizeCliente(c) {
+    if (!c) return c;
+    return {
+        id: c.id || c._id,
+        nombreCompleto: c.nombre_completo || c.nombreCompleto || '',
+        celular: c.celular || '',
+        correo: c.correo || c.email || '',
+        direccion: c.direccion || '',
+        dni: c.dni || '',
+    };
+}
+
 function ServiciosAdmin() {
     const comprobanteRef = useRef(null);
 
@@ -71,16 +129,18 @@ function ServiciosAdmin() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const clientesData = await api.get('/clientes');
+                const clientesRaw = await api.get('/clientes');
+                const clientesData = Array.isArray(clientesRaw) ? clientesRaw.map(normalizeCliente) : [];
                 setClientes(clientesData);
                 const options = clientesData.map((c) => ({
-                    value: c._id || c.id,
+                    value: c.id || c._id,
                     label: c.nombreCompleto,
-                    data: c, // Guardar datos completos del cliente
+                    data: c,
                 }));
                 setClientesOptions(options);
 
-                const serviciosData = await api.get('/servicios');
+                const serviciosRaw = await api.get('/servicios');
+                const serviciosData = Array.isArray(serviciosRaw) ? serviciosRaw.map(normalizeServicio) : [];
                 setServicios(serviciosData);
             } catch (error) {
                 console.error("Error al cargar datos:", error);
@@ -95,8 +155,20 @@ function ServiciosAdmin() {
     }, []);
 
     useEffect(() => {
-        if (isPrinting && comprobanteRef.current) {
-            const timeoutId = setTimeout(async () => {
+        if (isPrinting && serviceToPrint) {
+            // Esperar a que el DOM se renderice antes de capturar
+            const capturePdf = async () => {
+                // Dar tiempo a React para renderizar el div oculto
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                if (!comprobanteRef.current) {
+                    console.error('No se encontró el elemento del comprobante para generar PDF');
+                    Swal.fire('Error', 'No se pudo generar el comprobante PDF: elemento no encontrado.', 'error');
+                    setServiceToPrint(null);
+                    setIsPrinting(false);
+                    return;
+                }
+                
                 try {
                     const canvas = await html2canvas(comprobanteRef.current, { scale: 2 });
                     const imgData = canvas.toDataURL('image/png');
@@ -116,13 +188,31 @@ function ServiciosAdmin() {
                 }
                 setServiceToPrint(null);
                 setIsPrinting(false);
-            }, 100);
-            return () => clearTimeout(timeoutId);
+            };
+            
+            capturePdf();
         }
     }, [isPrinting, serviceToPrint]);
 
     const generarComprobante = (service) => {
-        setServiceToPrint(service);
+        const cid = service.clienteId || service.cliente;
+        const clienteData = clientes.find(c => String(c.id) === String(cid));
+        const serviceEnriched = {
+            ...service,
+            clienteNombre: clienteData?.nombreCompleto || 'N/A',
+            clienteTelefono: clienteData?.celular || 'N/A',
+            clienteDni: clienteData?.dni || 'N/A',
+            clienteCorreo: clienteData?.correo || 'N/A',
+            clienteDireccion: clienteData?.direccion || 'N/A',
+            cliente: clienteData || service.cliente,
+            presupuesto: service.presupuesto || {
+                items: service.presupuesto_items || [],
+                subtotal: Number(service.presupuesto_subtotal || 0),
+                iva: Number(service.presupuesto_iva || 0),
+                total: Number(service.presupuesto_total || 0)
+            }
+        };
+        setServiceToPrint(serviceEnriched);
         setIsPrinting(true);
     };
 
@@ -183,8 +273,10 @@ function ServiciosAdmin() {
     // Función para obtener datos del cliente del estado (usado en la lista de servicios)
     const getClienteData = (clienteId) => {
         if (typeof clienteId === 'object' && clienteId !== null) {
-            return clienteId;
+            if (clienteId.nombreCompleto) return clienteId;
+            clienteId = String(clienteId);
         }
+        if (!clienteId || clienteId === 'null' || clienteId === 'undefined') return null;
         return clientes.find(c => String(c._id || c.id) === String(clienteId));
     };
 
@@ -356,13 +448,18 @@ function ServiciosAdmin() {
 
     const openModal = async (service) => {
         let serviceToShow = service;
-        try {
-            if (service && service.cliente && typeof service.cliente === 'string') {
-                const clienteFull = await api.get(`/clientes/${service.cliente}`);
+        const cid = service.clienteId || service.cliente;
+        if (cid) {
+            try {
+                const clienteFull = await api.get(`/clientes/${cid}`);
                 serviceToShow = { ...service, cliente: clienteFull };
+            } catch (err) {
+                console.warn('No se pudo obtener cliente completo, usando datos locales:', err);
+                const clienteLocal = clientes.find(c => String(c.id) === String(cid));
+                if (clienteLocal) {
+                    serviceToShow = { ...service, cliente: clienteLocal };
+                }
             }
-        } catch (err) {
-            console.warn('No se pudo obtener cliente completo:', err);
         }
         setModalService(serviceToShow);
         setModalOpen(true);
@@ -388,8 +485,9 @@ function ServiciosAdmin() {
 
     const serviciosFiltrados = servicios.filter((s) => {
         const query = (searchQuery || '').toString().toLowerCase();
-        const clienteId = (s.cliente && typeof s.cliente === 'object') ? (s.cliente._id || s.cliente.id || '') : (s.cliente || '');
-        const clienteNombre = (s.cliente && typeof s.cliente === 'object') ? (s.cliente.nombreCompleto || '') : (clientes.find(c => c.value === clienteId)?.label || "");
+        const clienteId = s.clienteId;
+        const clienteData = clientes.find(c => String(c.id) === String(clienteId));
+        const clienteNombre = clienteData?.nombreCompleto || '';
         const servicioNumero = s.servicioNumero ? s.servicioNumero.toString() : "";
         const marca = (s.marcaProducto || '').toString().toLowerCase();
         const tipo = (s.tipoServicio || '').toString().toLowerCase();
@@ -735,7 +833,7 @@ function ServiciosAdmin() {
                 {showListaServicios && (
                     <div className="sn-servicios-grid">
                         {serviciosOrdenados.map((s) => {
-                            const clienteData = getClienteData(s.cliente);
+                            const clienteData = getClienteData(s.clienteId);
                             const clienteNombre = clienteData?.nombreCompleto || "Cliente desconocido";
                             const servicioId = s._id || s.id;
                             const servicioNumero = s.servicioNumero || 'N/A';

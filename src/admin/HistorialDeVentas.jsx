@@ -22,6 +22,24 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
+// Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
+function normalizeVenta(v) {
+    if (!v) return v;
+    const id = v.id || v._id;
+    return {
+        id: id,
+        _id: id,
+        username: v.username,
+        fechaCompra: v.fecha_compra ?? v.fechaCompra,
+        totalVenta: Number(v.total_venta ?? v.totalVenta ?? 0),
+        metodoPago: v.metodo_pago ?? v.metodoPago,
+        estado: v.estado,
+        productosComprados: v.productos_comprados ?? v.productosComprados ?? [],
+        createdAt: v.created_at ?? v.createdAt,
+        updatedAt: v.updated_at ?? v.updatedAt,
+    };
+}
+
 
 // --- Componente Principal ---
 const HistorialDeVentas = () => {
@@ -43,11 +61,8 @@ const HistorialDeVentas = () => {
                 api.get('/usuarios')
             ]);
             
-            // Normalizar _id a id
-            const ventasData = (ventasRaw || []).map(v => ({
-                ...v,
-                id: v._id || v.id
-            }));
+            // Normalizar _id a id y snake_case a camelCase
+            const ventasData = (ventasRaw || []).map(v => normalizeVenta(v));
             // Filtrar ventas cuyos usuarios aún existen (evita mostrar historiales de usuarios eliminados)
             const usernamesSet = new Set((usuariosRaw || []).map(u => u.username));
             const filtradas = ventasData.filter(v => usernamesSet.has(v.username));

@@ -27,11 +27,21 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
                 clonedData.clienteId = clonedData.cliente;
             }
             
+            // Asegurar que presupuesto existe con valores por defecto
+            if (!clonedData.presupuesto) {
+                clonedData.presupuesto = { items: [], subtotal: 0, iva: 0, total: 0 };
+            }
+            
             // Convertir 0 a "" para que el input se vea vacío
-            clonedData.presupuesto.items = clonedData.presupuesto.items.map(item => ({
+            clonedData.presupuesto.items = (clonedData.presupuesto.items || []).map(item => ({
                 ...item,
-                costo: item.costo === 0 ? "" : item.costo
+                costo: Number(item.costo) === 0 ? "" : item.costo
             }));
+            
+            // Asegurar que subtotal, iva, total son números
+            clonedData.presupuesto.subtotal = Number(clonedData.presupuesto.subtotal || 0);
+            clonedData.presupuesto.iva = Number(clonedData.presupuesto.iva || 0);
+            clonedData.presupuesto.total = Number(clonedData.presupuesto.total || 0);
             
             setEditData(clonedData); 
         }
@@ -206,8 +216,8 @@ const ModalDetalles = ({ isOpen, onClose, servicio, clientes, onSave }) => {
                         ))}
                         <button type="button" onClick={addPresupuestoItem}>+ Agregar ítem</button>
                         <div className="presupuesto-resumen">
-                            <p>Subtotal: ${editData.presupuesto?.subtotal?.toFixed(2) || '0.00'}</p>
-                            <p>Total: ${editData.presupuesto?.total?.toFixed(2) || '0.00'}</p>
+                            <p>Subtotal: ${Number(editData.presupuesto?.subtotal || 0).toFixed(2)}</p>
+                            <p>Total: ${Number(editData.presupuesto?.total || 0).toFixed(2)}</p>
                         </div>
                     </fieldset>
                     

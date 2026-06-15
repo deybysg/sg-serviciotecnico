@@ -28,13 +28,80 @@ const getEstadoIcon = (value) => {
 const getClienteName = (clienteId, clientes) => {
   // Si clienteId es un objeto (viene populado del backend)
   if (typeof clienteId === 'object' && clienteId !== null) {
-    return clienteId.nombreCompleto || "Cliente Desconocido";
+    if (clienteId.nombreCompleto) return clienteId.nombreCompleto;
+    // Si es un ObjectId u otro objeto, convertir a string para buscar
+    clienteId = String(clienteId);
   }
+
+  if (!clienteId || clienteId === 'null' || clienteId === 'undefined') return "Cliente Desconocido";
 
   // Si es un ID, buscar en el array de clientes
   const cliente = clientes.find(c => String(c._id || c.id) === String(clienteId));
   return cliente?.nombreCompleto || "Cliente Desconocido";
 };
+
+// Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
+function normalizeCliente(c) {
+  if (!c) return c;
+  const id = c.id || c._id;
+  return {
+    id: id,
+    _id: id,
+    nombreCompleto: c.nombre_completo || c.nombreCompleto || '',
+    celular: c.celular || '',
+    correo: c.correo || c.email || '',
+    direccion: c.direccion || '',
+    dni: c.dni || '',
+    serviciosRealizados: c.serviciosRealizados || [],
+    createdAt: c.created_at || c.createdAt,
+    updatedAt: c.updated_at || c.updatedAt,
+  };
+}
+
+function normalizeServicio(s) {
+  if (!s) return s;
+  const id = s.id || s._id;
+  let clienteId;
+  if (s.cliente_id != null) {
+    clienteId = String(s.cliente_id);
+  } else if (s.clienteId != null) {
+    clienteId = String(s.clienteId);
+  } else if (s.cliente && typeof s.cliente === 'object') {
+    clienteId = String(s.cliente.id || s.cliente._id);
+  } else if (s.cliente != null) {
+    clienteId = String(s.cliente);
+  }
+  return {
+    id: id,
+    _id: id,
+    servicioNumero: s.servicio_numero ?? s.servicioNumero,
+    clienteId: clienteId,
+    cliente: clienteId, // compatibilidad con código que usa s.cliente
+    tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+    marcaProducto: s.marca_producto ?? s.marcaProducto,
+    modeloProducto: s.modelo_producto ?? s.modeloProducto,
+    tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+    fallaReportada: s.falla_reportada ?? s.fallaReportada,
+    asunto: s.asunto,
+    detalles: s.detalles,
+    notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+    metodoPago: s.metodo_pago ?? s.metodoPago,
+    anticipo: s.anticipo,
+    presupuesto: s.presupuesto || {
+      items: s.presupuesto_items || [],
+      subtotal: s.presupuesto_subtotal || 0,
+      iva: s.presupuesto_iva || 0,
+      total: s.presupuesto_total || 0
+    },
+    estado: s.estado,
+    detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+    seguimiento: s.seguimiento || [],
+    fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+    fechaSalida: s.fecha_salida ?? s.fechaSalida,
+    createdAt: s.created_at ?? s.createdAt,
+    updatedAt: s.updated_at ?? s.updatedAt,
+  };
+}
 
 // Helper para obtener datos del equipo de forma segura
 const getEquipoPanel = (servicio) =>
@@ -88,8 +155,14 @@ const PanelTrabajo = () => {
         api.get('/clientes'),
       ]);
 
-      setServicios(serviciosData);
-      setClientes(clientesData);
+      const serviciosNormalizados = Array.isArray(serviciosData)
+        ? serviciosData.map(normalizeServicio)
+        : [];
+      const clientesNormalizados = Array.isArray(clientesData)
+        ? clientesData.map(normalizeCliente)
+        : [];
+      setServicios(serviciosNormalizados);
+      setClientes(clientesNormalizados);
     } catch (error) {
       console.error("Error al cargar datos del panel:", error);
       Swal.fire({

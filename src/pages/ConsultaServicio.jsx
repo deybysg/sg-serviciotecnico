@@ -27,6 +27,63 @@ const PASOS = {
     P6_ENTREGADO: 'entregado'
 };
 
+function normalizeServicio(s) {
+    if (!s) return s;
+    const id = s.id || s._id;
+    let clienteId;
+    if (s.cliente_id != null) {
+        clienteId = String(s.cliente_id);
+    } else if (s.clienteId != null) {
+        clienteId = String(s.clienteId);
+    } else if (s.cliente && typeof s.cliente === 'object') {
+        clienteId = String(s.cliente.id || s.cliente._id);
+    } else if (s.cliente != null) {
+        clienteId = String(s.cliente);
+    }
+    return {
+        id: id,
+        _id: id,
+        servicioNumero: s.servicio_numero ?? s.servicioNumero,
+        clienteId: clienteId,
+        cliente: clienteId,
+        tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
+        marcaProducto: s.marca_producto ?? s.marcaProducto,
+        modeloProducto: s.modelo_producto ?? s.modeloProducto,
+        tipoServicio: s.tipo_servicio ?? s.tipoServicio,
+        fallaReportada: s.falla_reportada ?? s.fallaReportada,
+        asunto: s.asunto,
+        detalles: s.detalles,
+        notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
+        metodoPago: s.metodo_pago ?? s.metodoPago,
+        anticipo: s.anticipo,
+        presupuesto: s.presupuesto || {
+            items: s.presupuesto_items || [],
+            subtotal: s.presupuesto_subtotal || 0,
+            iva: s.presupuesto_iva || 0,
+            total: s.presupuesto_total || 0
+        },
+        estado: s.estado,
+        detalleCliente: s.detalle_cliente ?? s.detalleCliente,
+        seguimiento: s.seguimiento || [],
+        fechaEntrada: s.fecha_entrada ?? s.fechaEntrada,
+        fechaSalida: s.fecha_salida ?? s.fechaSalida,
+        createdAt: s.created_at ?? s.createdAt,
+        updatedAt: s.updated_at ?? s.updatedAt,
+    };
+}
+
+function normalizeCliente(c) {
+    if (!c) return c;
+    return {
+        id: c.id || c._id,
+        nombreCompleto: c.nombre_completo || c.nombreCompleto || '',
+        celular: c.celular || '',
+        correo: c.correo || c.email || '',
+        direccion: c.direccion || '',
+        dni: c.dni || '',
+    };
+}
+
 const ESTADO_DISPLAY = {
     pendiente: "Equipo Recibido (Esperando ser Revisado)",
     enRevision: "En Revisión Inicial / Diagnóstico",
@@ -69,10 +126,11 @@ function ConsultaServicio() {
 
             if (/^\d{3,5}$/.test(candidate)) {
                 const dataServicio = await api.get(`/seguimiento/${candidate}`, false);
-                setServicio(dataServicio);
+                const servicioNormalizado = normalizeServicio(dataServicio);
+                setServicio(servicioNormalizado);
 
                 if (dataServicio.cliente && typeof dataServicio.cliente === 'object') {
-                    setCliente(dataServicio.cliente);
+                    setCliente(normalizeCliente(dataServicio.cliente));
                 } else {
                     setCliente(null);
                 }
