@@ -11,6 +11,7 @@ import {
   FaInstagram,
   FaMapMarkerAlt,
   FaMedal,
+  FaSearch,
   FaShieldAlt,
   FaShoppingCart,
   FaTools,
@@ -211,6 +212,9 @@ function Home() {
               </Link>
               <Link className="neon-btn neon-btn-outline" to="/productos">
                 Ver productos
+              </Link>
+              <Link className="neon-btn neon-btn-outline" to="/seguimiento">
+                <FaSearch /> Seguimiento
               </Link>
             </div>
           </div>

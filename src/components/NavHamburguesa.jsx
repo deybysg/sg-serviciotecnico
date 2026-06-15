@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
     FaBars, FaTimes, FaHome, FaServicestack, FaSignInAlt, 
@@ -11,7 +11,18 @@ import './NavHamburguesa.css';
 
 function NavHamburguesa() {
     const [open, setOpen] = useState(false);
+    const menuRef = useRef(null);
     const { user, logout } = useAuth();
+
+    useEffect(() => {
+        if (menuRef.current) {
+            if (!open) {
+                menuRef.current.setAttribute('inert', '');
+            } else {
+                menuRef.current.removeAttribute('inert');
+            }
+        }
+    }, [open]);
 
     let menuItems = [];
 
@@ -80,16 +91,36 @@ function NavHamburguesa() {
         });
     };
 
+    const handleOpen = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(true);
+    };
+
+    const handleClose = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        setOpen(false);
+    };
+
     return (
         <>
             <button 
+                type="button"
+                aria-label="Abrir menú"
+                aria-expanded={open}
                 className={`nav-hamburguesa-btn${open ? ' active' : ''}`} 
-                onClick={() => setOpen(true)}
+                onClick={handleOpen}
             >
                 <FaBars size={28} />
             </button>
 
-            <div className={`nav-hamburguesa-menu${open ? ' open' : ''}`}>
+            <div 
+                ref={menuRef}
+                className={`nav-hamburguesa-menu${open ? ' open' : ''}`}
+            >
                 <div className="nav-hamburguesa-header">
                     <div className="nav-hamburguesa-brand">
                         <img src={logoTech} alt="DEYBY" />
@@ -98,7 +129,12 @@ function NavHamburguesa() {
                             <span>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Servicio técnico'}</span>
                         </div>
                     </div>
-                    <button className="nav-hamburguesa-close" onClick={() => setOpen(false)}>
+                    <button 
+                        type="button"
+                        aria-label="Cerrar menú"
+                        className="nav-hamburguesa-close" 
+                        onClick={handleClose}
+                    >
                         <FaTimes size={24} />
                     </button>
                 </div>
@@ -112,7 +148,10 @@ function NavHamburguesa() {
                             <NavLink 
                                 to={item.to} 
                                 className={({ isActive }) => `${item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'}${isActive ? ' active' : ''}`}
-                                onClick={() => setOpen(false)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpen(false);
+                                }}
                             >
                                 {item.isCta ? (
                                     <>
@@ -136,11 +175,11 @@ function NavHamburguesa() {
                     {user && (
                         <li>
                             <button 
+                                type="button"
                                 className="nav-hamburguesa-link" 
                                 onClick={handleLogout}
-                                style={{ width: '100%', textAlign: 'left' }}
                             >
-                                <span className="menu-item logout"  ><FaSignInAlt  /></span>
+                                <span className="menu-item logout"><FaSignInAlt /></span>
                                 Logout
                             </button>
                         </li>
@@ -157,7 +196,15 @@ function NavHamburguesa() {
                 )}
             </div>
 
-            {open && <div className="nav-hamburguesa-overlay" onClick={() => setOpen(false)}></div>}
+            {open && (
+                <div 
+                    className="nav-hamburguesa-overlay" 
+                    onClick={handleClose}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Cerrar menú"
+                />
+            )}
         </>
     );
 }
