@@ -90,8 +90,8 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         nombre: productoInicial?.nombre || "",
         categoria: productoInicial?.categoria || CATEGORIAS_VALIDAS[0],
         descripcion: productoInicial?.descripcion || "",
-        precio: productoInicial?.precio || 0,
-        stock: productoInicial?.stock || 0,
+        precio: productoInicial?.precio ?? "",
+        stock: productoInicial?.stock ?? "",
         imagen: productoInicial?.imagen || "",
     });    const [useFileMode, setUseFileMode] = useState(false);
     const [localFile, setLocalFile] = useState(null);
@@ -103,7 +103,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: name === 'precio' || name === 'stock' ? Number(value) : value,
+            [name]: name === 'precio' || name === 'stock' ? (value === '' ? '' : Number(value)) : value,
         }));
     };
     
@@ -156,6 +156,11 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         // Validar precio (puede ser 0)
         if (formData.precio === "" || formData.precio === null || formData.precio === undefined) {
             formData.precio = 0;
+        }
+
+        // Validar stock (puede ser 0)
+        if (formData.stock === "" || formData.stock === null || formData.stock === undefined) {
+            formData.stock = 0;
         }
 
         // Validar stock no negativo
