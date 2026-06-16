@@ -310,27 +310,21 @@ function ConsultaServicio() {
                     <>
                         <div className="timeline-container">
                             {timelineSteps.map((step, index) => {
-                                const isActive = isStepActive(step.key);
                                 const isCurrent = (servicio?.estado === PASOS[step.key]) 
                                     || (step.key === 'P3_DIAGNOSTICO' && servicio?.estado === 'enRevision')
                                     || (step.key === 'P4_REPARACION' && (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada'))
                                     || (step.key === 'P5_TERMINADO' && servicio?.estado === 'terminado')
                                     || (step.key === 'P2_5_SIN_SOLUCION' && (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion'));
-                                const isPast = isActive && !isCurrent;
-                                const showDiagnostico = servicio?.estado === 'enRevision' && step.key === 'P3_DIAGNOSTICO';
-                                const showReparacion = (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada') && step.key === 'P4_REPARACION';
-                                const showTerminado = servicio?.estado === 'terminado' && step.key === 'P5_TERMINADO';
-                                const showNotificacion = (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion') && step.key === 'P2_5_SIN_SOLUCION';
                                 return (
                                     <React.Fragment key={step.key}>
                                         {index > 0 && (
-                                            <div className={`timeline-connector ${isActive ? 'active' : ''}`}>
+                                            <div className={`timeline-connector ${isCurrent ? 'active' : ''}`}>
                                                 <div className="timeline-line-track">
-                                                    <div className={`timeline-line-fill ${isActive ? 'filled' : ''}`}></div>
+                                                    <div className={`timeline-line-fill ${isCurrent ? 'filled' : ''}`}></div>
                                                 </div>
                                             </div>
                                         )}
-                                        <div className={`timeline-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''} ${step.color}`}>
+                                        <div className={`timeline-step ${isCurrent ? 'active current' : ''} ${step.color}`}>
                                             <div className={`timeline-circle ${step.color}`}>
                                                 {step.icon}
                                             </div>
@@ -339,7 +333,7 @@ function ConsultaServicio() {
                                                 {step.desc}
                                             </span>
                                             <span className="timeline-time">
-                                                {isActive ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
+                                                {isCurrent ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
                                             </span>
                                         </div>
                                     </React.Fragment>
