@@ -21,19 +21,21 @@ import mercadopagoRoutes from './src/routes/mercadopago.routes.js';
 const app = express();
 
 // Configuración CORS
-const FRONTEND_URL = process.env.FRONTEND_URL;
+let FRONTEND_URL = process.env.FRONTEND_URL || 'https://sg-serviciotecnico.vercel.app';
+// Asegurar que tiene protocolo https://
+if (FRONTEND_URL && !FRONTEND_URL.startsWith('http')) {
+  FRONTEND_URL = 'https://' + FRONTEND_URL;
+}
 console.log('FRONTEND_URL:', FRONTEND_URL);
 
-// Si FRONTEND_URL está configurado, usarlo. Si no, permitir todas las peticiones (solo para desarrollo)
 const corsOptions = {
-  origin: FRONTEND_URL ? [FRONTEND_URL, 'https://sg-serviciotecnico.vercel.app'] : true,
+  origin: FRONTEND_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Manejar preflight requests
 app.use(cookieParser());
 app.use(express.json());
 app.use(morgan('dev'));
