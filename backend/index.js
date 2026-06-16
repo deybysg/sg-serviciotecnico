@@ -23,6 +23,7 @@ const app = express();
 // Configuración CORS - Permitir múltiples orígenes
 const ALLOWED_ORIGINS = [
   'https://sg-serviciotecnico.vercel.app',
+  'https://sg-serviciotecnico.onrender.com',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:4000'
@@ -43,8 +44,14 @@ console.log('ALLOWED_ORIGINS:', ALLOWED_ORIGINS);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir requests sin origin (curl, Postman, etc.)
+    // Permitir requests sin origin (curl, Postman, móviles, etc.)
     if (!origin) return callback(null, true);
+    
+    // Permitir cualquier subdominio de vercel.app (preview deploys)
+    if (origin.includes('vercel.app')) return callback(null, true);
+    
+    // Permitir cualquier subdominio de onrender.com
+    if (origin.includes('onrender.com')) return callback(null, true);
     
     if (ALLOWED_ORIGINS.includes(origin)) {
       return callback(null, true);
@@ -55,10 +62,12 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  maxAge: 86400
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Manejar preflight requests para móviles
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
