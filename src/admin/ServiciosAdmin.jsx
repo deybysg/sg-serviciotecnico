@@ -419,9 +419,10 @@ function ServiciosAdmin() {
 
             Toast.fire({ icon: 'success', title: 'Servicio creado y asociado al cliente' });
 
-            setServicios((prev) => [...prev, nuevoServicio]);
+            const nuevoServicioNormalizado = normalizeServicio(nuevoServicio);
+            setServicios((prev) => [...prev, nuevoServicioNormalizado]);
             handleLimpiarFormulario();
-            generarComprobante(nuevoServicio);
+            generarComprobante(nuevoServicioNormalizado);
         } catch (err) {
             console.error("Error en la creación del servicio:", err);
             Swal.fire({
