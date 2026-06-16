@@ -1,6 +1,9 @@
 // Helper para hacer fetch con autenticación automática
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
+console.log('API_URL:', API_URL);
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+
 /**
  * Wrapper de fetch con manejo de JWT automático
  * @param {string} endpoint - Ruta relativa (ej: '/productos' o '/auth/login')
