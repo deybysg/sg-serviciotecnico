@@ -148,26 +148,14 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
             return;
         }
 
-        // Validar descripción no vacía
-        if (!formData.descripcion || formData.descripcion.trim().length < 5) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Descripción inválida',
-                text: 'La descripción debe tener al menos 5 caracteres',
-                timer: 2000
-            });
-            return;
+        // Validar descripción (opcional, puede estar vacía)
+        if (!formData.descripcion) {
+            formData.descripcion = "";
         }
 
-        // Validar precio mayor a 0
-        if (!formData.precio || formData.precio <= 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Precio inválido',
-                text: 'El precio debe ser mayor a 0',
-                timer: 2000
-            });
-            return;
+        // Validar precio (puede ser 0)
+        if (formData.precio === "" || formData.precio === null || formData.precio === undefined) {
+            formData.precio = 0;
         }
 
         // Validar stock no negativo
@@ -181,14 +169,14 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
             return;
         }
 
-        // Validar URL de imagen (si no está en modo archivo)
+        // Validar URL de imagen (solo si se proporcionó una URL)
         if (!useFileMode && formData.imagen && formData.imagen.trim() !== "") {
-            const urlRegex = /^(https?:\/\/)?([\w\d\-]+\.)+[\w\d]{2,}(\/.*)?$/i;
+            const urlRegex = /^(https?:\/\/)/i;
             if (!urlRegex.test(formData.imagen)) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'URL inválida',
-                    text: 'La URL de la imagen no tiene un formato válido',
+                    text: 'La URL debe comenzar con http:// o https://',
                     timer: 2500
                 });
                 return;
@@ -282,9 +270,8 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
                                     placeholder="0.00"
                                     value={formData.precio}
                                     onChange={handleChange}
-                                    min="0.01"
+                                    min="0"
                                     step="0.01"
-                                    required
                                 />
                             </div>
                             <div className="modal-producto-field">
@@ -299,7 +286,6 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
                                     value={formData.stock}
                                     onChange={handleChange}
                                     min="0"
-                                    required
                                 />
                             </div>
                         </div>
