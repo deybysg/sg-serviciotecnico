@@ -20,16 +20,39 @@ import mercadopagoRoutes from './src/routes/mercadopago.routes.js';
 
 const app = express();
 
-// Configuración CORS
-let FRONTEND_URL = process.env.FRONTEND_URL || 'https://sg-serviciotecnico.vercel.app';
-// Asegurar que tiene protocolo https://
-if (FRONTEND_URL && !FRONTEND_URL.startsWith('http')) {
-  FRONTEND_URL = 'https://' + FRONTEND_URL;
+// Configuración CORS - Permitir múltiples orígenes
+const ALLOWED_ORIGINS = [
+  'https://sg-serviciotecnico.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:4000'
+];
+
+// Si FRONTEND_URL está configurado, también lo permitimos
+if (process.env.FRONTEND_URL) {
+  let url = process.env.FRONTEND_URL;
+  if (!url.startsWith('http')) {
+    url = 'https://' + url;
+  }
+  if (!ALLOWED_ORIGINS.includes(url)) {
+    ALLOWED_ORIGINS.push(url);
+  }
 }
-console.log('FRONTEND_URL:', FRONTEND_URL);
+
+console.log('ALLOWED_ORIGINS:', ALLOWED_ORIGINS);
 
 const corsOptions = {
-  origin: FRONTEND_URL,
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (curl, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    console.log('CORS bloqueado para origin:', origin);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -52,6 +75,11 @@ app.use('/api/ventas', ventasRoutes);
 app.use('/api/carts', cartsRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/mercadopago', mercadopagoRoutes);
+
+// Endpoint simple para verificar que el servidor está corriendo
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', origin: req.headers.origin });
+});
 
 // Endpoint de verificación de datos en PostgreSQL
 app.get('/api/health/db', async (req, res) => {
