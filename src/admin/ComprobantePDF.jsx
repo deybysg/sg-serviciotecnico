@@ -44,7 +44,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 <div style={styles.qrCode}>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                         <QRCodeSVG 
-                            value={`${window.location.origin}/seguimiento/${servicioNumero}`} 
+                            value={`${import.meta.env.VITE_FRONTEND_URL || window.location.origin}/seguimiento/${servicioNumero}`} 
                             size={85} 
                             level="H"
                             bgColor="#ffffff"
