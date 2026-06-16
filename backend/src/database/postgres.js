@@ -53,11 +53,11 @@ export async function initPostgres() {
       CREATE TABLE IF NOT EXISTS productos (
         id SERIAL PRIMARY KEY,
         nombre VARCHAR(255) NOT NULL,
-        categoria VARCHAR(50) NOT NULL,
-        precio DECIMAL(10,2) NOT NULL,
+        categoria VARCHAR(50) NOT NULL DEFAULT 'General',
+        precio DECIMAL(10,2) NOT NULL DEFAULT 0,
         stock INTEGER NOT NULL DEFAULT 0,
-        descripcion TEXT NOT NULL,
-        imagen TEXT NOT NULL,
+        descripcion TEXT DEFAULT '',
+        imagen TEXT DEFAULT '/img/default-product.png',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
