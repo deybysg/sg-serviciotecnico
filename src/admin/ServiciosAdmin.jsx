@@ -216,23 +216,30 @@ function ServiciosAdmin() {
     }, [isPrinting, serviceToPrint]);
 
     const generarComprobante = (service) => {
-        const cid = service.clienteId || service.cliente;
-        const clienteData = clientes.find(c => String(c.id) === String(cid));
-        const serviceEnriched = {
-            ...service,
-            clienteNombre: clienteData?.nombreCompleto || service.cliente_nombre || service.clienteNombre || 'N/A',
-            clienteTelefono: clienteData?.celular || service.cliente_celular || 'N/A',
-            clienteDni: clienteData?.dni || service.cliente_dni || 'N/A',
-            clienteCorreo: clienteData?.correo || service.cliente_correo || 'N/A',
-            clienteDireccion: clienteData?.direccion || 'N/A',
-            cliente: clienteData || service.cliente,
-            presupuesto: service.presupuesto || {
-                items: service.presupuesto_items || [],
-                subtotal: Number(service.presupuesto_subtotal || 0),
-                iva: Number(service.presupuesto_iva || 0),
-                total: Number(service.presupuesto_total || 0)
-            }
+        // Si el servicio ya viene enriquecido (desde handleSubmit), usamos esos datos directamente
+        let serviceEnriched = { ...service };
+        if (!service.clienteNombre && !service.cliente_nombre) {
+            const cid = service.clienteId || service.cliente;
+            let clienteData = clientes.find(c => String(c.id) === String(cid));
+            if (clienteData) clienteData = normalizeCliente(clienteData);
+            serviceEnriched = {
+                ...service,
+                clienteNombre: clienteData?.nombreCompleto || service.cliente?.nombreCompleto || 'N/A',
+                clienteTelefono: clienteData?.celular || service.cliente?.celular || 'N/A',
+                clienteDni: clienteData?.dni || service.cliente?.dni || 'N/A',
+                clienteCorreo: clienteData?.correo || service.cliente?.correo || 'N/A',
+                clienteDireccion: clienteData?.direccion || service.cliente?.direccion || 'N/A',
+                cliente: clienteData || service.cliente,
+            };
+        }
+        // Asegurar que presupuesto siempre tenga formato correcto
+        serviceEnriched.presupuesto = service.presupuesto || {
+            items: service.presupuesto_items || [],
+            subtotal: Number(service.presupuesto_subtotal || 0),
+            iva: Number(service.presupuesto_iva || 0),
+            total: Number(service.presupuesto_total || 0)
         };
+        console.log('DEBUG generarComprobante - serviceEnriched:', serviceEnriched);
         setServiceToPrint(serviceEnriched);
         setIsPrinting(true);
     };
@@ -325,9 +332,10 @@ function ServiciosAdmin() {
                     cancelButtonColor: '#8b5cf6',
                 });
 
-                if (result.isConfirmed && clienteDuplicado._id) {
-                    clienteIdToUse = clienteDuplicado._id;
-                    const clienteOption = { value: clienteDuplicado._id, label: clienteDuplicado.nombreCompleto, data: clienteDuplicado };
+                const dupId = clienteDuplicado.id || clienteDuplicado._id;
+                if (result.isConfirmed && dupId) {
+                    clienteIdToUse = dupId;
+                    const clienteOption = { value: dupId, label: clienteDuplicado.nombreCompleto, data: clienteDuplicado };
                     setClienteSeleccionado(clienteOption);
                 } else {
                     try {
@@ -338,9 +346,10 @@ function ServiciosAdmin() {
                             direccion: clientData.direccion,
                             dni: clientData.dni,
                         });
-                        clienteIdToUse = nuevoCliente._id;
-                        const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
-                        setClientes((prev) => [...prev, nuevoCliente]);
+                        const nuevoClienteNormalizado = normalizeCliente(nuevoCliente);
+                        clienteIdToUse = nuevoClienteNormalizado.id;
+                        const newClientOption = { value: nuevoClienteNormalizado.id, label: nuevoClienteNormalizado.nombreCompleto, data: nuevoClienteNormalizado };
+                        setClientes((prev) => [...prev, nuevoClienteNormalizado]);
                         setClientesOptions((prev) => [...prev, newClientOption]);
                         setClienteSeleccionado(newClientOption);
                     } catch (err) {
@@ -357,9 +366,10 @@ function ServiciosAdmin() {
                         direccion: clientData.direccion,
                         dni: clientData.dni,
                     });
-                    clienteIdToUse = nuevoCliente._id;
-                    const newClientOption = { value: nuevoCliente._id, label: nuevoCliente.nombreCompleto, data: nuevoCliente };
-                    setClientes((prev) => [...prev, nuevoCliente]);
+                    const nuevoClienteNormalizado = normalizeCliente(nuevoCliente);
+                    clienteIdToUse = nuevoClienteNormalizado.id;
+                    const newClientOption = { value: nuevoClienteNormalizado.id, label: nuevoClienteNormalizado.nombreCompleto, data: nuevoClienteNormalizado };
+                    setClientes((prev) => [...prev, nuevoClienteNormalizado]);
                     setClientesOptions((prev) => [...prev, newClientOption]);
                     setClienteSeleccionado(newClientOption);
                 } catch (err) {
@@ -421,8 +431,41 @@ function ServiciosAdmin() {
 
             const nuevoServicioNormalizado = normalizeServicio(nuevoServicio);
             setServicios((prev) => [...prev, nuevoServicioNormalizado]);
+
+            // Enriquecer servicio con datos del cliente para el comprobante
+            let clienteParaComprobante = null;
+            if (!isNewClient && clienteSeleccionado?.data) {
+                // Cliente existente: usamos directamente los datos del select (más confiable que buscar en estado)
+                clienteParaComprobante = normalizeCliente(clienteSeleccionado.data);
+            } else {
+                // Cliente nuevo: buscamos en estado o usamos los datos del formulario
+                clienteParaComprobante = clientes.find(c => String(c.id) === String(clienteIdToUse));
+                if (!clienteParaComprobante) {
+                    clienteParaComprobante = normalizeCliente({
+                        id: clienteIdToUse,
+                        nombre_completo: clientData.nombreCompleto,
+                        celular: clientData.celular,
+                        correo: clientData.correo,
+                        direccion: clientData.direccion,
+                        dni: clientData.dni,
+                    });
+                }
+            }
+            console.log('DEBUG comprobante - clienteIdToUse:', clienteIdToUse);
+            console.log('DEBUG comprobante - clienteParaComprobante:', clienteParaComprobante);
+            const servicioParaComprobante = {
+                ...nuevoServicioNormalizado,
+                clienteNombre: clienteParaComprobante?.nombreCompleto || 'N/A',
+                clienteTelefono: clienteParaComprobante?.celular || 'N/A',
+                clienteDni: clienteParaComprobante?.dni || 'N/A',
+                clienteCorreo: clienteParaComprobante?.correo || 'N/A',
+                clienteDireccion: clienteParaComprobante?.direccion || 'N/A',
+                cliente: clienteParaComprobante,
+            };
+            console.log('DEBUG comprobante - servicioParaComprobante:', servicioParaComprobante);
+
             handleLimpiarFormulario();
-            generarComprobante(nuevoServicioNormalizado);
+            generarComprobante(servicioParaComprobante);
         } catch (err) {
             console.error("Error en la creación del servicio:", err);
             Swal.fire({
