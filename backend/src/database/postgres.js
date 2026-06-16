@@ -7,10 +7,11 @@ let pool = null;
 export function getPool() {
   if (!pool) {
     const connectionString = process.env.DATABASE_URL || process.env.PG_CONNECTION_STRING;
+    
     if (connectionString) {
       pool = new Pool({
         connectionString,
-        ssl: process.env.PG_SSL === 'true' || connectionString.includes('render.com') ? { rejectUnauthorized: false } : false
+        ssl: { rejectUnauthorized: false }
       });
     } else {
       pool = new Pool({
@@ -19,7 +20,7 @@ export function getPool() {
         database: process.env.PGDATABASE || 'ServicioTecnico',
         user: process.env.PGUSER || 'postgres',
         password: process.env.PGPASSWORD || 'postgres',
-        ssl: process.env.PG_SSL === 'true' ? { rejectUnauthorized: false } : false
+        ssl: { rejectUnauthorized: false }
       });
     }
   }

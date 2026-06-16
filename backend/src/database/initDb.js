@@ -17,4 +17,9 @@ export async function initDb() {
   if (isPostgres()) {
     await initPostgres();
   }
+  
+  if (!isMongo() && !isPostgres()) {
+    console.error('ERROR: DB_PROVIDER debe ser "mongo" o "postgres"');
+    throw new Error('DB_PROVIDER no configurado correctamente');
+  }
 }

@@ -19,7 +19,9 @@ import mercadopagoRoutes from './src/routes/mercadopago.routes.js';
 
 
 const app = express();
-// Habilitar CORS con credenciales para cookies (ajustar FRONTEND_URL en .env)
+
+// Habilitar CORS con credenciales para cookies
+// FRONTEND_URL debe ser la URL exacta de tu frontend en Vercel
 app.use(cors({ origin: process.env.FRONTEND_URL || true, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
