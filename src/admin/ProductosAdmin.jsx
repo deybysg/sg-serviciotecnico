@@ -109,14 +109,28 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
     
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setLocalFile(file);
         if (file) {
+            // Validar tamaño máximo (2MB)
+            const maxSize = 2 * 1024 * 1024; // 2MB en bytes
+            if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Imagen muy grande',
+                    text: 'La imagen no debe superar los 2MB. Usá una URL de imagen o comprimí la imagen.',
+                    timer: 3000
+                });
+                setLocalFile(null);
+                setLocalFileBase64(null);
+                return;
+            }
+            setLocalFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setLocalFileBase64(reader.result);
             };
             reader.readAsDataURL(file);
         } else {
+            setLocalFile(null);
             setLocalFileBase64(null);
         }
     }
@@ -191,6 +205,17 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         let finalData = { ...formData };
         
         if (useFileMode && localFileBase64) {
+            // Validar tamaño del base64 (máximo 8MB para ser seguro)
+            const maxBase64Length = 8 * 1024 * 1024; // 8MB aproximado en base64
+            if (localFileBase64.length > maxBase64Length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Imagen muy grande',
+                    text: 'La imagen es muy grande. Usá una URL de imagen o una imagen más liviana.',
+                    timer: 3000
+                });
+                return;
+            }
             finalData.imagen = localFileBase64;
         } else if (useFileMode && !localFileBase64 && !isEditing) {
             Swal.fire({
