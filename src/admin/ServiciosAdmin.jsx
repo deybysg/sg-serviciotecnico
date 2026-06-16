@@ -47,6 +47,10 @@ function normalizeServicio(s) {
         servicioNumero: s.servicio_numero ?? s.servicioNumero,
         clienteId: clienteId,
         cliente: clienteId,
+        cliente_nombre: s.cliente_nombre || '',
+        cliente_celular: s.cliente_celular || '',
+        cliente_correo: s.cliente_correo || '',
+        cliente_dni: s.cliente_dni || '',
         tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
         marcaProducto: s.marca_producto ?? s.marcaProducto,
         modeloProducto: s.modelo_producto ?? s.modeloProducto,
@@ -170,16 +174,33 @@ function ServiciosAdmin() {
                 }
                 
                 try {
-                    const canvas = await html2canvas(comprobanteRef.current, { scale: 2 });
+                    const canvas = await html2canvas(comprobanteRef.current, { scale: 1.5 });
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                     const imgProps = pdf.getImageProperties(imgData);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const imgWidth = imgProps.width;
+                    const imgHeight = imgProps.height;
+                    const ratio = pageWidth / imgWidth;
+                    const scaledHeight = imgHeight * ratio;
+                    
+                    let heightLeft = scaledHeight;
+                    let position = 0;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, position, pageWidth, scaledHeight);
+                    heightLeft -= pageHeight;
+                    
+                    while (heightLeft > 0) {
+                        position -= pageHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, scaledHeight);
+                        heightLeft -= pageHeight;
+                    }
+                    
                     const nombreFuente = serviceToPrint?.clienteNombre || serviceToPrint?.cliente?.nombreCompleto || '';
-                    const nombreClienteLimpio = nombreFuente.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
-                    const sid = toIdString(serviceToPrint._id || serviceToPrint.id);
+                    const nombreClienteLimpio = nombreFuente.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') || 'Cliente';
+                    const sid = serviceToPrint.servicioNumero || serviceToPrint.servicio_numero || toIdString(serviceToPrint._id || serviceToPrint.id);
                     pdf.save(`Servicio_${sid}_${nombreClienteLimpio}.pdf`);
                     Swal.fire('PDF Generado', 'El comprobante ha sido descargado.', 'success');
                 } catch (error) {
@@ -199,10 +220,10 @@ function ServiciosAdmin() {
         const clienteData = clientes.find(c => String(c.id) === String(cid));
         const serviceEnriched = {
             ...service,
-            clienteNombre: clienteData?.nombreCompleto || 'N/A',
-            clienteTelefono: clienteData?.celular || 'N/A',
-            clienteDni: clienteData?.dni || 'N/A',
-            clienteCorreo: clienteData?.correo || 'N/A',
+            clienteNombre: clienteData?.nombreCompleto || service.cliente_nombre || service.clienteNombre || 'N/A',
+            clienteTelefono: clienteData?.celular || service.cliente_celular || 'N/A',
+            clienteDni: clienteData?.dni || service.cliente_dni || 'N/A',
+            clienteCorreo: clienteData?.correo || service.cliente_correo || 'N/A',
             clienteDireccion: clienteData?.direccion || 'N/A',
             cliente: clienteData || service.cliente,
             presupuesto: service.presupuesto || {
