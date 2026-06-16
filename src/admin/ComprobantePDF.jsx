@@ -196,26 +196,27 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     );
 };
 
-// --- Estilos Mejorados y Modernos ---
+    // --- Estilos Mejorados y Modernos ---
 const styles = {
     // Colores: Primario (#007bff o un tono más oscuro), Fondo (#f8f9fa), Texto (#343a40), Bordes (#dee2e6)
     
     comprobanteContainer: {
         fontFamily: 'Roboto, Arial, sans-serif',
-        fontSize: '10pt',
-        color: '#343a40', // Gris oscuro para texto
-        padding: '15mm', // Más espacio alrededor
-        border: '1px solid #adb5bd', // Borde suave
+        fontSize: '9pt',
+        color: '#343a40',
+        padding: '10mm',
+        border: '1px solid #adb5bd',
         backgroundColor: '#ffffff',
         margin: '0 auto',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        maxWidth: '190mm'
     },
     header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '15px',
-        paddingBottom: '10px'
+        marginBottom: '10px',
+        paddingBottom: '8px'
     },
     qrCode: {
         // Estilo específico para mover el QR
@@ -228,19 +229,19 @@ const styles = {
         textAlign: 'right',
     },
     title: {
-        fontSize: '18pt',
+        fontSize: '14pt',
         margin: '0',
-        color: '#007bff', // Color primario
+        color: '#007bff',
         fontWeight: '900',
     },
     subtitle: {
-        fontSize: '11pt',
+        fontSize: '10pt',
         margin: '2px 0 0 0',
         fontWeight: 'bold'
     },
     headerDetail: {
-        fontSize: '9pt',
-        marginTop: '5px',
+        fontSize: '8pt',
+        marginTop: '3px',
     },
     highlight: {
         fontWeight: 'bold',
@@ -257,24 +258,25 @@ const styles = {
         margin: '5px 0 15px 0',
     },
     section: {
-        marginBottom: '15px',
+        marginBottom: '8px',
     },
     sectionTitle: {
-        fontSize: '11pt',
+        fontSize: '9pt',
         fontWeight: 'bold',
         textTransform: 'uppercase',
         color: '#495057',
-        borderBottom: '2px solid #ced4da',
-        paddingBottom: '3px',
-        marginBottom: '10px',
+        borderBottom: '1px solid #ced4da',
+        paddingBottom: '2px',
+        marginBottom: '6px',
     },
     grid: {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '8px 20px', // Espacio vertical y horizontal
+        gap: '4px 12px',
     },
     gridItem: {
         margin: 0,
+        fontSize: '9pt',
     },
     statusBadge: (estado) => ({
         padding: '2px 5px',
@@ -299,64 +301,64 @@ const styles = {
     },
     th: {
         border: '1px solid #adb5bd',
-        backgroundColor: '#e9ecef', // Fondo para encabezados de tabla
+        backgroundColor: '#e9ecef',
         color: '#343a40',
-        padding: '7px',
+        padding: '4px',
         textAlign: 'left',
-        fontSize: '9.5pt',
+        fontSize: '8pt',
         textTransform: 'uppercase',
     },
     thCosto: {
         border: '1px solid #adb5bd',
         backgroundColor: '#e9ecef',
         color: '#343a40',
-        padding: '7px',
+        padding: '4px',
         textAlign: 'right',
         width: '15%',
-        fontSize: '9.5pt',
+        fontSize: '8pt',
         textTransform: 'uppercase',
     },
     td: {
-        border: '1px solid #f8f9fa', // Borde muy sutil
-        borderBottom: '1px solid #e9ecef', // Separador de fila
-        padding: '7px',
-        fontSize: '10pt',
+        border: '1px solid #f8f9fa',
+        borderBottom: '1px solid #e9ecef',
+        padding: '4px',
+        fontSize: '9pt',
     },
     tdCosto: {
         border: '1px solid #f8f9fa',
         borderBottom: '1px solid #e9ecef',
-        padding: '7px',
+        padding: '4px',
         textAlign: 'right',
-        fontSize: '10pt',
+        fontSize: '9pt',
     },
     tdTotalLabel: {
-        borderTop: '2px solid #495057',
-        padding: '7px',
+        borderTop: '1px solid #495057',
+        padding: '4px',
         textAlign: 'right',
-        fontSize: '10pt',
+        fontSize: '9pt',
         fontWeight: 'bold',
         backgroundColor: '#f8f9fa',
     },
     tdTotalValue: {
-        borderTop: '2px solid #495057',
-        padding: '7px',
+        borderTop: '1px solid #495057',
+        padding: '4px',
         textAlign: 'right',
         backgroundColor: '#e9ecef',
-        fontSize: '11pt',
+        fontSize: '10pt',
         fontWeight: 'bold',
         color: '#007bff',
     },
     note: {
-        fontSize: '8pt',
-        marginTop: '10px',
+        fontSize: '7pt',
+        marginTop: '5px',
         color: '#6c757d',
     },
     footer: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginTop: '30px',
-        paddingTop: '15px',
+        marginTop: '15px',
+        paddingTop: '10px',
     },
     signature: {
         textAlign: 'left',

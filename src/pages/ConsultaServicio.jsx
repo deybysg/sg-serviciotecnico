@@ -124,7 +124,7 @@ function ConsultaServicio() {
         try {
             const candidate = String(serviceId).trim();
 
-            if (/^\d{3,5}$/.test(candidate)) {
+            if (/^\d{3,}$/.test(candidate)) {
                 const dataServicio = await api.get(`/seguimiento/${candidate}`, false);
                 const servicioNormalizado = normalizeServicio(dataServicio);
                 setServicio(servicioNormalizado);
@@ -135,13 +135,13 @@ function ConsultaServicio() {
                     setCliente(null);
                 }
             } else {
-                throw new Error('Ingrese un número de servicio válido (3-5 dígitos).');
+                throw new Error('Ingrese un número de servicio válido (mínimo 3 dígitos).');
             }
 
         } catch (err) {
             if (isInitialFetch) {
-                setError("No se pudo encontrar el servicio con el número proporcionado. Ingrese un número de 3 a 5 dígitos.");
-                Swal.fire("Sin resultados", "Verificá el número de servicio (3-5 dígitos).", "warning");
+                setError("No se pudo encontrar el servicio con el número proporcionado. Ingrese un número de mínimo 3 dígitos.");
+                Swal.fire("Sin resultados", "Verificá el número de servicio (mínimo 3 dígitos).", "warning");
             }
         } finally {
             if (isInitialFetch) {
@@ -188,8 +188,8 @@ function ConsultaServicio() {
             return;
         }
 
-        if (!/^\d{3,5}$/.test(finalId)) {
-            Swal.fire("Atención", "Ingrese un número válido de 3 a 5 dígitos.", "warning");
+        if (!/^\d{3,}$/.test(finalId)) {
+            Swal.fire("Atención", "Ingrese un número válido de mínimo 3 dígitos.", "warning");
             return;
         }
 
