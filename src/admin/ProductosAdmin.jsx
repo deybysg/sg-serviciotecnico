@@ -167,18 +167,20 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
             formData.descripcion = "";
         }
 
+        let finalData = { ...formData };
+        
         // Validar precio (puede ser 0)
-        if (formData.precio === "" || formData.precio === null || formData.precio === undefined) {
-            formData.precio = 0;
+        if (finalData.precio === "" || finalData.precio === null || finalData.precio === undefined) {
+            finalData.precio = 0;
         }
 
         // Validar stock (puede ser 0)
-        if (formData.stock === "" || formData.stock === null || formData.stock === undefined) {
-            formData.stock = 0;
+        if (finalData.stock === "" || finalData.stock === null || finalData.stock === undefined) {
+            finalData.stock = 0;
         }
 
         // Validar stock no negativo
-        if (formData.stock < 0) {
+        if (finalData.stock < 0) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Stock inválido',
@@ -202,8 +204,6 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
             }
         }
 
-        let finalData = { ...formData };
-        
         if (useFileMode && localFileBase64) {
             // Validar tamaño del base64 (máximo 8MB para ser seguro)
             const maxBase64Length = 8 * 1024 * 1024; // 8MB aproximado en base64
