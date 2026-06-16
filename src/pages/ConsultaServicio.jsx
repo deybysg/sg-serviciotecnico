@@ -46,6 +46,9 @@ function normalizeServicio(s) {
         servicioNumero: s.servicio_numero ?? s.servicioNumero,
         clienteId: clienteId,
         cliente: clienteId,
+        clienteNombre: s.cliente_nombre || s.clienteNombre || '',
+        clienteCelular: s.cliente_celular || s.clienteCelular || '',
+        clienteCorreo: s.cliente_correo || s.clienteCorreo || '',
         tipoEquipo: s.tipo_equipo ?? s.tipoEquipo,
         marcaProducto: s.marca_producto ?? s.marcaProducto,
         modeloProducto: s.modelo_producto ?? s.modeloProducto,
@@ -131,6 +134,12 @@ function ConsultaServicio() {
 
                 if (dataServicio.cliente && typeof dataServicio.cliente === 'object') {
                     setCliente(normalizeCliente(dataServicio.cliente));
+                } else if (dataServicio.cliente_nombre || dataServicio.clienteNombre) {
+                    setCliente({
+                        nombreCompleto: dataServicio.cliente_nombre || dataServicio.clienteNombre || '',
+                        celular: dataServicio.cliente_celular || dataServicio.clienteCelular || '',
+                        correo: dataServicio.cliente_correo || dataServicio.clienteCorreo || ''
+                    });
                 } else {
                     setCliente(null);
                 }
@@ -248,9 +257,9 @@ function ConsultaServicio() {
 
     const timelineSteps = [
         { key: 'P1_RECIBIDO', label: 'RECIBIDO', desc: 'Tu equipo ha sido recibido correctamente.', icon: <FiFileText size={22} />, color: 'blue' },
-        { key: 'P3_DIAGNOSTICO', label: 'DIAGNÓSTICO', desc: 'Estamos evaluando la falla reportada.', icon: <FiSearch size={22} />, color: 'cyan' },
-        { key: 'P2_5_SIN_SOLUCION', label: 'NOTIFICACIÓN', desc: 'Te notificaremos si equipo no tiene solucion', icon: <FiBell size={22} />, color: 'amber' },
-        { key: 'P4_REPARACION', label: 'REPARACIÓN', desc: 'Tu equipo está siendo reparado por nuestro equipo técnico.', icon: <FiTool size={22} />, color: 'magenta' },
+        { key: 'P3_DIAGNOSTICO', label: 'DIAGNÓSTICO', desc: 'Estamos evaluando la falla reportada.', icon: <FiSearch size={22} />, color: 'amber' },
+        { key: 'P2_5_SIN_SOLUCION', label: 'NOTIFICACIÓN', desc: 'Te notificaremos si equipo no tiene solucion', icon: <FiBell size={22} />, color: 'magenta' },
+        { key: 'P4_REPARACION', label: 'REPARACIÓN', desc: 'Tu equipo está siendo reparado por nuestro equipo técnico.', icon: <FiTool size={22} />, color: 'purple' },
         { key: 'P5_TERMINADO', label: 'LISTO PARA RETIRAR', desc: 'Tu equipo está listo para ser retirado.', icon: <FiPackage size={22} />, color: 'green' },
     ];
 
@@ -278,7 +287,37 @@ function ConsultaServicio() {
 
             <div className="consulta-servicio-container">
                 <h1 className="title-bold">Estado de tu <span className="title-highlight">Equipo</span></h1>
-                <p className="tracking-subtitle">Ingresá el número de orden para seguir tu servicio</p>
+                <p className={`tracking-subtitle ${isViewingResult && servicio ? (() => {
+                    const colorMap = {
+                        pendiente: 'blue',
+                        enRevision: 'amber',
+                        diagnostico: 'amber',
+                        notificacion: 'magenta',
+                        sinSolucion: 'magenta',
+                        reparacion: 'purple',
+                        revisionTerminada: 'purple',
+                        terminado: 'green',
+                        entregado: 'green',
+                        presupuestoPendiente: 'amber'
+                    };
+                    return colorMap[servicio.estado] || '';
+                })() : ''}`}>
+                    {isViewingResult && servicio ? (() => {
+                        const estadoDesc = {
+                            pendiente: 'Tu equipo ha sido recibido correctamente.',
+                            enRevision: 'Estamos evaluando la falla reportada.',
+                            diagnostico: 'Estamos evaluando la falla reportada.',
+                            notificacion: 'Te notificaremos si el equipo no tiene solución.',
+                            sinSolucion: 'Te notificaremos si el equipo no tiene solución.',
+                            reparacion: 'Tu equipo está siendo reparado por nuestro equipo técnico.',
+                            revisionTerminada: 'Tu equipo está siendo reparado por nuestro equipo técnico.',
+                            terminado: 'Tu equipo está listo para ser retirado.',
+                            entregado: 'Servicio entregado y cerrado.',
+                            presupuestoPendiente: 'Presupuesto generado, esperando aprobación del cliente.'
+                        };
+                        return estadoDesc[servicio.estado] || 'Seguimiento de tu servicio técnico.';
+                    })() : 'Ingresá el número de orden para seguir tu servicio'}
+                </p>
 
                 {(!urlId || error || !isViewingResult) && (
                     <form onSubmit={handleSearch} className="search-wrapper">
@@ -310,30 +349,29 @@ function ConsultaServicio() {
                     <>
                         <div className="timeline-container">
                             {timelineSteps.map((step, index) => {
+                                const isActive = isStepActive(step.key);
                                 const isCurrent = (servicio?.estado === PASOS[step.key]) 
                                     || (step.key === 'P3_DIAGNOSTICO' && servicio?.estado === 'enRevision')
                                     || (step.key === 'P4_REPARACION' && (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada'))
                                     || (step.key === 'P5_TERMINADO' && servicio?.estado === 'terminado')
                                     || (step.key === 'P2_5_SIN_SOLUCION' && (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion'));
+                                const isPast = isActive && !isCurrent;
                                 return (
                                     <React.Fragment key={step.key}>
                                         {index > 0 && (
-                                            <div className={`timeline-connector ${isCurrent ? 'active' : ''}`}>
+                                            <div className={`timeline-connector ${isActive ? 'active' : ''}`}>
                                                 <div className="timeline-line-track">
-                                                    <div className={`timeline-line-fill ${isCurrent ? 'filled' : ''}`}></div>
+                                                    <div className={`timeline-line-fill ${isActive ? 'filled' : ''}`}></div>
                                                 </div>
                                             </div>
                                         )}
-                                        <div className={`timeline-step ${isCurrent ? 'active current' : ''} ${step.color}`}>
+                                        <div className={`timeline-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''} ${step.color}`}>
                                             <div className={`timeline-circle ${step.color}`}>
                                                 {step.icon}
                                             </div>
                                             <span className={`timeline-label ${step.color}`}>{step.label}</span>
-                                            <span className="timeline-desc">
-                                                {step.desc}
-                                            </span>
                                             <span className="timeline-time">
-                                                {isCurrent ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
+                                                {isActive ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
                                             </span>
                                         </div>
                                     </React.Fragment>
@@ -348,7 +386,7 @@ function ConsultaServicio() {
                                 </div>
                                 <div className="client-info">
                                     <span className="client-label">CLIENTE</span>
-                                    <span className="client-name">{cliente?.nombreCompleto || 'N/A'}</span>
+                                    <span className="client-name">{cliente?.nombreCompleto || servicio?.clienteNombre || servicio?.cliente_nombre || 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="client-card-right">
@@ -366,9 +404,6 @@ function ConsultaServicio() {
                                         <span className="client-meta-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="client-card-image">
-                                <img src="/img/fondo2.png" alt="Equipo" />
                             </div>
                         </div>
 
