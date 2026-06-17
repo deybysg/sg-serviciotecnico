@@ -4,6 +4,45 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 console.log('API_URL:', API_URL);
 console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 
+// ============================================
+// SISTEMA DE DETECCIÓN DE SERVIDOR DORMIDO
+// ============================================
+let pendingRequests = 0;
+let wakeUpTimer = null;
+let isShowingWakeUp = false;
+
+const WAKE_UP_DELAY = 3000; // ms antes de mostrar el overlay
+
+function notifyServerWakingUp() {
+    if (!isShowingWakeUp) {
+        isShowingWakeUp = true;
+        window.dispatchEvent(new CustomEvent('server-waking-up'));
+    }
+}
+
+function notifyServerAwake() {
+    if (isShowingWakeUp && pendingRequests === 0) {
+        isShowingWakeUp = false;
+        window.dispatchEvent(new CustomEvent('server-awake'));
+    }
+}
+
+function startWakeUpTimer() {
+    if (wakeUpTimer) clearTimeout(wakeUpTimer);
+    wakeUpTimer = setTimeout(() => {
+        if (pendingRequests > 0) {
+            notifyServerWakingUp();
+        }
+    }, WAKE_UP_DELAY);
+}
+
+function clearWakeUpTimer() {
+    if (wakeUpTimer) {
+        clearTimeout(wakeUpTimer);
+        wakeUpTimer = null;
+    }
+}
+
 /**
  * Wrapper de fetch con manejo de JWT automático
  * @param {string} endpoint - Ruta relativa (ej: '/productos' o '/auth/login')
@@ -12,7 +51,7 @@ console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
  */
 export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     const url = `${API_URL}${endpoint}`;
-    
+
     // Headers por defecto
     const headers = {
         'Content-Type': 'application/json',
@@ -33,10 +72,14 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
         headers
     };
 
+    // Track peticiones pendientes para el overlay de "servidor durmiendo"
+    pendingRequests++;
+    startWakeUpTimer();
+
     try {
         const response = await fetch(url, config);
 
-    // Manejar errores HTTP
+        // Manejar errores HTTP
         if (!response.ok) {
             // Si es 401, y la solicitud requería auth, redirigimos al login.
             // Si NO requería auth (página pública), NO redirigimos: solo lanzamos error.
@@ -76,6 +119,10 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     } catch (error) {
         console.error(`Error en ${endpoint}:`, error);
         throw error;
+    } finally {
+        pendingRequests--;
+        clearWakeUpTimer();
+        notifyServerAwake();
     }
 };
 

@@ -1,0 +1,549 @@
+/* ============================================
+   SERVER WAKE UP - ANIMACIÓN DE ESPERA
+   Overlay global cuando Render duerme el backend
+   ============================================ */
+
+.server-wakeup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.server-wakeup-backdrop {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(0, 183, 255, 0.06), transparent 60%),
+    rgba(2, 5, 13, 0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   PARTÍCULAS FLOTANTES
+   ============================================ */
+.wakeup-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wakeup-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 183, 255, 0.5);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 183, 255, 0.4);
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   TARJETA PRINCIPAL
+   ============================================ */
+.server-wakeup-card {
+  position: relative;
+  width: min(90vw, 480px);
+  padding: 48px 36px 36px;
+  background: linear-gradient(145deg, rgba(6, 19, 32, 0.95), rgba(10, 29, 49, 0.9));
+  border: 1px solid rgba(0, 183, 255, 0.2);
+  border-radius: 24px;
+  box-shadow: 
+    0 0 60px rgba(0, 183, 255, 0.08),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  text-align: center;
+  animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.server-wakeup-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-blue, #00b7ff), var(--neon-purple, #bf32ff), transparent);
+  background-size: 200% 100%;
+  animation: neonShift 3s linear infinite;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes neonShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ============================================
+   SERVIDOR ANIMADO (ROBOT)
+   ============================================ */
+.wakeup-server-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.wakeup-server {
+  position: relative;
+  width: 100px;
+  height: 120px;
+}
+
+/* Cuerpo del servidor */
+.server-body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 85px;
+  background: linear-gradient(145deg, rgba(0, 183, 255, 0.15), rgba(191, 50, 255, 0.1));
+  border: 2px solid rgba(0, 183, 255, 0.4);
+  border-radius: 12px;
+  box-shadow: 
+    0 0 30px rgba(0, 183, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: serverBreathe 3s ease-in-out infinite;
+}
+
+@keyframes serverBreathe {
+  0%, 100% { 
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 30px rgba(0, 183, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  50% { 
+    transform: translateX(-50%) scale(1.02);
+    box-shadow: 0 0 40px rgba(0, 183, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Luces indicadoras */
+.server-lights {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.server-light {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 183, 255, 0.3);
+  border: 1px solid rgba(0, 183, 255, 0.3);
+}
+
+.server-light.light-1 {
+  animation: lightBlink 1.2s ease-in-out infinite;
+}
+.server-light.light-2 {
+  animation: lightBlink 1.2s ease-in-out 0.4s infinite;
+}
+.server-light.light-3 {
+  animation: lightBlink 1.2s ease-in-out 0.8s infinite;
+}
+
+@keyframes lightBlink {
+  0%, 100% { 
+    background: rgba(0, 183, 255, 0.3);
+    box-shadow: 0 0 4px rgba(0, 183, 255, 0.2);
+  }
+  50% { 
+    background: rgba(0, 183, 255, 0.9);
+    box-shadow: 0 0 12px rgba(0, 183, 255, 0.6), 0 0 20px rgba(0, 183, 255, 0.3);
+  }
+}
+
+/* Ventiladores */
+.server-fans {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.server-fan {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 183, 255, 0.3);
+  border-radius: 50%;
+  position: relative;
+  animation: fanSpin 0.8s linear infinite;
+}
+
+.server-fan::before,
+.server-fan::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 183, 255, 0.4);
+  border-radius: 1px;
+}
+
+.server-fan::before {
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.server-fan::after {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes fanSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Antena */
+.server-antenna {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to top, rgba(0, 183, 255, 0.5), rgba(0, 183, 255, 0.1));
+}
+
+.server-antenna::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 183, 255, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 183, 255, 0.4);
+  animation: antennaPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes antennaPulse {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.4);
+    background: rgba(0, 183, 255, 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(0, 183, 255, 0.8), 0 0 40px rgba(0, 183, 255, 0.3);
+    background: rgba(0, 183, 255, 1);
+  }
+}
+
+/* Señales de antena */
+.antenna-signal {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 183, 255, 0);
+  border-radius: 50%;
+  border-top-color: rgba(0, 183, 255, 0.5);
+  border-right-color: rgba(0, 183, 255, 0.3);
+  animation: signalWave 2s ease-out infinite;
+  opacity: 0;
+}
+
+.antenna-signal.signal-1 { animation-delay: 0s; }
+.antenna-signal.signal-2 { animation-delay: 0.6s; }
+.antenna-signal.signal-3 { animation-delay: 1.2s; }
+
+@keyframes signalWave {
+  0% {
+    width: 10px;
+    height: 10px;
+    top: -6px;
+    opacity: 1;
+    border-top-color: rgba(0, 183, 255, 0.6);
+  }
+  100% {
+    width: 50px;
+    height: 50px;
+    top: -26px;
+    opacity: 0;
+    border-top-color: rgba(0, 183, 255, 0);
+  }
+}
+
+/* Zzz durmiendo */
+.server-sleeping {
+  position: absolute;
+  top: 8px;
+  right: -10px;
+}
+
+.zzz {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(191, 50, 255, 0.8);
+  text-shadow: 0 0 10px rgba(191, 50, 255, 0.4);
+  animation: zzzFloat 2s ease-in-out infinite;
+}
+
+.zzz-delay {
+  animation-delay: 0.5s;
+  font-size: 12px;
+}
+
+.zzz-delay-2 {
+  animation-delay: 1s;
+  font-size: 10px;
+}
+
+@keyframes zzzFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(5px, -10px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(10px, -20px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Ojos del robot */
+.server-eyes {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.server-eye {
+  width: 10px;
+  height: 3px;
+  background: rgba(0, 183, 255, 0.6);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 183, 255, 0.3);
+  animation: eyeBlink 3s ease-in-out infinite;
+  transition: all 0.5s ease;
+}
+
+.server-eye.eye-awake {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 183, 255, 0.9);
+  box-shadow: 0 0 12px rgba(0, 183, 255, 0.5), 0 0 24px rgba(0, 183, 255, 0.2);
+}
+
+@keyframes eyeBlink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* ============================================
+   TÍTULO Y DOTS
+   ============================================ */
+.wakeup-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+.wakeup-dots {
+  display: inline-block;
+  width: 24px;
+  text-align: left;
+  color: var(--neon-blue, #00b7ff);
+}
+
+/* ============================================
+   BARRA DE PROGRESO
+   ============================================ */
+.wakeup-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.wakeup-progress-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 183, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.wakeup-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-blue, #00b7ff), var(--neon-purple, #bf32ff));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  position: relative;
+  box-shadow: 0 0 12px rgba(0, 183, 255, 0.3);
+}
+
+.progress-glow {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(0, 183, 255, 0.5),
+    0 0 40px rgba(191, 50, 255, 0.3);
+  animation: glowPulse 1s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { transform: translateY(-50%) scale(1); opacity: 1; }
+  50% { transform: translateY(-50%) scale(1.3); opacity: 0.7; }
+}
+
+.wakeup-progress-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--neon-blue, #00b7ff);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+  text-shadow: 0 0 10px rgba(0, 183, 255, 0.3);
+}
+
+/* ============================================
+   TIP / MENSAJE
+   ============================================ */
+.wakeup-tip {
+  font-size: 0.9rem;
+  color: rgba(238, 249, 255, 0.75);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  min-height: 44px;
+  animation: tipFade 0.5s ease;
+}
+
+@keyframes tipFade {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   BRANDING
+   ============================================ */
+.wakeup-branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 183, 255, 0.1);
+}
+
+.wakeup-brand-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--neon-blue, #00b7ff);
+  box-shadow: 0 0 8px rgba(0, 183, 255, 0.4);
+}
+
+.wakeup-brand-text {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--neon-blue, #00b7ff), var(--neon-purple, #bf32ff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .server-wakeup-card {
+    padding: 36px 24px 28px;
+    width: 92vw;
+  }
+
+  .wakeup-title {
+    font-size: 1.1rem;
+  }
+
+  .wakeup-tip {
+    font-size: 0.85rem;
+    min-height: 52px;
+  }
+
+  .wakeup-server {
+    transform: scale(0.85);
+  }
+}
+
+/* Preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .server-wakeup-card,
+  .server-body,
+  .server-light,
+  .server-fan,
+  .antenna-signal,
+  .zzz,
+  .server-eye,
+  .progress-glow,
+  .wakeup-particle,
+  .wakeup-tip {
+    animation: none !important;
+  }
+}

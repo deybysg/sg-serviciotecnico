@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { shortId, toIdString } from '../utils/id';
 import Swal from 'sweetalert2';
 import './ConsultaServicio.css';
-import { FiFileText, FiSearch, FiBell, FiTool, FiPackage, FiArrowRight, FiHome, FiUser, FiClock, FiCalendar, FiHash } from 'react-icons/fi';
+import { FiFileText, FiSearch, FiBell, FiTool, FiPackage, FiArrowRight, FiHome, FiUser, FiClock, FiCalendar, FiHash, FiActivity, FiAlertTriangle, FiDollarSign } from 'react-icons/fi';
 
 const formatNumber = (value) => {
     if (value === null || value === undefined || isNaN(Number(value))) {
@@ -408,20 +408,67 @@ function ConsultaServicio() {
                         </div>
 
                         <div className="details-box">
-                            <div className="detail-item">
-                                <span className="detail-label">Equipo</span>
-                                <span className="detail-value">{servicio.marcaProducto} ({servicio.tipoServicio})</span>
+                            <h3 className="details-box-title">
+                                <FiFileText size={18} /> Estado de tu Equipo
+                            </h3>
+                            <div className="detail-row">
+                                <div className="detail-icon">
+                                    <FiCalendar size={18} />
+                                </div>
+                                <div className="detail-content">
+                                    <span className="detail-label">Fecha de Ingreso</span>
+                                    <span className="detail-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Estado Actual</span>
-                                <span className="detail-value">
-                                    <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span>
-                                </span>
+                            <div className="detail-row">
+                                <div className="detail-icon">
+                                    <FiTool size={18} />
+                                </div>
+                                <div className="detail-content">
+                                    <span className="detail-label">Equipo</span>
+                                    <span className="detail-value">{servicio.marcaProducto} {servicio.modeloProducto} ({servicio.tipoEquipo})</span>
+                                </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-label">Presupuesto Total</span>
-                                <span className="detail-value">${formatNumber(servicio.presupuesto?.total) || 'Pendiente'}</span>
+                            <div className="detail-row">
+                                <div className="detail-icon">
+                                    <FiActivity size={18} />
+                                </div>
+                                <div className="detail-content">
+                                    <span className="detail-label">Estado Actual</span>
+                                    <span className="detail-value">
+                                        <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span>
+                                    </span>
+                                </div>
                             </div>
+                            <div className="detail-row">
+                                <div className="detail-icon">
+                                    <FiHash size={18} />
+                                </div>
+                                <div className="detail-content">
+                                    <span className="detail-label">N° de Orden</span>
+                                    <span className="detail-value">#{servicio.servicioNumero || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div className="detail-row">
+                                <div className="detail-icon">
+                                    <FiDollarSign size={18} />
+                                </div>
+                                <div className="detail-content">
+                                    <span className="detail-label">Presupuesto Total</span>
+                                    <span className="detail-value">${formatNumber(servicio.presupuesto?.total) || 'Pendiente'}</span>
+                                </div>
+                            </div>
+                            {servicio.fallaReportada && (
+                                <div className="detail-row">
+                                    <div className="detail-icon">
+                                        <FiAlertTriangle size={18} />
+                                    </div>
+                                    <div className="detail-content">
+                                        <span className="detail-label">Falla Reportada</span>
+                                        <span className="detail-value">{servicio.fallaReportada}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {(servicio?.estado === 'notificacion' || servicio?.notificacion || servicio?.sinSolucion) && (

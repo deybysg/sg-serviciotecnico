@@ -29,12 +29,13 @@ import Paneltrabajos from "./admin/Paneltrabajos";
 import HistorialDeVentas from "./admin/HistorialDeVentas";
 
 import { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartProvider"; 
+import { CartProvider } from "./context/CartProvider";
 import PrivateRoute from "./components/PrivateRoute";
 import MisComprasModal from "./pages/MisComprasModal";
 import ComprobanteVenta from "./pages/ComprobanteVenta";
 import UsuariosAdmin from "./admin/UsuariosAdmin";
 import { useAuth } from "./context/AuthContext";
+import ServerWakeUp from "./components/ServerWakeUp";
 
 
 function AppBody() {
@@ -162,16 +163,17 @@ function AppBody() {
 }
 
 function App() {
-  return (
-    <AuthProvider>
-      <CartProvider> {/* ⬅️ ENVUELVE EL ROUTER AQUÍ */}
-        <Router>
-          <Navbar />
+  return (
+    <AuthProvider>
+      <CartProvider> {/* ⬅️ ENVUELVE EL ROUTER AQUÍ */}
+        <Router>
+          <ServerWakeUp />
+          <Navbar />
                     <AppBody />
                 </Router>
-      </CartProvider>
-    </AuthProvider>
-  );
+      </CartProvider>
+    </AuthProvider>
+  );
 }
 
 export default App;

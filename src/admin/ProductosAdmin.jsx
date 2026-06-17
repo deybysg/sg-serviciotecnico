@@ -738,7 +738,7 @@ function ProductosAdmin() {
 
                 {/* --- Modal de Alertas de Stock --- */}
                 {showStockModal && (
-                    <AlertaStockModal
+                    <AlertaStockModalo98
                         productosAAlertar={productosAAlertar}
                         onClose={() => setShowStockModal(false)}
                     />
