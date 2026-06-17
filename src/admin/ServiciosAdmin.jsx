@@ -215,31 +215,25 @@ function ServiciosAdmin() {
         }
     }, [isPrinting, serviceToPrint]);
 
-    const generarComprobante = (service) => {
-        // Si el servicio ya viene enriquecido (desde handleSubmit), usamos esos datos directamente
-        let serviceEnriched = { ...service };
-        if (!service.clienteNombre && !service.cliente_nombre) {
-            const cid = service.clienteId || service.cliente;
-            let clienteData = clientes.find(c => String(c.id) === String(cid));
-            if (clienteData) clienteData = normalizeCliente(clienteData);
-            serviceEnriched = {
-                ...service,
-                clienteNombre: clienteData?.nombreCompleto || service.cliente?.nombreCompleto || 'N/A',
-                clienteTelefono: clienteData?.celular || service.cliente?.celular || 'N/A',
-                clienteDni: clienteData?.dni || service.cliente?.dni || 'N/A',
-                clienteCorreo: clienteData?.correo || service.cliente?.correo || 'N/A',
-                clienteDireccion: clienteData?.direccion || service.cliente?.direccion || 'N/A',
-                cliente: clienteData || service.cliente,
-            };
-        }
-        // Asegurar que presupuesto siempre tenga formato correcto
-        serviceEnriched.presupuesto = service.presupuesto || {
-            items: service.presupuesto_items || [],
-            subtotal: Number(service.presupuesto_subtotal || 0),
-            iva: Number(service.presupuesto_iva || 0),
-            total: Number(service.presupuesto_total || 0)
+    const generarComprobante = (service, clienteOverride = null) => {
+        const cid = service.clienteId || service.cliente;
+        let clienteData = clienteOverride || clientes.find(c => String(c.id) === String(cid)) || null;
+        if (clienteData) clienteData = normalizeCliente(clienteData);
+        const serviceEnriched = {
+            ...service,
+            clienteNombre: clienteData?.nombreCompleto || service.clienteNombre || service.cliente_nombre || 'N/A',
+            clienteTelefono: clienteData?.celular || service.clienteTelefono || service.cliente_celular || 'N/A',
+            clienteDni: clienteData?.dni || service.clienteDni || service.cliente_dni || 'N/A',
+            clienteCorreo: clienteData?.correo || service.clienteCorreo || service.cliente_correo || 'N/A',
+            clienteDireccion: clienteData?.direccion || service.clienteDireccion || service.cliente_direccion || 'N/A',
+            cliente: clienteData || service.cliente,
+            presupuesto: service.presupuesto || {
+                items: service.presupuesto_items || [],
+                subtotal: Number(service.presupuesto_subtotal || 0),
+                iva: Number(service.presupuesto_iva || 0),
+                total: Number(service.presupuesto_total || 0)
+            }
         };
-        console.log('DEBUG generarComprobante - serviceEnriched:', serviceEnriched);
         setServiceToPrint(serviceEnriched);
         setIsPrinting(true);
     };
@@ -432,40 +426,23 @@ function ServiciosAdmin() {
             const nuevoServicioNormalizado = normalizeServicio(nuevoServicio);
             setServicios((prev) => [...prev, nuevoServicioNormalizado]);
 
-            // Enriquecer servicio con datos del cliente para el comprobante
+            // Obtener datos del cliente para el comprobante
             let clienteParaComprobante = null;
-            if (!isNewClient && clienteSeleccionado?.data) {
-                // Cliente existente: usamos directamente los datos del select (más confiable que buscar en estado)
+            if (isNewClient) {
+                clienteParaComprobante = normalizeCliente({
+                    id: clienteIdToUse,
+                    nombre_completo: clientData.nombreCompleto,
+                    celular: clientData.celular,
+                    correo: clientData.correo,
+                    direccion: clientData.direccion,
+                    dni: clientData.dni,
+                });
+            } else if (clienteSeleccionado?.data) {
                 clienteParaComprobante = normalizeCliente(clienteSeleccionado.data);
-            } else {
-                // Cliente nuevo: buscamos en estado o usamos los datos del formulario
-                clienteParaComprobante = clientes.find(c => String(c.id) === String(clienteIdToUse));
-                if (!clienteParaComprobante) {
-                    clienteParaComprobante = normalizeCliente({
-                        id: clienteIdToUse,
-                        nombre_completo: clientData.nombreCompleto,
-                        celular: clientData.celular,
-                        correo: clientData.correo,
-                        direccion: clientData.direccion,
-                        dni: clientData.dni,
-                    });
-                }
             }
-            console.log('DEBUG comprobante - clienteIdToUse:', clienteIdToUse);
-            console.log('DEBUG comprobante - clienteParaComprobante:', clienteParaComprobante);
-            const servicioParaComprobante = {
-                ...nuevoServicioNormalizado,
-                clienteNombre: clienteParaComprobante?.nombreCompleto || 'N/A',
-                clienteTelefono: clienteParaComprobante?.celular || 'N/A',
-                clienteDni: clienteParaComprobante?.dni || 'N/A',
-                clienteCorreo: clienteParaComprobante?.correo || 'N/A',
-                clienteDireccion: clienteParaComprobante?.direccion || 'N/A',
-                cliente: clienteParaComprobante,
-            };
-            console.log('DEBUG comprobante - servicioParaComprobante:', servicioParaComprobante);
 
             handleLimpiarFormulario();
-            generarComprobante(servicioParaComprobante);
+            generarComprobante(nuevoServicioNormalizado, clienteParaComprobante);
         } catch (err) {
             console.error("Error en la creación del servicio:", err);
             Swal.fire({
