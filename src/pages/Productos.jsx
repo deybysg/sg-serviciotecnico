@@ -96,11 +96,11 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const slides = [
     {
-      imagen: "/img/fondo3.png",
-      titulo: "Smartphones 2024",
-      subtitulo: "La última tecnología en la palma de tu mano.",
+      imagen: "/img/fondo2.png",
+      titulo: "Auriculares Inalámbricos",
+      subtitulo: "Audio libre y sin cables para todo el día.",
       cta: "Explorar",
-      categoria: "celulares",
+      categoria: "auriculares",
     },
     {
       imagen: "/img/image.png",
@@ -111,10 +111,10 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
     },
     {
       imagen: "/img/fondo1.jpg",
-      titulo: "Cargadores Rápidos",
-      subtitulo: "Power Delivery para todos tus dispositivos.",
+      titulo: "Linternas Tácticas",
+      subtitulo: "Iluminación potente para cualquier aventura.",
       cta: "Descubrir",
-      categoria: "cargadores",
+      categoria: "linternas",
     },
     {
       imagen: "/img/sonidos.png",
