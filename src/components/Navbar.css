@@ -131,6 +131,25 @@
   text-shadow: 0 0 30px rgba(0, 183, 255, 0.3);
 }
 
+/* Admin profile inside navbar title */
+.navbar-admin-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.1), rgba(191, 50, 255, 0.1));
+  border: 1px solid rgba(0, 183, 255, 0.25);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition);
+}
+
+.navbar-admin-profile:hover {
+  border-color: rgba(0, 183, 255, 0.5);
+  box-shadow: 0 0 25px rgba(0, 183, 255, 0.2);
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.15), rgba(191, 50, 255, 0.15));
+}
+
 @keyframes textShimmer {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.2); }
@@ -505,7 +524,102 @@
   }
 }
 
-/* 10. SCANLINE EFFECT */
+/* 10. USER PROFILE (Admin / SuperAdmin) */
+.navbar-user-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.08), rgba(191, 50, 255, 0.08));
+  border: 1px solid rgba(0, 183, 255, 0.2);
+  transition: all var(--transition);
+  cursor: default;
+}
+
+.navbar-user-profile:hover {
+  border-color: rgba(0, 183, 255, 0.45);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.15);
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.12), rgba(191, 50, 255, 0.12));
+}
+
+.navbar-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  color: #fff;
+  box-shadow: 0 0 12px rgba(0, 183, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.navbar-user-avatar.superadmin {
+  background: linear-gradient(135deg, var(--neon-amber), #ff8c00);
+  box-shadow: 0 0 12px rgba(255, 196, 0, 0.5);
+}
+
+.navbar-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar-user-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.navbar-user-role {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--neon-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.navbar-user-role.superadmin {
+  color: var(--neon-amber);
+}
+
+.navbar-user-avatar.user {
+  background: linear-gradient(135deg, var(--neon-green), #17b84c);
+  box-shadow: 0 0 12px rgba(35, 221, 95, 0.4);
+}
+
+.navbar-user-role.user {
+  color: var(--neon-green);
+}
+
+.navbar-user-profile.user {
+  background: linear-gradient(135deg, rgba(35, 221, 95, 0.08), rgba(23, 184, 76, 0.08));
+  border-color: rgba(35, 221, 95, 0.2);
+}
+
+.navbar-user-profile.user:hover {
+  border-color: rgba(35, 221, 95, 0.45);
+  box-shadow: 0 0 20px rgba(35, 221, 95, 0.15);
+  background: linear-gradient(135deg, rgba(35, 221, 95, 0.12), rgba(23, 184, 76, 0.12));
+}
+
+/* Responsive: ocultar nombre en pantallas medianas */
+@media (max-width: 1100px) {
+  .navbar-user-info {
+    display: none;
+  }
+  .navbar-user-profile {
+    padding: 0.4rem;
+  }
+  .navbar-admin-profile {
+    padding: 0.35rem;
+  }
+}
+
+/* 11. SCANLINE EFFECT */
 .navbar-sg .scanline {
   position: absolute;
   top: 0;

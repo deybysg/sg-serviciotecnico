@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaTools, FaShoppingCart } from 'react-icons/fa';
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser, FiBriefcase } from "react-icons/fi";
+import { RiAdminFill } from "react-icons/ri";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
@@ -95,20 +96,36 @@ function Navbar() {
           </div>
           <h1 className="navbar-title-logo">
             <img src="/img/logo2.png" alt="Logo SG" className="navbar-logo-image" />
-            <span 
-              className="navbar-title-text" 
-              style={{ color: isAdminish ? "#FFD700" : "#ffffff" }}
-            >
-              {user?.role === "superadmin" ? "SuperAdmin" : (user?.role === "admin" ? "Panel Admin" : "Servicio Técnico Deyby")}
-            </span>
+            
+            {/* Guest: título normal */}
+            {!user && (
+              <span className="navbar-title-text">
+                Servicio Técnico Deyby
+              </span>
+            )}
+            
+            {/* Usuario logueado: perfil en vez de título */}
+            {user && (
+              <div className="navbar-admin-profile">
+                <div className={`navbar-user-avatar ${user?.role === 'superadmin' ? 'superadmin' : user?.role === 'user' ? 'user' : ''}`}>
+                  {user?.role === 'user' ? <FiUser size={16} /> : <RiAdminFill size={16} />}
+                </div>
+                <div className="navbar-user-info">
+                  <span className="navbar-user-name">{user?.username}</span>
+                  <span className={`navbar-user-role ${user?.role === 'superadmin' ? 'superadmin' : user?.role === 'user' ? 'user' : ''}`}>
+                    {user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'user' ? 'Usuario' : 'Administrador'}
+                  </span>
+                </div>
+              </div>
+            )}
           </h1>
         </div>
 
-        {/* 2. CENTRO: Seguimiento */}
-        {(!user || user.role === 'user') && (
+        {/* 2. CENTRO: Seguimiento (solo para visitantes no logueados) */}
+        {!user && (
           <div className="navbar-section-center-tracking">
             <NavLink to="/seguimiento" className="tracking-oval-link">
-              <FiSearch size={14} /> Seguimiento de Servicio
+              <FiSearch size={14} /> Estado de tu Equipo
             </NavLink>
           </div>
         )}
@@ -167,7 +184,6 @@ function Navbar() {
 
           {user?.role === 'superadmin' && (
             <>
-              {/* Para superadmin usamos la barra lateral; aquí solo dejamos Logout */}
               <li>
                 <button onClick={handleLogout} className="logout-btn">
                   <FiLogOut size={14} /> Salir

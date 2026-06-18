@@ -352,7 +352,7 @@ function Home() {
                 Ver productos
               </Link>
               <Link className="neon-btn neon-btn-outline" to="/seguimiento">
-                <FaSearch /> Seguimiento
+                <FaSearch /> Estado de Reparación
               </Link>
             </div>
           </div>
