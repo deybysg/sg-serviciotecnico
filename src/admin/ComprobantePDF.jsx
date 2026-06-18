@@ -12,9 +12,12 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     // --- Formateo de fechas ---
     const formatDate = (isoString) => {
         if (!isoString) return 'N/A';
-        // Usa T12:00:00 para evitar problemas de zona horaria al formatear solo la fecha
         const date = new Date(isoString.split('T')[0] + 'T12:00:00'); 
         return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+    const formatDateTime = (isoString) => {
+        if (!isoString) return 'N/A';
+        return new Date(isoString).toLocaleString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
     // --- Lógica del Presupuesto ---
@@ -29,58 +32,39 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const presupuestoCero = presupuestoTotal === 0 && presupuestoItems.every(item => (Number(item.costo || 0) === 0 || !item.descripcion));
     const itemsPresupuesto = presupuestoItems.filter(item => item.descripcion || Number(item.costo || 0) > 0);
     
-    // Si el presupuesto es cero, crea filas vacías para completar a mano (3 líneas por defecto)
     const filasVacias = presupuestoCero ? Array(3).fill({ descripcion: '_________________________', costo: 0 }) : [];
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
     const servicioNumero = service.servicioNumero || 'N/A';
+    const urlSeguimiento = `${import.meta.env.VITE_FRONTEND_URL || 'https://sg-serviciotecnico.vercel.app'}/seguimiento/${servicioNumero}`;
 
-    return (
-        <div style={styles.comprobanteContainer}>
-            
-            {/* Cabecera y QR - Reordenado */}
-            <div style={styles.header}>
-                <p style={styles.qrText}>Escanea para seguimiento</p>
-                <div style={styles.qrCode}>
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <QRCodeSVG 
-                            value={`${import.meta.env.VITE_FRONTEND_URL || 'https://sg-serviciotecnico.vercel.app'}/seguimiento/${servicioNumero}`} 
-                            size={85} 
-                            level="H"
-                            bgColor="#ffffff"
-                            fgColor="#000000"
-                        />
-                        <img 
-                            src="/img/logo2.png"
-                            alt="Logo"
-                            style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '26px',
-                                height: '26px',
-                                borderRadius: '50%',
-                                backgroundColor: 'white',
-                                padding: '0px',
-                                // border: '1px solid #ccc'
-                            }}
-                        />
+    // ============================
+    // PARTE SUPERIOR: CLIENTE
+    // ============================
+    const ClienteSection = () => (
+        <div style={styles.bloqueCliente}>
+            {/* Cabecera */}
+            <div style={styles.headerCliente}>
+                <div style={styles.headerLeft}>
+                    <div style={styles.logoBox}>SG</div>
+                    <div>
+                        <h1 style={styles.titleCliente}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
+                        <p style={styles.subtitleCliente}>SG SERVICIO TECNICO — Original Cliente</p>
                     </div>
                 </div>
-                <div style={styles.headerInfo}>
-                    <h1 style={styles.title}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
-                    <p style={styles.subtitle}>SG SERVICIO TECNICO</p>
-                    <p style={styles.headerDetail}>N° de Orden: <span style={styles.highlight}>{servicioNumero}</span> | <strong>Fecha Ingreso:</strong> <span style={styles.highlight}>{formatDate(service.fechaEntrada)}</span></p>
+                <div style={styles.headerRight}>
+                    <div style={styles.metaRow}><strong>N° Orden:</strong> <span style={styles.metaHighlight}>{servicioNumero}</span></div>
+                    <div style={styles.metaRow}><strong>Fecha Ingreso:</strong> {formatDate(service.fechaEntrada)}</div>
+                    <div style={styles.metaRow}><strong>Estado:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></div>
                 </div>
             </div>
 
-            <div style={styles.separator} />
+            <div style={styles.sepBlue} />
 
-            {/* Sección de Datos del Cliente */}
-            <div style={styles.section}>
+            {/* Datos del Cliente */}
+            <div style={styles.sectionBox}>
                 <h2 style={styles.sectionTitle}>DATOS DEL CLIENTE</h2>
-                <div style={styles.grid}>
+                <div style={styles.grid2}>
                     <p style={styles.gridItem}><strong>Cliente:</strong> {service.clienteNombre || service.cliente?.nombreCompleto || 'N/A'}</p>
                     <p style={styles.gridItem}><strong>Teléfono:</strong> {service.clienteTelefono || service.cliente?.celular || 'N/A'}</p>
                     <p style={styles.gridItem}><strong>DNI:</strong> {service.clienteDni || service.cliente?.dni || 'N/A'}</p>
@@ -89,57 +73,53 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 </div>
             </div>
 
-            <div style={styles.separatorThin} />
+            <div style={styles.sepThin} />
 
-            {/* Sección de Datos del Equipo y Servicio */}
-            <div style={styles.section}>
+            {/* Datos del Equipo */}
+            <div style={styles.sectionBox}>
                 <h2 style={styles.sectionTitle}>DATOS DEL SERVICIO Y EQUIPO</h2>
-                <div style={styles.grid}>
+                <div style={styles.grid2}>
                     <p style={styles.gridItem}><strong>Equipo:</strong> {service.tipoEquipo || service.tipo_equipo || 'N/A'}</p>
                     <p style={styles.gridItem}><strong>Marca:</strong> {service.marcaProducto || service.marca_producto || 'N/A'}</p>
                     <p style={styles.gridItem}><strong>Modelo:</strong> {service.modeloProducto || service.modelo_producto || 'N/A'}</p>
                     <p style={styles.gridItem}><strong>Tipo de Servicio:</strong> {getTipoLabel(service.tipoServicio || service.tipo_servicio)}</p>
-                    <p style={styles.gridItem}><strong>Estado Actual:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></p>
+                    <p style={styles.gridItem}><strong>Estado:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></p>
                     <p style={styles.gridItem}><strong>Nro. Orden:</strong> {service.servicioNumero || service.servicio_numero || 'N/A'}</p>
                 </div>
             </div>
 
-            <div style={styles.separatorThin} />
+            <div style={styles.sepThin} />
 
-            {/* Problema Reportado */}
-            <div style={styles.section}>
+            {/* Problema */}
+            <div style={styles.sectionBox}>
                 <h2 style={styles.sectionTitle}>PROBLEMA REPORTADO / FALLA</h2>
-                <p style={styles.details}>{service.fallaReportada || service.falla_reportada || service.detalles || 'No se registraron detalles. (Revisión Pendiente)'}</p>
+                <p style={styles.detailsBox}>{service.fallaReportada || service.falla_reportada || service.detalles || 'No se registraron detalles. (Revisión Pendiente)'}</p>
             </div>
 
-            {/* Asunto y Detalles */}
-            {(service.asunto || service.notasAdicionales || service.notas_adicionales) && (
+            {/* Info Adicional */}
+            {(service.asunto || service.notasAdicionales || service.notas_adicionales || service.metodoPago || service.anticipo) && (
                 <>
-                    <div style={styles.separatorThin} />
-                    <div style={styles.section}>
+                    <div style={styles.sepThin} />
+                    <div style={styles.sectionBox}>
                         <h2 style={styles.sectionTitle}>INFORMACIÓN ADICIONAL</h2>
-                        <div style={styles.grid}>
-                            {service.asunto && (
-                                <p style={styles.gridItem}><strong>Asunto:</strong> {service.asunto}</p>
-                            )}
-                            {service.metodoPago && (
-                                <p style={styles.gridItem}><strong>Método de Pago:</strong> {service.metodoPago || service.metodo_pago}</p>
-                            )}
+                        <div style={styles.grid2}>
+                            {service.asunto && <p style={styles.gridItem}><strong>Asunto:</strong> {service.asunto}</p>}
+                            {service.metodoPago && <p style={styles.gridItem}><strong>Método de Pago:</strong> {service.metodoPago || service.metodo_pago}</p>}
                             {service.anticipo && Number(service.anticipo) > 0 && (
                                 <p style={styles.gridItem}><strong>Anticipo:</strong> ${Number(service.anticipo).toFixed(2)}</p>
                             )}
                         </div>
                         {(service.notasAdicionales || service.notas_adicionales) && (
-                            <p style={styles.details}><strong>Notas:</strong> {service.notasAdicionales || service.notas_adicionales}</p>
+                            <p style={styles.detailsBox}><strong>Notas:</strong> {service.notasAdicionales || service.notas_adicionales}</p>
                         )}
                     </div>
                 </>
             )}
 
-            <div style={styles.separatorThin} />
+            <div style={styles.sepThin} />
 
-            {/* Sección de Presupuesto */}
-            <div style={styles.section}>
+            {/* Presupuesto */}
+            <div style={styles.sectionBox}>
                 <h2 style={styles.sectionTitle}>PRESUPUESTO ESTIMADO / DETALLE DE REPARACIÓN</h2>
                 <table style={styles.table}>
                     <thead>
@@ -171,94 +151,188 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                 </table>
                 <p style={styles.note}>
                     {presupuestoCero 
-                        ? '_____________________________________________________________________' // Línea para escribir
+                        ? '_____________________________________________________________________'
                         : '* Este es un presupuesto estimado, el costo final puede variar tras la revisión técnica o aprobación del cliente.'
                     }
                 </p>
             </div>
-            
-            <div style={styles.separator} />
 
-            {/* Pie de Página */}
-            <div style={styles.footer}>
-                <div style={styles.signature}>
-                    <p style={styles.signatureLine}>_________________________</p>
-                    <p style={styles.signatureText}>Firma del Cliente/Receptor</p>
-                    {/* <p style={styles.qrText}>Escanea para seguimiento: {`tu-web.com/seguimiento/${service.id}`}</p> */}
+            <div style={styles.sepBlue} />
+
+            {/* Footer Cliente */}
+            <div style={styles.footerCliente}>
+                <div style={styles.footerLeft}>
+                    <p style={styles.footerThanks}>¡Gracias por tu confianza!</p>
+                    <p style={styles.footerSmall}>Conservá este comprobante para seguimiento y reclamos.</p>
                 </div>
-                <div style={styles.companyContact}>
-                    <p>¡Gracias por tu confianza!</p>
-                    <p>Dirección, Teléfono, Email.</p>
+                <div style={styles.footerQr}>
+                    <QRCodeSVG value={urlSeguimiento} size={50} level="H" bgColor="#ffffff" fgColor="#000000" />
+                    <span style={styles.qrLabel}>Escaneá para seguimiento</span>
+                </div>
+            </div>
+        </div>
+    );
+
+    // ============================
+    // PARTE INFERIOR: TICKET VENDEDOR
+    // ============================
+    const TicketVendedor = () => (
+        <div style={styles.ticketVendedor}>
+            <div style={styles.ticketHeader}>
+                <div style={styles.ticketLogo}>SG</div>
+                <div style={styles.ticketTipo}>COPIA VENDEDOR</div>
+            </div>
+            
+            <div style={styles.ticketBody}>
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>N° Orden:</span>
+                    <span style={styles.ticketValue}>{servicioNumero}</span>
+                </div>
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Fecha:</span>
+                    <span style={styles.ticketValue}>{formatDateTime(service.fechaEntrada)}</span>
+                </div>
+                <div style={styles.ticketSep} />
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Cliente:</span>
+                    <span style={styles.ticketValue}>{service.clienteNombre || service.cliente?.nombreCompleto || '—'}</span>
+                </div>
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Teléfono:</span>
+                    <span style={styles.ticketValue}>{service.clienteTelefono || service.cliente?.celular || '—'}</span>
+                </div>
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Equipo:</span>
+                    <span style={styles.ticketValue}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''}</span>
+                </div>
+                <div style={styles.ticketSep} />
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Estado:</span>
+                    <span style={styles.ticketValue}>{getEstadoLabel(service.estado)}</span>
+                </div>
+                <div style={styles.ticketRow}>
+                    <span style={styles.ticketLabel}>Total:</span>
+                    <span style={styles.ticketValue}>${Number(presupuestoTotal).toFixed(2)}</span>
                 </div>
             </div>
 
+            <div style={styles.ticketFooter}>
+                Control interno — No válido como factura
+            </div>
+        </div>
+    );
+
+    // ============================
+    // RENDER PRINCIPAL
+    // ============================
+    return (
+        <div style={styles.container}>
+            <ClienteSection />
+            
+            {/* Línea de corte */}
+            <div style={styles.corteLinea}>
+                <div style={styles.corteLine} />
+                <span style={styles.corteIcon}>✂</span>
+                <span style={styles.corteText}>Recortar aquí</span>
+                <div style={styles.corteLine} />
+            </div>
+            
+            <TicketVendedor />
         </div>
     );
 };
 
-    // --- Estilos Mejorados y Modernos ---
+// ============================
+// ESTILOS
+// ============================
 const styles = {
-    // Colores: Primario (#007bff o un tono más oscuro), Fondo (#f8f9fa), Texto (#343a40), Bordes (#dee2e6)
-    
-    comprobanteContainer: {
+    container: {
         fontFamily: 'Roboto, Arial, sans-serif',
         fontSize: '9pt',
         color: '#343a40',
         padding: '10mm',
-        border: '1px solid #adb5bd',
         backgroundColor: '#ffffff',
         margin: '0 auto',
         boxSizing: 'border-box',
         maxWidth: '190mm'
     },
-    header: {
+
+    // === CLIENTE ===
+    bloqueCliente: {
+        border: '1px solid #adb5bd',
+        padding: '8mm',
+        backgroundColor: '#ffffff',
+        marginBottom: '4mm',
+    },
+    headerCliente: {
         display: 'flex',
         justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: '6px',
+    },
+    headerLeft: {
+        display: 'flex',
         alignItems: 'center',
-        marginBottom: '10px',
-        paddingBottom: '8px'
+        gap: '10px',
     },
-    qrCode: {
-        // Estilo específico para mover el QR
-        marginRight: '20px',
-        padding: '5px',
-        border: '1px solid #dee2e6',
+    logoBox: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '6px',
+        background: 'linear-gradient(90deg, #0b2545, #1f6f9f)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: '700',
+        fontSize: '0.9rem',
     },
-    headerInfo: {
-        flexGrow: 1,
-        textAlign: 'right',
-    },
-    title: {
-        fontSize: '14pt',
+    titleCliente: {
+        fontSize: '13pt',
         margin: '0',
         color: '#007bff',
         fontWeight: '900',
     },
-    subtitle: {
-        fontSize: '10pt',
+    subtitleCliente: {
+        fontSize: '9pt',
         margin: '2px 0 0 0',
-        fontWeight: 'bold'
-    },
-    headerDetail: {
-        fontSize: '8pt',
-        marginTop: '3px',
-    },
-    highlight: {
         fontWeight: 'bold',
-        color: '#495057',
+        color: '#6c757d',
     },
-    separator: {
-        height: '1px',
+    headerRight: {
+        textAlign: 'right',
+        fontSize: '8.5pt',
+        lineHeight: '1.4',
+    },
+    metaRow: {
+        marginBottom: '2px',
+    },
+    metaHighlight: {
+        fontWeight: 'bold',
+        color: '#0b2545',
+    },
+    statusBadge: (estado) => ({
+        padding: '1px 6px',
+        borderRadius: '3px',
+        fontWeight: 'bold',
+        fontSize: '8pt',
+        color: '#ffffff',
+        backgroundColor: estado === 'ENTREGADO' ? '#28a745' : estado === 'REVISIÓN' ? '#ffc107' : '#007bff',
+    }),
+
+    sepBlue: {
+        height: '2px',
         backgroundColor: '#007bff',
-        margin: '10px 0 20px 0',
+        margin: '8px 0',
     },
-    separatorThin: {
+    sepThin: {
         height: '1px',
         backgroundColor: '#dee2e6',
-        margin: '5px 0 15px 0',
+        margin: '6px 0',
     },
-    section: {
-        marginBottom: '8px',
+
+    sectionBox: {
+        marginBottom: '6px',
     },
     sectionTitle: {
         fontSize: '9pt',
@@ -268,42 +342,39 @@ const styles = {
         borderBottom: '1px solid #ced4da',
         paddingBottom: '2px',
         marginBottom: '6px',
+        marginTop: '0',
     },
-    grid: {
+    grid2: {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '4px 12px',
+        gap: '3px 12px',
     },
     gridItem: {
         margin: 0,
         fontSize: '9pt',
     },
-    statusBadge: (estado) => ({
-        padding: '2px 5px',
-        borderRadius: '3px',
-        fontWeight: 'bold',
-        color: '#ffffff',
-        backgroundColor: estado === 'ENTREGADO' ? '#28a745' : estado === 'REVISIÓN' ? '#ffc107' : '#007bff', // Colores condicionales
-    }),
-    details: {
+    detailsBox: {
         whiteSpace: 'pre-wrap',
         border: '1px solid #ced4da',
-        backgroundColor: '#f8f9fa', // Fondo claro
-        padding: '10px',
+        backgroundColor: '#f8f9fa',
+        padding: '8px',
         borderRadius: '4px',
         lineHeight: '1.4',
-        minHeight: '40px', // Para que se vea bien si no hay detalles
+        minHeight: '35px',
+        fontSize: '9pt',
+        margin: '0',
     },
+
     table: {
         width: '100%',
         borderCollapse: 'collapse',
-        marginTop: '10px',
+        marginTop: '6px',
     },
     th: {
         border: '1px solid #adb5bd',
         backgroundColor: '#e9ecef',
         color: '#343a40',
-        padding: '4px',
+        padding: '3px 6px',
         textAlign: 'left',
         fontSize: '8pt',
         textTransform: 'uppercase',
@@ -312,7 +383,7 @@ const styles = {
         border: '1px solid #adb5bd',
         backgroundColor: '#e9ecef',
         color: '#343a40',
-        padding: '4px',
+        padding: '3px 6px',
         textAlign: 'right',
         width: '15%',
         fontSize: '8pt',
@@ -321,19 +392,19 @@ const styles = {
     td: {
         border: '1px solid #f8f9fa',
         borderBottom: '1px solid #e9ecef',
-        padding: '4px',
+        padding: '3px 6px',
         fontSize: '9pt',
     },
     tdCosto: {
         border: '1px solid #f8f9fa',
         borderBottom: '1px solid #e9ecef',
-        padding: '4px',
+        padding: '3px 6px',
         textAlign: 'right',
         fontSize: '9pt',
     },
     tdTotalLabel: {
         borderTop: '1px solid #495057',
-        padding: '4px',
+        padding: '3px 6px',
         textAlign: 'right',
         fontSize: '9pt',
         fontWeight: 'bold',
@@ -341,7 +412,7 @@ const styles = {
     },
     tdTotalValue: {
         borderTop: '1px solid #495057',
-        padding: '4px',
+        padding: '3px 6px',
         textAlign: 'right',
         backgroundColor: '#e9ecef',
         fontSize: '10pt',
@@ -350,46 +421,145 @@ const styles = {
     },
     note: {
         fontSize: '7pt',
-        marginTop: '5px',
+        marginTop: '4px',
         color: '#6c757d',
     },
-    footer: {
+
+    footerCliente: {
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginTop: '15px',
-        paddingTop: '10px',
+        alignItems: 'center',
+        marginTop: '8px',
+        paddingTop: '8px',
+        borderTop: '1px solid #dee2e6',
     },
-    signature: {
+    footerLeft: {
         textAlign: 'left',
-        width: '50%',
+    },
+    footerThanks: {
+        margin: '0',
+        fontWeight: 'bold',
+        fontSize: '10pt',
+        color: '#0b2545',
+    },
+    footerSmall: {
+        margin: '2px 0 0 0',
+        fontSize: '7.5pt',
+        color: '#888',
+    },
+    footerQr: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '2px',
+    },
+    qrLabel: {
+        fontSize: '7pt',
+        color: '#888',
+    },
+
+    // === CORTE ===
+    corteLinea: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '8px 16px',
+        background: 'repeating-linear-gradient(45deg, #fff9f0, #fff9f0 10px, #fff0d9 10px, #fff0d9 20px)',
+        borderTop: '2px dashed #ffd699',
+        borderBottom: '2px dashed #ffd699',
+        margin: '4px 0',
+    },
+    corteLine: {
+        flex: 1,
+        height: 0,
+        borderTop: '2px dashed #e0a800',
+    },
+    corteIcon: {
+        fontSize: '1.3rem',
+        color: '#e0a800',
+    },
+    corteText: {
+        fontSize: '0.75rem',
+        fontWeight: '700',
+        color: '#b38600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+        whiteSpace: 'nowrap',
+    },
+
+    // === TICKET VENDEDOR ===
+    ticketVendedor: {
+        maxWidth: '320px',
+        margin: '0 auto',
+        padding: '10px 14px',
+        background: '#fff',
+        border: '2px dashed #ffc107',
+        borderRadius: '6px',
         fontSize: '9pt',
-        color: '#6c757d',
     },
-    signatureLine: {
-        margin: '0',
-        borderBottom: '1px dashed #6c757d',
-        marginBottom: '5px',
-        paddingTop: '15px',
-        textAlign: 'center',
+    ticketHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: '6px',
+        borderBottom: '2px dashed #e0e0e0',
+        marginBottom: '6px',
     },
-    signatureText: {
-        margin: '0',
-        fontSize: '8pt',
-        textAlign: 'center',
+    ticketLogo: {
+        width: '32px',
+        height: '32px',
+        borderRadius: '5px',
+        background: 'linear-gradient(90deg, #0b2545, #1f6f9f)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: '700',
+        fontSize: '0.8rem',
     },
-    qrText: {
-        fontSize: '14pt',
-        marginTop: '15px',
-        textAlign: 'left',
-        color: '#007bff',
+    ticketTipo: {
+        fontSize: '0.7rem',
+        fontWeight: '800',
+        color: '#b38600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        background: '#fff8e1',
+        padding: '2px 6px',
+        borderRadius: '3px',
     },
-    companyContact: {
+    ticketBody: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '3px',
+    },
+    ticketRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '0.85rem',
+        lineHeight: '1.3',
+    },
+    ticketLabel: {
+        color: '#666',
+        fontWeight: '600',
+    },
+    ticketValue: {
+        color: '#333',
+        fontWeight: '700',
         textAlign: 'right',
-        width: '50%',
-        fontSize: '9pt',
-        color: '#6c757d',
-    }
+    },
+    ticketSep: {
+        height: 0,
+        borderTop: '1px dashed #ddd',
+        margin: '3px 0',
+    },
+    ticketFooter: {
+        textAlign: 'center',
+        fontSize: '0.65rem',
+        color: '#aaa',
+        marginTop: '6px',
+        paddingTop: '4px',
+        borderTop: '1px dashed #ddd',
+    },
 };
 
 export default ComprobantePDF;
