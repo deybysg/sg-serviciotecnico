@@ -1,26 +1,21 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { shortId, toIdString } from '../utils/id';
-
-// Se asume que este componente estará en el mismo directorio que ServiciosAdmin.jsx
+import { toIdString } from '../utils/id';
 
 const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
-    // --- Helpers para obtener labels ---
     const getTipoLabel = (value) => TIPO_SERVICIO_OPTIONS.find(o => o.value === value)?.label || value;
     const getEstadoLabel = (value) => ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
-    
-    // --- Formateo de fechas ---
+
     const formatDate = (isoString) => {
         if (!isoString) return 'N/A';
-        const date = new Date(isoString.split('T')[0] + 'T12:00:00'); 
-        return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        const date = new Date(isoString.split('T')[0] + 'T12:00:00');
+        return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
     };
     const formatDateTime = (isoString) => {
         if (!isoString) return 'N/A';
         return new Date(isoString).toLocaleString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
-    // --- Lógica del Presupuesto ---
     const presupuesto = service.presupuesto || {
         items: service.presupuesto_items || [],
         subtotal: Number(service.presupuesto_subtotal || 0),
@@ -31,533 +26,439 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const presupuestoItems = presupuesto.items || [];
     const presupuestoCero = presupuestoTotal === 0 && presupuestoItems.every(item => (Number(item.costo || 0) === 0 || !item.descripcion));
     const itemsPresupuesto = presupuestoItems.filter(item => item.descripcion || Number(item.costo || 0) > 0);
-    
-    const filasVacias = presupuestoCero ? Array(3).fill({ descripcion: '_________________________', costo: 0 }) : [];
+    const filasVacias = presupuestoCero ? Array(2).fill({ descripcion: '_________________________', costo: 0 }) : [];
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
     const servicioNumero = service.servicioNumero || 'N/A';
     const urlSeguimiento = `${import.meta.env.VITE_FRONTEND_URL || 'https://sg-serviciotecnico.vercel.app'}/seguimiento/${servicioNumero}`;
 
-    // ============================
-    // PARTE SUPERIOR: CLIENTE
-    // ============================
-    const ClienteSection = () => (
-        <div style={styles.bloqueCliente}>
-            {/* Cabecera */}
-            <div style={styles.headerCliente}>
-                <div style={styles.headerLeft}>
-                    <div style={styles.logoBox}>SG</div>
-                    <div>
-                        <h1 style={styles.titleCliente}>COMPROBANTE DE SERVICIO TÉCNICO</h1>
-                        <p style={styles.subtitleCliente}>SG SERVICIO TECNICO — Original Cliente</p>
+    return (
+        <div style={S.wrap}>
+            {/* ================= CLIENTE ================= */}
+            <div style={S.cliente}>
+                {/* Header */}
+                <div style={S.header}>
+                    <div style={S.headerLeft}>
+                        <div style={S.logo}>SG</div>
+                        <div>
+                            <div style={S.title}>COMPROBANTE DE SERVICIO TÉCNICO</div>
+                            <div style={S.subtitle}>Original Cliente — SG Servicio Técnico</div>
+                        </div>
+                    </div>
+                    <div style={S.headerRight}>
+                        <div><b>N° Orden:</b> {servicioNumero}</div>
+                        <div><b>Fecha:</b> {formatDate(service.fechaEntrada)}</div>
+                        <div><b>Estado:</b> <span style={S.badge(service.estado)}>{getEstadoLabel(service.estado)}</span></div>
                     </div>
                 </div>
-                <div style={styles.headerRight}>
-                    <div style={styles.metaRow}><strong>N° Orden:</strong> <span style={styles.metaHighlight}>{servicioNumero}</span></div>
-                    <div style={styles.metaRow}><strong>Fecha Ingreso:</strong> {formatDate(service.fechaEntrada)}</div>
-                    <div style={styles.metaRow}><strong>Estado:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></div>
+
+                {/* Cliente + Equipo en dos columnas */}
+                <div style={S.cols2}>
+                    <div style={S.col}>
+                        <div style={S.secTitle}>DATOS DEL CLIENTE</div>
+                        <div style={S.line}><b>Cliente:</b> {service.clienteNombre || service.cliente?.nombreCompleto || '—'}</div>
+                        <div style={S.line}><b>Tel:</b> {service.clienteTelefono || service.cliente?.celular || '—'}</div>
+                        <div style={S.line}><b>DNI:</b> {service.clienteDni || service.cliente?.dni || '—'}</div>
+                        <div style={S.line}><b>Email:</b> {service.clienteCorreo || service.cliente?.correo || '—'}</div>
+                        <div style={S.line}><b>Dir:</b> {service.clienteDireccion || service.cliente?.direccion || '—'}</div>
+                    </div>
+                    <div style={S.col}>
+                        <div style={S.secTitle}>DATOS DEL EQUIPO</div>
+                        <div style={S.line}><b>Equipo:</b> {service.tipoEquipo || service.tipo_equipo || '—'}</div>
+                        <div style={S.line}><b>Marca:</b> {service.marcaProducto || service.marca_producto || '—'}</div>
+                        <div style={S.line}><b>Modelo:</b> {service.modeloProducto || service.modelo_producto || '—'}</div>
+                        <div style={S.line}><b>Servicio:</b> {getTipoLabel(service.tipoServicio || service.tipo_servicio)}</div>
+                        <div style={S.line}><b>N° Orden:</b> {service.servicioNumero || service.servicio_numero || '—'}</div>
+                    </div>
                 </div>
-            </div>
 
-            <div style={styles.sepBlue} />
-
-            {/* Datos del Cliente */}
-            <div style={styles.sectionBox}>
-                <h2 style={styles.sectionTitle}>DATOS DEL CLIENTE</h2>
-                <div style={styles.grid2}>
-                    <p style={styles.gridItem}><strong>Cliente:</strong> {service.clienteNombre || service.cliente?.nombreCompleto || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Teléfono:</strong> {service.clienteTelefono || service.cliente?.celular || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>DNI:</strong> {service.clienteDni || service.cliente?.dni || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Correo:</strong> {service.clienteCorreo || service.cliente?.correo || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Dirección:</strong> {service.clienteDireccion || service.cliente?.direccion || 'N/A'}</p>
+                {/* Falla */}
+                <div style={S.box}>
+                    <div style={S.secTitle}>PROBLEMA REPORTADO / FALLA</div>
+                    <div style={S.falla}>{service.fallaReportada || service.falla_reportada || service.detalles || 'No se registraron detalles.'}</div>
                 </div>
-            </div>
 
-            <div style={styles.sepThin} />
-
-            {/* Datos del Equipo */}
-            <div style={styles.sectionBox}>
-                <h2 style={styles.sectionTitle}>DATOS DEL SERVICIO Y EQUIPO</h2>
-                <div style={styles.grid2}>
-                    <p style={styles.gridItem}><strong>Equipo:</strong> {service.tipoEquipo || service.tipo_equipo || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Marca:</strong> {service.marcaProducto || service.marca_producto || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Modelo:</strong> {service.modeloProducto || service.modelo_producto || 'N/A'}</p>
-                    <p style={styles.gridItem}><strong>Tipo de Servicio:</strong> {getTipoLabel(service.tipoServicio || service.tipo_servicio)}</p>
-                    <p style={styles.gridItem}><strong>Estado:</strong> <span style={styles.statusBadge(service.estado)}>{getEstadoLabel(service.estado)}</span></p>
-                    <p style={styles.gridItem}><strong>Nro. Orden:</strong> {service.servicioNumero || service.servicio_numero || 'N/A'}</p>
-                </div>
-            </div>
-
-            <div style={styles.sepThin} />
-
-            {/* Problema */}
-            <div style={styles.sectionBox}>
-                <h2 style={styles.sectionTitle}>PROBLEMA REPORTADO / FALLA</h2>
-                <p style={styles.detailsBox}>{service.fallaReportada || service.falla_reportada || service.detalles || 'No se registraron detalles. (Revisión Pendiente)'}</p>
-            </div>
-
-            {/* Info Adicional */}
-            {(service.asunto || service.notasAdicionales || service.notas_adicionales || service.metodoPago || service.anticipo) && (
-                <>
-                    <div style={styles.sepThin} />
-                    <div style={styles.sectionBox}>
-                        <h2 style={styles.sectionTitle}>INFORMACIÓN ADICIONAL</h2>
-                        <div style={styles.grid2}>
-                            {service.asunto && <p style={styles.gridItem}><strong>Asunto:</strong> {service.asunto}</p>}
-                            {service.metodoPago && <p style={styles.gridItem}><strong>Método de Pago:</strong> {service.metodoPago || service.metodo_pago}</p>}
-                            {service.anticipo && Number(service.anticipo) > 0 && (
-                                <p style={styles.gridItem}><strong>Anticipo:</strong> ${Number(service.anticipo).toFixed(2)}</p>
-                            )}
+                {/* Info adicional compacta */}
+                {(service.asunto || service.notasAdicionales || service.notas_adicionales || service.metodoPago || service.anticipo) && (
+                    <div style={S.box}>
+                        <div style={S.secTitle}>INFO ADICIONAL</div>
+                        <div style={S.cols2}>
+                            {service.asunto && <div style={S.line}><b>Asunto:</b> {service.asunto}</div>}
+                            {service.metodoPago && <div style={S.line}><b>Pago:</b> {service.metodoPago || service.metodo_pago}</div>}
+                            {service.anticipo && Number(service.anticipo) > 0 && <div style={S.line}><b>Anticipo:</b> ${Number(service.anticipo).toFixed(2)}</div>}
                         </div>
                         {(service.notasAdicionales || service.notas_adicionales) && (
-                            <p style={styles.detailsBox}><strong>Notas:</strong> {service.notasAdicionales || service.notas_adicionales}</p>
+                            <div style={S.line}><b>Notas:</b> {service.notasAdicionales || service.notas_adicionales}</div>
                         )}
                     </div>
-                </>
-            )}
+                )}
 
-            <div style={styles.sepThin} />
-
-            {/* Presupuesto */}
-            <div style={styles.sectionBox}>
-                <h2 style={styles.sectionTitle}>PRESUPUESTO ESTIMADO / DETALLE DE REPARACIÓN</h2>
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            <th style={styles.th}>DESCRIPCIÓN</th>
-                            <th style={styles.thCosto}>COSTO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filasAMostrar.map((item, index) => (
-                            <tr key={index}>
-                                <td style={styles.td}>{item.descripcion}</td>
-                                <td style={styles.tdCosto}>
-                                    {presupuestoCero ? '' : `$${Number(item.costo || 0).toFixed(2)}`}
-                                </td>
+                {/* Presupuesto */}
+                <div style={S.box}>
+                    <div style={S.secTitle}>PRESUPUESTO ESTIMADO</div>
+                    <table style={S.table}>
+                        <thead>
+                            <tr><th style={S.th}>Descripción</th><th style={S.thR}>Costo</th></tr>
+                        </thead>
+                        <tbody>
+                            {filasAMostrar.map((item, i) => (
+                                <tr key={i}><td style={S.td}>{item.descripcion}</td><td style={S.tdR}>{presupuestoCero ? '' : `$${Number(item.costo || 0).toFixed(2)}`}</td></tr>
+                            ))}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style={S.tdTotalL}>{presupuestoCero ? 'TOTAL (A COMPLETAR):' : 'TOTAL ESTIMADO:'}</td>
+                                <td style={S.tdTotalR}>{presupuestoCero ? '___________' : `$${Number(presupuestoTotal).toFixed(2)}`}</td>
                             </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td style={styles.tdTotalLabel}>
-                                {presupuestoCero ? 'COSTO TOTAL (A COMPLETAR):' : 'TOTAL ESTIMADO:'}
-                            </td>
-                            <td style={styles.tdTotalValue}>
-                                {presupuestoCero ? '___________' : `$${Number(presupuestoTotal).toFixed(2)}`}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <p style={styles.note}>
-                    {presupuestoCero 
-                        ? '_____________________________________________________________________'
-                        : '* Este es un presupuesto estimado, el costo final puede variar tras la revisión técnica o aprobación del cliente.'
-                    }
-                </p>
-            </div>
+                        </tfoot>
+                    </table>
+                    <div style={S.note}>
+                        {presupuestoCero ? '___________________________________________________________' : '* Presupuesto estimado, el costo final puede variar.'}
+                    </div>
+                </div>
 
-            <div style={styles.sepBlue} />
-
-            {/* Footer Cliente */}
-            <div style={styles.footerCliente}>
-                <div style={styles.footerLeft}>
-                    <p style={styles.footerThanks}>¡Gracias por tu confianza!</p>
-                    <p style={styles.footerSmall}>Conservá este comprobante para seguimiento y reclamos.</p>
-                </div>
-                <div style={styles.footerQr}>
-                    <QRCodeSVG value={urlSeguimiento} size={50} level="H" bgColor="#ffffff" fgColor="#000000" />
-                    <span style={styles.qrLabel}>Escaneá para seguimiento</span>
-                </div>
-            </div>
-        </div>
-    );
-
-    // ============================
-    // PARTE INFERIOR: TICKET VENDEDOR
-    // ============================
-    const TicketVendedor = () => (
-        <div style={styles.ticketVendedor}>
-            <div style={styles.ticketHeader}>
-                <div style={styles.ticketLogo}>SG</div>
-                <div style={styles.ticketTipo}>COPIA VENDEDOR</div>
-            </div>
-            
-            <div style={styles.ticketBody}>
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>N° Orden:</span>
-                    <span style={styles.ticketValue}>{servicioNumero}</span>
-                </div>
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Fecha:</span>
-                    <span style={styles.ticketValue}>{formatDateTime(service.fechaEntrada)}</span>
-                </div>
-                <div style={styles.ticketSep} />
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Cliente:</span>
-                    <span style={styles.ticketValue}>{service.clienteNombre || service.cliente?.nombreCompleto || '—'}</span>
-                </div>
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Teléfono:</span>
-                    <span style={styles.ticketValue}>{service.clienteTelefono || service.cliente?.celular || '—'}</span>
-                </div>
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Equipo:</span>
-                    <span style={styles.ticketValue}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''}</span>
-                </div>
-                <div style={styles.ticketSep} />
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Estado:</span>
-                    <span style={styles.ticketValue}>{getEstadoLabel(service.estado)}</span>
-                </div>
-                <div style={styles.ticketRow}>
-                    <span style={styles.ticketLabel}>Total:</span>
-                    <span style={styles.ticketValue}>${Number(presupuestoTotal).toFixed(2)}</span>
+                {/* Footer cliente */}
+                <div style={S.footerCliente}>
+                    <div>
+                        <div style={S.thanks}>¡Gracias por tu confianza!</div>
+                        <div style={S.small}>Conservá este comprobante para seguimiento.</div>
+                    </div>
+                    <div style={S.qrWrap}>
+                        <QRCodeSVG value={urlSeguimiento} size={42} level="H" />
+                        <div style={S.qrText}>Seguimiento</div>
+                    </div>
                 </div>
             </div>
 
-            <div style={styles.ticketFooter}>
-                Control interno — No válido como factura
+            {/* ================= CORTE ================= */}
+            <div style={S.corte}>
+                <div style={S.corteLine} />
+                <span style={S.corteIcon}>✂</span>
+                <span style={S.corteTxt}>Recortar aquí</span>
+                <div style={S.corteLine} />
             </div>
-        </div>
-    );
 
-    // ============================
-    // RENDER PRINCIPAL
-    // ============================
-    return (
-        <div style={styles.container}>
-            <ClienteSection />
-            
-            {/* Línea de corte */}
-            <div style={styles.corteLinea}>
-                <div style={styles.corteLine} />
-                <span style={styles.corteIcon}>✂</span>
-                <span style={styles.corteText}>Recortar aquí</span>
-                <div style={styles.corteLine} />
+            {/* ================= TICKET VENDEDOR ================= */}
+            <div style={S.ticket}>
+                <div style={S.ticketHead}>
+                    <div style={S.ticketLogo}>SG</div>
+                    <div style={S.ticketLabel}>COPIA VENDEDOR</div>
+                </div>
+                <div style={S.ticketBody}>
+                    <div style={S.ticketRow}><span style={S.ticketK}>N° Orden:</span><span style={S.ticketV}>{servicioNumero}</span></div>
+                    <div style={S.ticketRow}><span style={S.ticketK}>Fecha:</span><span style={S.ticketV}>{formatDateTime(service.fechaEntrada)}</span></div>
+                    <div style={S.ticketSep} />
+                    <div style={S.ticketRow}><span style={S.ticketK}>Cliente:</span><span style={S.ticketV}>{service.clienteNombre || service.cliente?.nombreCompleto || '—'}</span></div>
+                    <div style={S.ticketRow}><span style={S.ticketK}>Tel:</span><span style={S.ticketV}>{service.clienteTelefono || service.cliente?.celular || '—'}</span></div>
+                    <div style={S.ticketRow}><span style={S.ticketK}>Equipo:</span><span style={S.ticketV}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''}</span></div>
+                    <div style={S.ticketSep} />
+                    <div style={S.ticketRow}><span style={S.ticketK}>Estado:</span><span style={S.ticketV}>{getEstadoLabel(service.estado)}</span></div>
+                    <div style={S.ticketRow}><span style={S.ticketK}>Total:</span><span style={S.ticketV}>${Number(presupuestoTotal).toFixed(2)}</span></div>
+                </div>
+                <div style={S.ticketFoot}>Control interno — No válido como factura</div>
             </div>
-            
-            <TicketVendedor />
         </div>
     );
 };
 
-// ============================
-// ESTILOS
-// ============================
-const styles = {
-    container: {
-        fontFamily: 'Roboto, Arial, sans-serif',
-        fontSize: '9pt',
-        color: '#343a40',
-        padding: '10mm',
-        backgroundColor: '#ffffff',
+const S = {
+    wrap: {
+        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontSize: '8.5pt',
+        color: '#222',
+        padding: '4mm',
+        backgroundColor: '#fff',
         margin: '0 auto',
         boxSizing: 'border-box',
-        maxWidth: '190mm'
+        maxWidth: '190mm',
+        lineHeight: 1.25,
     },
 
-    // === CLIENTE ===
-    bloqueCliente: {
-        border: '1px solid #adb5bd',
-        padding: '8mm',
-        backgroundColor: '#ffffff',
-        marginBottom: '4mm',
+    // Cliente
+    cliente: {
+        border: '1px solid #999',
+        padding: '5mm',
+        backgroundColor: '#fff',
     },
-    headerCliente: {
+    header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: '6px',
+        marginBottom: '4px',
+        paddingBottom: '4px',
+        borderBottom: '1.5px solid #007bff',
     },
     headerLeft: {
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '6px',
     },
-    logoBox: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '6px',
+    logo: {
+        width: '28px',
+        height: '28px',
+        borderRadius: '4px',
         background: 'linear-gradient(90deg, #0b2545, #1f6f9f)',
         color: '#fff',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontWeight: '700',
-        fontSize: '0.9rem',
+        fontSize: '0.75rem',
     },
-    titleCliente: {
-        fontSize: '13pt',
-        margin: '0',
-        color: '#007bff',
+    title: {
+        fontSize: '11pt',
         fontWeight: '900',
+        color: '#007bff',
+        margin: 0,
     },
-    subtitleCliente: {
-        fontSize: '9pt',
-        margin: '2px 0 0 0',
-        fontWeight: 'bold',
-        color: '#6c757d',
+    subtitle: {
+        fontSize: '7.5pt',
+        color: '#666',
+        margin: 0,
     },
     headerRight: {
         textAlign: 'right',
-        fontSize: '8.5pt',
-        lineHeight: '1.4',
+        fontSize: '7.5pt',
+        lineHeight: 1.3,
     },
-    metaRow: {
-        marginBottom: '2px',
-    },
-    metaHighlight: {
+    badge: (estado) => ({
+        padding: '0px 4px',
+        borderRadius: '2px',
         fontWeight: 'bold',
-        color: '#0b2545',
-    },
-    statusBadge: (estado) => ({
-        padding: '1px 6px',
-        borderRadius: '3px',
-        fontWeight: 'bold',
-        fontSize: '8pt',
-        color: '#ffffff',
+        fontSize: '7pt',
+        color: '#fff',
         backgroundColor: estado === 'ENTREGADO' ? '#28a745' : estado === 'REVISIÓN' ? '#ffc107' : '#007bff',
     }),
 
-    sepBlue: {
-        height: '2px',
-        backgroundColor: '#007bff',
-        margin: '8px 0',
-    },
-    sepThin: {
-        height: '1px',
-        backgroundColor: '#dee2e6',
-        margin: '6px 0',
-    },
-
-    sectionBox: {
-        marginBottom: '6px',
-    },
-    sectionTitle: {
-        fontSize: '9pt',
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-        color: '#495057',
-        borderBottom: '1px solid #ced4da',
-        paddingBottom: '2px',
-        marginBottom: '6px',
-        marginTop: '0',
-    },
-    grid2: {
+    cols2: {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '3px 12px',
+        gap: '6px 10px',
+        marginTop: '4px',
+        marginBottom: '4px',
     },
-    gridItem: {
-        margin: 0,
-        fontSize: '9pt',
+    col: {
+        border: '1px solid #e0e0e0',
+        borderRadius: '3px',
+        padding: '4px 6px',
+        background: '#fafbfc',
     },
-    detailsBox: {
+    secTitle: {
+        fontSize: '7.5pt',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        color: '#444',
+        borderBottom: '1px solid #ddd',
+        paddingBottom: '1px',
+        marginBottom: '3px',
+    },
+    line: {
+        fontSize: '8pt',
+        margin: '1px 0',
+    },
+    box: {
+        border: '1px solid #e0e0e0',
+        borderRadius: '3px',
+        padding: '4px 6px',
+        background: '#fafbfc',
+        marginTop: '4px',
+    },
+    falla: {
+        fontSize: '8pt',
         whiteSpace: 'pre-wrap',
-        border: '1px solid #ced4da',
-        backgroundColor: '#f8f9fa',
-        padding: '8px',
-        borderRadius: '4px',
-        lineHeight: '1.4',
-        minHeight: '35px',
-        fontSize: '9pt',
-        margin: '0',
+        background: '#fff',
+        border: '1px solid #e0e0e0',
+        padding: '4px',
+        borderRadius: '2px',
+        minHeight: '24px',
     },
 
     table: {
         width: '100%',
         borderCollapse: 'collapse',
-        marginTop: '6px',
+        marginTop: '3px',
+        fontSize: '8pt',
     },
     th: {
-        border: '1px solid #adb5bd',
+        border: '1px solid #bbb',
         backgroundColor: '#e9ecef',
-        color: '#343a40',
-        padding: '3px 6px',
+        padding: '2px 4px',
         textAlign: 'left',
-        fontSize: '8pt',
-        textTransform: 'uppercase',
+        fontSize: '7pt',
+        fontWeight: 'bold',
     },
-    thCosto: {
-        border: '1px solid #adb5bd',
+    thR: {
+        border: '1px solid #bbb',
         backgroundColor: '#e9ecef',
-        color: '#343a40',
-        padding: '3px 6px',
+        padding: '2px 4px',
         textAlign: 'right',
-        width: '15%',
-        fontSize: '8pt',
-        textTransform: 'uppercase',
+        fontSize: '7pt',
+        fontWeight: 'bold',
+        width: '18%',
     },
     td: {
-        border: '1px solid #f8f9fa',
-        borderBottom: '1px solid #e9ecef',
-        padding: '3px 6px',
-        fontSize: '9pt',
+        border: '1px solid #e0e0e0',
+        padding: '2px 4px',
+        fontSize: '8pt',
     },
-    tdCosto: {
-        border: '1px solid #f8f9fa',
-        borderBottom: '1px solid #e9ecef',
-        padding: '3px 6px',
+    tdR: {
+        border: '1px solid #e0e0e0',
+        padding: '2px 4px',
         textAlign: 'right',
-        fontSize: '9pt',
+        fontSize: '8pt',
     },
-    tdTotalLabel: {
-        borderTop: '1px solid #495057',
-        padding: '3px 6px',
+    tdTotalL: {
+        borderTop: '1px solid #555',
+        padding: '2px 4px',
         textAlign: 'right',
-        fontSize: '9pt',
         fontWeight: 'bold',
-        backgroundColor: '#f8f9fa',
+        fontSize: '8pt',
+        backgroundColor: '#f0f0f0',
     },
-    tdTotalValue: {
-        borderTop: '1px solid #495057',
-        padding: '3px 6px',
+    tdTotalR: {
+        borderTop: '1px solid #555',
+        padding: '2px 4px',
         textAlign: 'right',
+        fontWeight: 'bold',
+        fontSize: '9pt',
         backgroundColor: '#e9ecef',
-        fontSize: '10pt',
-        fontWeight: 'bold',
         color: '#007bff',
     },
     note: {
-        fontSize: '7pt',
-        marginTop: '4px',
-        color: '#6c757d',
+        fontSize: '6.5pt',
+        color: '#777',
+        marginTop: '2px',
     },
 
     footerCliente: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: '8px',
-        paddingTop: '8px',
-        borderTop: '1px solid #dee2e6',
+        marginTop: '4px',
+        paddingTop: '4px',
+        borderTop: '1px solid #ddd',
     },
-    footerLeft: {
-        textAlign: 'left',
-    },
-    footerThanks: {
-        margin: '0',
+    thanks: {
         fontWeight: 'bold',
-        fontSize: '10pt',
+        fontSize: '9pt',
         color: '#0b2545',
+        margin: 0,
     },
-    footerSmall: {
-        margin: '2px 0 0 0',
-        fontSize: '7.5pt',
+    small: {
+        fontSize: '6.5pt',
         color: '#888',
+        margin: 0,
     },
-    footerQr: {
+    qrWrap: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '2px',
+        gap: '1px',
     },
-    qrLabel: {
-        fontSize: '7pt',
+    qrText: {
+        fontSize: '6pt',
         color: '#888',
     },
 
-    // === CORTE ===
-    corteLinea: {
+    // Corte
+    corte: {
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        padding: '8px 16px',
-        background: 'repeating-linear-gradient(45deg, #fff9f0, #fff9f0 10px, #fff0d9 10px, #fff0d9 20px)',
-        borderTop: '2px dashed #ffd699',
-        borderBottom: '2px dashed #ffd699',
-        margin: '4px 0',
+        gap: '8px',
+        padding: '4px 12px',
+        background: 'repeating-linear-gradient(45deg, #fff9f0, #fff9f0 8px, #fff0d9 8px, #fff0d9 16px)',
+        borderTop: '1.5px dashed #e0a800',
+        borderBottom: '1.5px dashed #e0a800',
+        margin: '2px 0',
     },
     corteLine: {
         flex: 1,
         height: 0,
-        borderTop: '2px dashed #e0a800',
+        borderTop: '1.5px dashed #e0a800',
     },
     corteIcon: {
-        fontSize: '1.3rem',
+        fontSize: '1.1rem',
         color: '#e0a800',
     },
-    corteText: {
-        fontSize: '0.75rem',
+    corteTxt: {
+        fontSize: '0.7rem',
         fontWeight: '700',
         color: '#b38600',
         textTransform: 'uppercase',
-        letterSpacing: '0.06em',
+        letterSpacing: '0.05em',
         whiteSpace: 'nowrap',
     },
 
-    // === TICKET VENDEDOR ===
-    ticketVendedor: {
-        maxWidth: '320px',
+    // Ticket vendedor
+    ticket: {
+        maxWidth: '280px',
         margin: '0 auto',
-        padding: '10px 14px',
+        padding: '6px 10px',
         background: '#fff',
-        border: '2px dashed #ffc107',
-        borderRadius: '6px',
-        fontSize: '9pt',
+        border: '1.5px dashed #ffc107',
+        borderRadius: '4px',
+        fontSize: '8pt',
     },
-    ticketHeader: {
+    ticketHead: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: '6px',
-        borderBottom: '2px dashed #e0e0e0',
-        marginBottom: '6px',
+        paddingBottom: '3px',
+        borderBottom: '1.5px dashed #e0e0e0',
+        marginBottom: '3px',
     },
     ticketLogo: {
-        width: '32px',
-        height: '32px',
-        borderRadius: '5px',
+        width: '24px',
+        height: '24px',
+        borderRadius: '3px',
         background: 'linear-gradient(90deg, #0b2545, #1f6f9f)',
         color: '#fff',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontWeight: '700',
-        fontSize: '0.8rem',
-    },
-    ticketTipo: {
         fontSize: '0.7rem',
+    },
+    ticketLabel: {
+        fontSize: '0.65rem',
         fontWeight: '800',
         color: '#b38600',
         textTransform: 'uppercase',
-        letterSpacing: '0.05em',
         background: '#fff8e1',
-        padding: '2px 6px',
-        borderRadius: '3px',
+        padding: '1px 5px',
+        borderRadius: '2px',
     },
     ticketBody: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '3px',
+        gap: '1px',
     },
     ticketRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        fontSize: '0.85rem',
-        lineHeight: '1.3',
+        fontSize: '7.5pt',
+        lineHeight: 1.2,
     },
-    ticketLabel: {
-        color: '#666',
+    ticketK: {
+        color: '#555',
         fontWeight: '600',
     },
-    ticketValue: {
-        color: '#333',
+    ticketV: {
+        color: '#222',
         fontWeight: '700',
         textAlign: 'right',
     },
     ticketSep: {
         height: 0,
         borderTop: '1px dashed #ddd',
-        margin: '3px 0',
+        margin: '2px 0',
     },
-    ticketFooter: {
+    ticketFoot: {
         textAlign: 'center',
-        fontSize: '0.65rem',
+        fontSize: '6pt',
         color: '#aaa',
-        marginTop: '6px',
-        paddingTop: '4px',
+        marginTop: '3px',
+        paddingTop: '2px',
         borderTop: '1px dashed #ddd',
     },
 };
