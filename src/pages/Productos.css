@@ -299,6 +299,28 @@
 .category-list {
   display: grid;
   gap: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Scrollbar personalizado para la lista de categorías */
+.category-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.category-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 183, 255, 0.25);
+  border-radius: 999px;
+}
+
+.category-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 183, 255, 0.45);
 }
 
 .category-list button {

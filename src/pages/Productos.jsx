@@ -27,6 +27,7 @@ import {
   FaUsb,
   FaCar,
   FaEllipsisH,
+  FaToolbox,
 } from "react-icons/fa";
 import { BsPhone } from "react-icons/bs";
 import { api } from "../services/api";
@@ -56,12 +57,10 @@ const DEFAULT_CATEGORIES = [
 
 const categoryMeta = {
   todos: { label: "Todos los productos", icon: <FaThLarge /> },
-  celulares: { label: "Smartphones", icon: <BsPhone /> },
-  smartphones: { label: "Smartphones", icon: <BsPhone /> },
-  computadoras: { label: "Laptops", icon: <FaLaptop /> },
-  laptops: { label: "Laptops", icon: <FaLaptop /> },
+  celulares: { label: "Celulares", icon: <BsPhone /> },
+  computadoras: { label: "Computadoras", icon: <FaLaptop /> },
   audio: { label: "Audio", icon: <FaHeadphonesAlt /> },
-  accesorios: { label: "Accesorios", icon: <FaHeadphonesAlt /> },
+  accesorios: { label: "Accesorios", icon: <FaToolbox /> },
   componentes: { label: "Componentes", icon: <FaMicrochip /> },
   perifericos: { label: "Periféricos", icon: <FaMouse /> },
   auriculares: { label: "Auriculares", icon: <FaHeadphonesAlt /> },
