@@ -48,7 +48,6 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     <div style={S.headerRight}>
                         <div><b>N° Orden:</b> {servicioNumero}</div>
                         <div><b>Fecha:</b> {formatDate(service.fechaEntrada)}</div>
-                        <div><b>Estado:</b> <span style={S.badge(service.estado)}>{getEstadoLabel(service.estado)}</span></div>
                     </div>
                 </div>
 
@@ -57,8 +56,6 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     <div style={S.col}>
                         <div style={S.secTitle}>DATOS DEL CLIENTE</div>
                         <div style={S.line}><b>Cliente:</b> {service.clienteNombre || service.cliente?.nombreCompleto || '—'}</div>
-                        <div style={S.line}><b>Tel:</b> {service.clienteTelefono || service.cliente?.celular || '—'}</div>
-                        <div style={S.line}><b>DNI:</b> {service.clienteDni || service.cliente?.dni || '—'}</div>
                         <div style={S.line}><b>Email:</b> {service.clienteCorreo || service.cliente?.correo || '—'}</div>
                         <div style={S.line}><b>Dir:</b> {service.clienteDireccion || service.cliente?.direccion || '—'}</div>
                     </div>
@@ -68,7 +65,6 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                         <div style={S.line}><b>Marca:</b> {service.marcaProducto || service.marca_producto || '—'}</div>
                         <div style={S.line}><b>Modelo:</b> {service.modeloProducto || service.modelo_producto || '—'}</div>
                         <div style={S.line}><b>Servicio:</b> {getTipoLabel(service.tipoServicio || service.tipo_servicio)}</div>
-                        <div style={S.line}><b>N° Orden:</b> {service.servicioNumero || service.servicio_numero || '—'}</div>
                     </div>
                 </div>
 
@@ -125,7 +121,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     </div>
                     <div style={S.qrWrap}>
                         <QRCodeSVG value={urlSeguimiento} size={42} level="H" />
-                        <div style={S.qrText}>Seguimiento</div>
+                        <div style={S.qrText}>Ver estado</div>
                     </div>
                 </div>
             </div>
@@ -149,10 +145,8 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     <div style={S.ticketRow}><span style={S.ticketK}>Fecha:</span><span style={S.ticketV}>{formatDateTime(service.fechaEntrada)}</span></div>
                     <div style={S.ticketSep} />
                     <div style={S.ticketRow}><span style={S.ticketK}>Cliente:</span><span style={S.ticketV}>{service.clienteNombre || service.cliente?.nombreCompleto || '—'}</span></div>
-                    <div style={S.ticketRow}><span style={S.ticketK}>Tel:</span><span style={S.ticketV}>{service.clienteTelefono || service.cliente?.celular || '—'}</span></div>
                     <div style={S.ticketRow}><span style={S.ticketK}>Equipo:</span><span style={S.ticketV}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''}</span></div>
                     <div style={S.ticketSep} />
-                    <div style={S.ticketRow}><span style={S.ticketK}>Estado:</span><span style={S.ticketV}>{getEstadoLabel(service.estado)}</span></div>
                     <div style={S.ticketRow}><span style={S.ticketK}>Total:</span><span style={S.ticketV}>${Number(presupuestoTotal).toFixed(2)}</span></div>
                 </div>
                 <div style={S.ticketFoot}>Control interno — No válido como factura</div>
