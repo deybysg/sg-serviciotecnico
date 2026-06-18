@@ -86,14 +86,14 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
       categoria: "celulares",
     },
     {
-      imagen: "/img/fondo1.jpg",
+      imagen: "/img/pc.png",
       titulo: "Setup Perfecto",
       subtitulo: "Accesorios y periféricos para tu estación de trabajo.",
       cta: "Descubrir",
       categoria: "accesorios",
     },
     {
-      imagen: "/img/fondo4.png",
+      imagen: "/img/sonidos.png",
       titulo: "Musica y Sonido",
       subtitulo: "Sumergite en el sonido con cancelación de ruido.",
       cta: "Escuchar",

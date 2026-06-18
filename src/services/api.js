@@ -48,8 +48,9 @@ function clearWakeUpTimer() {
  * @param {string} endpoint - Ruta relativa (ej: '/productos' o '/auth/login')
  * @param {object} options - Opciones de fetch (method, body, headers, etc)
  * @param {boolean} requiresAuth - Si requiere token JWT (default: true)
+ * @param {boolean} background - Si es true, no activa el overlay de servidor dormido (default: false)
  */
-export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
+export const apiFetch = async (endpoint, options = {}, requiresAuth = true, background = false) => {
     const url = `${API_URL}${endpoint}`;
 
     // Headers por defecto
@@ -73,8 +74,11 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     };
 
     // Track peticiones pendientes para el overlay de "servidor durmiendo"
-    pendingRequests++;
-    startWakeUpTimer();
+    // Solo si no es background (peticiones en segundo plano no molestan al usuario)
+    if (!background) {
+        pendingRequests++;
+        startWakeUpTimer();
+    }
 
     try {
         const response = await fetch(url, config);
@@ -120,40 +124,48 @@ export const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
         console.error(`Error en ${endpoint}:`, error);
         throw error;
     } finally {
-        pendingRequests--;
-        clearWakeUpTimer();
-        notifyServerAwake();
+        if (!background) {
+            pendingRequests--;
+            clearWakeUpTimer();
+            notifyServerAwake();
+        }
     }
 };
 
 /**
  * Métodos HTTP comunes para usar fácilmente
+ * 
+ * @param {string} endpoint - Ruta relativa
+ * @param {boolean} requiresAuth - Si requiere token JWT (default: true)
+ * @param {boolean} background - Si es true, no activa el overlay de servidor dormido (default: false)
+ *   Usar background=true para peticiones en segundo plano (ej: refresh periódico) para
+ *   no molestar al usuario con el overlay cuando ya está usando la app.
  */
 export const api = {
     // GET
-    get: (endpoint, requiresAuth = true) => 
-        apiFetch(endpoint, { method: 'GET' }, requiresAuth),
+    get: (endpoint, requiresAuth = true, background = false) =>
+        apiFetch(endpoint, { method: 'GET' }, requiresAuth, background),
 
     // POST
-    post: (endpoint, data, requiresAuth = true) => 
+    post: (endpoint, data, requiresAuth = true) =>
         apiFetch(endpoint, {
             method: 'POST',
             body: JSON.stringify(data)
         }, requiresAuth),
 
     // PUT
-    put: (endpoint, data, requiresAuth = true) => 
+    put: (endpoint, data, requiresAuth = true) =>
         apiFetch(endpoint, {
             method: 'PUT',
             body: JSON.stringify(data)
         }, requiresAuth),
 
     // DELETE
-    delete: (endpoint, requiresAuth = true) => 
+    delete: (endpoint, requiresAuth = true) =>
         apiFetch(endpoint, { method: 'DELETE' }, requiresAuth),
 
     // PATCH
-    patch: (endpoint, data, requiresAuth = true) => 
+    patch: (endpoint, data, requiresAuth = true) =>
         apiFetch(endpoint, {
             method: 'PATCH',
             body: JSON.stringify(data)

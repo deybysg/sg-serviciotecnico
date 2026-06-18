@@ -331,6 +331,44 @@ body {
   color: var(--cs-magenta);
 }
 
+/* ===== ESTADO DE CARGA MEJORADO ===== */
+.cs-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 20px;
+  margin-bottom: 20px;
+  animation: csLoadingEnter 0.4s ease;
+}
+
+@keyframes csLoadingEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cs-loading-pulse {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cs-blue), var(--cs-purple));
+  animation: csLoadingPulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.3), 0 0 40px rgba(191, 50, 255, 0.15);
+}
+
+@keyframes csLoadingPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+.cs-loading-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cs-text-muted);
+  letter-spacing: 0.02em;
+}
+
 /* ===== TIMELINE ===== */
 .timeline-container {
   display: flex;

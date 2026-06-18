@@ -25,22 +25,22 @@ import "./Home.css";
 
 const heroSlides = [
   {
-    eyebrow: "Servicio técnico profesional",
+    eyebrow: "Servicio técnico DEYBY",
     title: ["Reparamos", "Solucionamos", "Conectamos"],
-    text: "Soluciones técnicas confiables, accesorios y productos de calidad para tu equipo.",
-    image: "/img/fondo4.png",
+    text: "Soluciones técnicas confiables, accesorios y productos para tu equipo.",
+    image: "/img/SERVICIOS.png",
   },
   {
     eyebrow: "Tecnología lista para rendir",
     title: ["Optimizamos", "Actualizamos", "Potenciamos"],
     text: "Mantenimiento, upgrades y diagnóstico para notebooks, PCs y dispositivos móviles.",
-    image: "/img/fondo2.png",
+    image: "/img/TALLER.png",
   },
   {
     eyebrow: "Ventas y soporte",
     title: ["Elegí", "Comprá", "Disfrutá"],
     text: "Productos seleccionados, garantía y atención personalizada antes y después de comprar.",
-    image: "/img/fondo3.png",
+    image: "/img/PRODUCTOS.png",
   },
 ];
 
@@ -91,7 +91,7 @@ const serviceCards = [
 ];
 
 const benefits = [
-  { icon: <FaMedal />, title: "Calidad garantizada", text: "Productos originales y reparaciones cuidadas." },
+  { icon: <FaMedal />, title: "Calidad garantizada", text: "Productos de calidad y reparaciones Garantizadas." },
   { icon: <FaCreditCard />, title: "Métodos de pago", text: "Compra fácil con tarjetas, transferencias y más." },
   { icon: <FaShieldAlt />, title: "Precios justos", text: "Tecnología y servicio al mejor precio posible." },
   { icon: <FaGift />, title: "Promociones", text: "Ofertas y descuentos especiales para vos." },

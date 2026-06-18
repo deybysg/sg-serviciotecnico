@@ -112,7 +112,7 @@ function ConsultaServicio() {
     const [showPresupuestoModal, setShowPresupuestoModal] = useState(false);
     const [showBudgetDetails, setShowBudgetDetails] = useState(false);
 
-    const fetchServicio = useCallback(async (serviceId) => {
+    const fetchServicio = useCallback(async (serviceId, isBackground = false) => {
         if (!serviceId) return;
 
         const isInitialFetch = !servicio;
@@ -128,7 +128,8 @@ function ConsultaServicio() {
             const candidate = String(serviceId).trim();
 
             if (/^\d{3,}$/.test(candidate)) {
-                const dataServicio = await api.get(`/seguimiento/${candidate}`, false);
+                // background=true para refreshes periódicos (no activa overlay)
+                const dataServicio = await api.get(`/seguimiento/${candidate}`, false, isBackground);
                 const servicioNormalizado = normalizeServicio(dataServicio);
                 setServicio(servicioNormalizado);
 
@@ -171,7 +172,8 @@ function ConsultaServicio() {
             const intervalId = setInterval(() => {
                 const sid = servicio.servicioNumero;
                 if (sid) {
-                    fetchServicio(sid);
+                    // background=true: no activa el overlay de servidor dormido
+                    fetchServicio(sid, true);
                 }
             }, 10000);
 
@@ -342,7 +344,12 @@ function ConsultaServicio() {
                     </form>
                 )}
 
-                {loading && <div className="status-message">Cargando detalles...</div>}
+                {loading && (
+                    <div className="cs-loading-state">
+                        <div className="cs-loading-pulse"></div>
+                        <span className="cs-loading-text">Conectando con el servidor...</span>
+                    </div>
+                )}
                 {error && <div className="error-message">{error}</div>}
 
                 {isViewingResult && (
