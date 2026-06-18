@@ -19,6 +19,14 @@ import {
   FaThLarge,
   FaTimes,
   FaWhatsapp,
+  FaVolumeUp,
+  FaPlug,
+  FaHome,
+  FaCamera,
+  FaLightbulb,
+  FaUsb,
+  FaCar,
+  FaEllipsisH,
 } from "react-icons/fa";
 import { BsPhone } from "react-icons/bs";
 import { api } from "../services/api";
@@ -26,7 +34,25 @@ import { useAuth } from "../context/AuthContext";
 import useCartStore from "../store/cartStore";
 import "./Productos.css";
 
-const DEFAULT_CATEGORIES = ["todos", "celulares", "computadoras", "audio", "accesorios", "componentes", "perifericos"];
+const DEFAULT_CATEGORIES = [
+  "todos",
+  "celulares",
+  "computadoras",
+  "audio",
+  "accesorios",
+  "componentes",
+  "perifericos",
+  "auriculares",
+  "parlantes",
+  "cargadores",
+  "hogar",
+  "camaras",
+  "linternas",
+  "cables usb",
+  "mouse",
+  "accesorio para auto",
+  "varios",
+];
 
 const categoryMeta = {
   todos: { label: "Todos los productos", icon: <FaThLarge /> },
@@ -38,6 +64,16 @@ const categoryMeta = {
   accesorios: { label: "Accesorios", icon: <FaHeadphonesAlt /> },
   componentes: { label: "Componentes", icon: <FaMicrochip /> },
   perifericos: { label: "Periféricos", icon: <FaMouse /> },
+  auriculares: { label: "Auriculares", icon: <FaHeadphonesAlt /> },
+  parlantes: { label: "Parlantes", icon: <FaVolumeUp /> },
+  cargadores: { label: "Cargadores", icon: <FaPlug /> },
+  hogar: { label: "Hogar", icon: <FaHome /> },
+  camaras: { label: "Cámaras", icon: <FaCamera /> },
+  linternas: { label: "Linternas", icon: <FaLightbulb /> },
+  "cables usb": { label: "Cables USB", icon: <FaUsb /> },
+  mouse: { label: "Mouse", icon: <FaMouse /> },
+  "accesorio para auto": { label: "Accesorios para Auto", icon: <FaCar /> },
+  varios: { label: "Varios", icon: <FaEllipsisH /> },
 };
 
 const fallbackProducts = [

@@ -5,7 +5,25 @@ import Swal from "sweetalert2";
 import "./ProductosAdmin.css";
 import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit3, FiTrash2, FiSearch, FiAlertTriangle, FiPackage, FiX, FiSave, FiUpload, FiLink } from "react-icons/fi"; 
 
-const CATEGORIAS_VALIDAS = ["celulares", "computadoras", "accesorios", "otros"];
+const CATEGORIAS_VALIDAS = [
+    "celulares",
+    "computadoras",
+    "audio",
+    "accesorios",
+    "componentes",
+    "perifericos",
+    "auriculares",
+    "parlantes",
+    "cargadores",
+    "hogar",
+    "camaras",
+    "linternas",
+    "cables usb",
+    "mouse",
+    "accesorio para auto",
+    "varios",
+    "otros"
+];
 const UMBRAL_STOCK_BAJO = 5; // Constante para el umbral de stock bajo o crítico
 
 // =================================================================
