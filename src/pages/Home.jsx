@@ -124,7 +124,41 @@ function shuffle(array) {
   return arr;
 }
 
-const CATEGORIAS_ROTATIVAS = shuffle(CATEGORIAS_BASE);
+const LS_ORDER_KEY = "home_cat_order_v1";
+const LS_INDEX_KEY = "home_cat_index_v1";
+const LS_TIME_KEY  = "home_cat_time_v1";
+
+function getStoredOrder() {
+  try {
+    const raw = localStorage.getItem(LS_ORDER_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+function getStoredIndex() {
+  try {
+    const raw = localStorage.getItem(LS_INDEX_KEY);
+    if (raw) return Number(raw);
+  } catch {}
+  return 0;
+}
+
+function getStoredTime() {
+  try {
+    const raw = localStorage.getItem(LS_TIME_KEY);
+    if (raw) return Number(raw);
+  } catch {}
+  return 0;
+}
+
+function saveOrderState(order, index, time) {
+  try {
+    localStorage.setItem(LS_ORDER_KEY, JSON.stringify(order));
+    localStorage.setItem(LS_INDEX_KEY, String(index));
+    localStorage.setItem(LS_TIME_KEY, String(time));
+  } catch {}
+}
 
 function Home() {
   const { user } = useAuth();
@@ -133,7 +167,21 @@ function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [productIndex, setProductIndex] = useState(0);
   const [products, setProducts] = useState(fallbackProducts);
-  const [categoriaIndex, setCategoriaIndex] = useState(0);
+
+  // Generar orden aleatorio UNA SOLA VEZ (persistido en localStorage)
+  const [catOrder, setCatOrder] = useState(() => {
+    const stored = getStoredOrder();
+    if (stored && Array.isArray(stored) && stored.length === CATEGORIAS_BASE.length) {
+      return stored;
+    }
+    const nuevo = shuffle(CATEGORIAS_BASE);
+    saveOrderState(nuevo, 0, Date.now());
+    return nuevo;
+  });
+
+  const [categoriaIndex, setCategoriaIndex] = useState(() => {
+    return getStoredIndex();
+  });
 
   const activeHero = heroSlides[heroIndex];
 
@@ -150,8 +198,8 @@ function Home() {
     });
 
     // Orden de categorías para esta hora (determinístico basado en categoriaIndex)
-    const order = CATEGORIAS_ROTATIVAS.slice(categoriaIndex)
-      .concat(CATEGORIAS_ROTATIVAS.slice(0, categoriaIndex));
+    const order = catOrder.slice(categoriaIndex)
+      .concat(catOrder.slice(0, categoriaIndex));
 
     // Concatenar productos en ese orden de categorías
     const mezclados = [];
@@ -198,15 +246,34 @@ function Home() {
     };
   }, []);
 
-  // Rotar categoría destacada cada 10 minutos
+  // Al montar: verificar si ya pasó 1h desde la última rotación
+  useEffect(() => {
+    const lastTime = getStoredTime();
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+
+    if (lastTime && now - lastTime >= oneHour) {
+      const hoursPassed = Math.floor((now - lastTime) / oneHour);
+      const newIndex = (getStoredIndex() + hoursPassed) % catOrder.length;
+      setCategoriaIndex(newIndex);
+      setProductIndex(0);
+      saveOrderState(catOrder, newIndex, now);
+    }
+  }, [catOrder]);
+
+  // Rotar categoría destacada cada 1 hora
   useEffect(() => {
     const interval = setInterval(() => {
-      setCategoriaIndex((current) => (current + 1) % CATEGORIAS_ROTATIVAS.length);
+      setCategoriaIndex((current) => {
+        const next = (current + 1) % catOrder.length;
+        saveOrderState(catOrder, next, Date.now());
+        return next;
+      });
       setProductIndex(0); // reset scroll cuando cambia categoría
     }, 60 * 60 * 1000); // 1 hora
 
     return () => clearInterval(interval);
-  }, []);
+  }, [catOrder]);
 
   const goHero = (direction) => {
     setHeroIndex((current) => (current + direction + heroSlides.length) % heroSlides.length);
