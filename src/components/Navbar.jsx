@@ -99,7 +99,7 @@ function Navbar() {
               className="navbar-title-text" 
               style={{ color: isAdminish ? "#FFD700" : "#ffffff" }}
             >
-              {user?.role === "superadmin" ? "SuperAdmin" : (user?.role === "admin" ? "Panel Admin" : "Servicio Técnico")}
+              {user?.role === "superadmin" ? "SuperAdmin" : (user?.role === "admin" ? "Panel Admin" : "Servicio Técnico Deyby")}
             </span>
           </h1>
         </div>
