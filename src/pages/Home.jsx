@@ -97,6 +97,17 @@ const benefits = [
   { icon: <FaGift />, title: "Promociones", text: "Ofertas y descuentos especiales para vos." },
 ];
 
+const CATEGORIAS_ROTATIVAS = [
+  "celulares",
+  "computadoras",
+  "audio",
+  "accesorios",
+  "auriculares",
+  "parlantes",
+  "cargadores",
+  "camaras",
+];
+
 function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -104,9 +115,17 @@ function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [productIndex, setProductIndex] = useState(0);
   const [products, setProducts] = useState(fallbackProducts);
+  const [categoriaIndex, setCategoriaIndex] = useState(0);
 
   const activeHero = heroSlides[heroIndex];
-  const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
+  const categoriaActiva = CATEGORIAS_ROTATIVAS[categoriaIndex];
+
+  const featuredProducts = useMemo(() => {
+    const filtrados = products.filter(
+      (p) => String(p.categoria).toLowerCase() === categoriaActiva
+    );
+    return filtrados.length > 0 ? filtrados : products.slice(0, 8);
+  }, [products, categoriaActiva]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -135,6 +154,16 @@ function Home() {
     return () => {
       mounted = false;
     };
+  }, []);
+
+  // Rotar categoría destacada cada 10 minutos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCategoriaIndex((current) => (current + 1) % CATEGORIAS_ROTATIVAS.length);
+      setProductIndex(0); // reset scroll cuando cambia categoría
+    }, 10 * 60 * 1000); // 10 minutos
+
+    return () => clearInterval(interval);
   }, []);
 
   const goHero = (direction) => {
@@ -248,7 +277,12 @@ function Home() {
         <div className="section-heading">
           <div>
             <span className="section-kicker">Lo mejor en tecnología</span>
-            <h2 id="productos-destacados">Productos <span>destacados</span></h2>
+            <h2 id="productos-destacados">
+              {featuredProducts.length > 0 && featuredProducts !== products.slice(0, 8)
+                ? <>{categoriaActiva.charAt(0).toUpperCase() + categoriaActiva.slice(1)} <span>destacados</span></>
+                : <>Productos <span>destacados</span></>
+              }
+            </h2>
           </div>
           <Link className="neon-btn neon-btn-outline" to="/productos">
             Ver todos <FaArrowRight />
