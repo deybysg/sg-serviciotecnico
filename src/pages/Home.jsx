@@ -97,7 +97,7 @@ const benefits = [
   { icon: <FaGift />, title: "Promociones", text: "Ofertas y descuentos especiales para vos." },
 ];
 
-const CATEGORIAS_ROTATIVAS = [
+const CATEGORIAS_BASE = [
   "celulares",
   "computadoras",
   "audio",
@@ -106,7 +106,25 @@ const CATEGORIAS_ROTATIVAS = [
   "parlantes",
   "cargadores",
   "camaras",
+  "componentes",
+  "hogar",
+  "linternas",
+  "mouse",
+  "accesorio para auto",
+  "varios",
 ];
+
+// Mezcla aleatoria (Fisher-Yates)
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const CATEGORIAS_ROTATIVAS = shuffle(CATEGORIAS_BASE);
 
 function Home() {
   const { user } = useAuth();
@@ -161,7 +179,7 @@ function Home() {
     const interval = setInterval(() => {
       setCategoriaIndex((current) => (current + 1) % CATEGORIAS_ROTATIVAS.length);
       setProductIndex(0); // reset scroll cuando cambia categoría
-    }, 10 * 60 * 1000); // 10 minutos
+    }, 60 * 60 * 1000); // 1 hora
 
     return () => clearInterval(interval);
   }, []);
