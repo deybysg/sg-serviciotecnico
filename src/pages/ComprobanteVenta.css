@@ -108,6 +108,93 @@
   color: #0b2545;
 }
 
+/* --- Cliente info detallado --- */
+.cliente-info-detallado {
+  background: #fbfdff;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #eef6fb;
+}
+
+.cliente-info-detallado h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #0b2545;
+  border-bottom: 1px solid #eef3f8;
+  padding-bottom: 6px;
+}
+
+.cliente-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 6px 16px;
+}
+
+.cliente-grid p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* --- Totales --- */
+.comprobante-totales {
+  background: #f8fbff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #eef3f8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.total-row.grand-total {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0b2545;
+  border-top: 2px solid #0b2545;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+/* --- Footer cliente --- */
+.footer-small {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+.footer-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.qr-placeholder {
+  width: 48px;
+  height: 48px;
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #999;
+  background: #fafafa;
+}
+
+.footer-qr span {
+  font-size: 0.7rem;
+  color: #888;
+}
+
 /* --- Tabla de productos --- */
 .productos-table-wrap {
   overflow-x: auto;
@@ -212,6 +299,103 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   white-space: nowrap;
+}
+
+/* ================================================== */
+/* --- TICKET VENDEDOR (pequeño, tipo recorte) --- */
+/* ================================================== */
+.comprobante-vendedor {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  background: #fff;
+  border: 2px dashed #ffc107;
+  border-radius: 8px;
+}
+
+.ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 2px dashed #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.ticket-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #0b2545, #1f6f9f);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.ticket-tipo {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #b38600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #fff8e1;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ticket-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.ticket-label {
+  color: #666;
+  font-weight: 600;
+}
+
+.ticket-valor {
+  color: #333;
+  font-weight: 700;
+  text-align: right;
+}
+
+.ticket-separador {
+  height: 0;
+  border-top: 1px dashed #ddd;
+  margin: 4px 0;
+}
+
+.ticket-fila.ticket-total {
+  font-size: 1rem;
+  padding-top: 4px;
+  border-top: 2px solid #0b2545;
+  margin-top: 2px;
+}
+
+.ticket-fila.ticket-total .ticket-label,
+.ticket-fila.ticket-total .ticket-valor {
+  color: #0b2545;
+  font-weight: 800;
+}
+
+.ticket-footer {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #ddd;
 }
 
 .btn-print, .btn-download, .btn-volver {
@@ -429,5 +613,11 @@
   .btn-download,
   .btn-volver {
     display: none !important;
+  }
+  .comprobante-vendedor {
+    max-width: 100%;
+    margin: 0;
+    border: 2px dashed #e0a800;
+    page-break-inside: avoid;
   }
 }
