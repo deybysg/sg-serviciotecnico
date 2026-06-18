@@ -673,8 +673,8 @@ function ProductosAdmin() {
                     </div>
                 </div>
 
-                {/* Grid de Productos */}
-                <div className="admin-producto-grid">
+                {/* Lista de Productos */}
+                <div className="admin-producto-lista">
                     {productosFiltrados.length === 0 ? (
                         <div className="admin-producto-empty">
                             <FiSearch size={48} />
@@ -682,66 +682,75 @@ function ProductosAdmin() {
                             <span>Intentá con otro término de búsqueda</span>
                         </div>
                     ) : (
-                        productosFiltrados.map((producto) => {
-                            const iniciales = producto.nombre
-                                ? producto.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                                : '??';
-                            const stockClass = producto.stock === 0 ? 'cero' : producto.stock <= UMBRAL_STOCK_BAJO ? 'bajo' : 'ok';
-                            return (
-                                <div key={producto._id || producto.id} className={`admin-producto-card card-stock-${stockClass}`}>
-                                    {/* Header */}
-                                    <div className="admin-producto-card-header">
-                                        <div className="admin-producto-card-avatar">
-                                            {iniciales}
+                        <>
+                            {/* Header de la tabla */}
+                            <div className="admin-producto-lista-header">
+                                <span className="col-foto">Producto</span>
+                                <span className="col-cat">Categoría</span>
+                                <span className="col-precio">Precio</span>
+                                <span className="col-stock">Stock</span>
+                                <span className="col-acciones">Acciones</span>
+                            </div>
+                            {productosFiltrados.map((producto) => {
+                                const stockClass = producto.stock === 0 ? 'cero' : producto.stock <= UMBRAL_STOCK_BAJO ? 'bajo' : 'ok';
+                                return (
+                                    <div key={producto._id || producto.id} className={`admin-producto-fila card-stock-${stockClass}`}>
+                                        {/* Foto + Nombre */}
+                                        <div className="col-foto">
+                                            <img
+                                                src={producto.imagen || "https://placehold.co/48x48/e9ecef/868e96?text=?"}
+                                                alt={producto.nombre}
+                                                className="admin-producto-thumb"
+                                                onError={(e) => { e.target.src = "https://placehold.co/48x48/e9ecef/868e96?text=?"; }}
+                                            />
+                                            <div className="admin-producto-fila-info">
+                                                <h4>{producto.nombre}</h4>
+                                                <span className="admin-producto-fila-id">{shortId(producto._id || producto.id, 6)}</span>
+                                            </div>
                                         </div>
-                                        <div className="admin-producto-card-header-info">
-                                            <h4>{producto.nombre}</h4>
-                                            <span className="admin-producto-card-cat">
+
+                                        {/* Categoría */}
+                                        <div className="col-cat">
+                                            <span className="admin-producto-fila-cat">
                                                 {producto.categoria.charAt(0).toUpperCase() + producto.categoria.slice(1)}
                                             </span>
                                         </div>
-                                        <div className={`admin-producto-stock-badge stock-${stockClass}`}>
-                                            {producto.stock} u
-                                        </div>
-                                    </div>
 
-                                    {/* Body */}
-                                    <div className="admin-producto-card-body">
-                                        <div className="admin-producto-data-row">
-                                            <span className="admin-producto-data-icon"><FiDollarSign size={14} /></span>
-                                            <span className="admin-producto-data-label">Precio</span>
-                                            <span className="admin-producto-data-value">${producto.precio.toLocaleString('es-AR')}</span>
+                                        {/* Precio */}
+                                        <div className="col-precio">
+                                            <span className="admin-producto-fila-precio">
+                                                ${Number(producto.precio || 0).toLocaleString('es-AR')}
+                                            </span>
                                         </div>
-                                        <div className="admin-producto-data-row">
-                                            <span className="admin-producto-data-icon"><FiHash size={14} /></span>
-                                            <span className="admin-producto-data-label">Stock</span>
-                                            <span className="admin-producto-data-value">{producto.stock} unidades</span>
-                                        </div>
-                                        <div className="admin-producto-data-row">
-                                            <span className="admin-producto-data-icon"><FiTag size={14} /></span>
-                                            <span className="admin-producto-data-label">ID</span>
-                                            <span className="admin-producto-data-value">{shortId(producto._id || producto.id, 6)}</span>
-                                        </div>
-                                    </div>
 
-                                    {/* Footer */}
-                                    <div className="admin-producto-card-footer">
-                                        <button
-                                            className="admin-producto-card-btn admin-producto-btn-edit"
-                                            onClick={() => handleEditar(producto)}
-                                        >
-                                            <FiEdit3 size={14} /> Editar
-                                        </button>
-                                        <button
-                                            className="admin-producto-card-btn admin-producto-btn-delete"
-                                            onClick={() => handleEliminar(producto._id || producto.id, producto.nombre)}
-                                        >
-                                            <FiTrash2 size={14} />
-                                        </button>
+                                        {/* Stock */}
+                                        <div className="col-stock">
+                                            <span className={`admin-producto-stock-badge stock-${stockClass}`}>
+                                                {producto.stock} u
+                                            </span>
+                                        </div>
+
+                                        {/* Acciones */}
+                                        <div className="col-acciones">
+                                            <button
+                                                className="admin-producto-lista-btn admin-producto-btn-edit"
+                                                onClick={() => handleEditar(producto)}
+                                                title="Editar"
+                                            >
+                                                <FiEdit3 size={14} />
+                                            </button>
+                                            <button
+                                                className="admin-producto-lista-btn admin-producto-btn-delete"
+                                                onClick={() => handleEliminar(producto._id || producto.id, producto.nombre)}
+                                                title="Eliminar"
+                                            >
+                                                <FiTrash2 size={14} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })
+                                );
+                            })}
+                        </>
                     )}
                 </div>
 
