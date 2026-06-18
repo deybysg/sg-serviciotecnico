@@ -6,23 +6,23 @@ import "./ProductosAdmin.css";
 import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit3, FiTrash2, FiSearch, FiAlertTriangle, FiPackage, FiX, FiSave, FiUpload, FiLink } from "react-icons/fi"; 
 
 const CATEGORIAS_VALIDAS = [
-    "celulares",
-    "computadoras",
-    "audio",
-    "accesorios",
-    "componentes",
-    "perifericos",
-    "auriculares",
-    "parlantes",
-    "cargadores",
-    "hogar",
-    "camaras",
-    "linternas",
-    "cables usb",
-    "mouse",
     "accesorio para auto",
-    "varios",
-    "otros"
+    "accesorios",
+    "audio",
+    "auriculares",
+    "cables usb",
+    "camaras",
+    "cargadores",
+    "celulares",
+    "componentes",
+    "computadoras",
+    "hogar",
+    "linternas",
+    "mouse",
+    "otros",
+    "parlantes",
+    "perifericos",
+    "varios"
 ];
 const UMBRAL_STOCK_BAJO = 5; // Constante para el umbral de stock bajo o crítico
 

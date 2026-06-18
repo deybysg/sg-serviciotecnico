@@ -37,21 +37,21 @@ import "./Productos.css";
 
 const DEFAULT_CATEGORIES = [
   "todos",
-  "celulares",
-  "computadoras",
-  "audio",
-  "accesorios",
-  "componentes",
-  "perifericos",
-  "auriculares",
-  "parlantes",
-  "cargadores",
-  "hogar",
-  "camaras",
-  "linternas",
-  "cables usb",
-  "mouse",
   "accesorio para auto",
+  "accesorios",
+  "audio",
+  "auriculares",
+  "cables usb",
+  "camaras",
+  "cargadores",
+  "celulares",
+  "componentes",
+  "computadoras",
+  "hogar",
+  "linternas",
+  "mouse",
+  "parlantes",
+  "perifericos",
   "varios",
 ];
 
@@ -187,7 +187,13 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const categories = useMemo(() => {
     const fromProducts = productos.map((p) => normalize(p.categoria)).filter(Boolean);
-    return Array.from(new Set([...(categoriasDisponibles || []), ...fromProducts]));
+    const all = Array.from(new Set([...(categoriasDisponibles || []), ...fromProducts]));
+    // Ordenar alfabéticamente, manteniendo "todos" siempre al principio
+    return all.sort((a, b) => {
+      if (a === "todos") return -1;
+      if (b === "todos") return 1;
+      return a.localeCompare(b, "es");
+    });
   }, [categoriasDisponibles, productos]);
 
   const countByCategory = useMemo(() => {

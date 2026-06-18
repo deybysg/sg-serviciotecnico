@@ -1,23 +1,23 @@
 import { body } from "express-validator";
 
 const CATEGORIAS_VALIDAS = [
-    "celulares",
-    "computadoras",
-    "audio",
-    "accesorios",
-    "componentes",
-    "perifericos",
-    "auriculares",
-    "parlantes",
-    "cargadores",
-    "hogar",
-    "camaras",
-    "linternas",
-    "cables usb",
-    "mouse",
     "accesorio para auto",
-    "varios",
-    "otros"
+    "accesorios",
+    "audio",
+    "auriculares",
+    "cables usb",
+    "camaras",
+    "cargadores",
+    "celulares",
+    "componentes",
+    "computadoras",
+    "hogar",
+    "linternas",
+    "mouse",
+    "otros",
+    "parlantes",
+    "perifericos",
+    "varios"
 ];
 
 export const validarProducto = [
