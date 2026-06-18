@@ -163,9 +163,55 @@
   background: #fafbfc;
 }
 
-.footer-actions {
+.comprobante-footer-vendedor {
+  background: #fff8e1;
+  border-top: 2px dashed #ffc107;
+}
+
+.comprobante-actions-screen {
   display: flex;
+  justify-content: center;
   gap: 10px;
+  padding: 16px;
+  background: #f5f8fb;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* --- Línea de corte --- */
+.comprobante-corte {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  background: repeating-linear-gradient(
+    45deg,
+    #fff9f0,
+    #fff9f0 10px,
+    #fff0d9 10px,
+    #fff0d9 20px
+  );
+  border-top: 2px dashed #ffd699;
+  border-bottom: 2px dashed #ffd699;
+}
+
+.corte-linea {
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed #e0a800;
+}
+
+.corte-icono {
+  font-size: 1.4rem;
+  color: #e0a800;
+}
+
+.corte-texto {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b38600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .btn-print, .btn-download, .btn-volver {
@@ -281,10 +327,20 @@
     align-items: stretch; /* Estira los botones para ocupar el ancho */
   }
   
-  .footer-actions {
+  .comprobante-actions-screen {
     width: 100%;
     flex-direction: column; /* Apila los botones de Imprimir/Descargar */
     gap: 8px;
+    padding: 12px;
+  }
+
+  .comprobante-corte {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .corte-texto {
+    font-size: 0.7rem;
   }
 
   .btn-print, .btn-download, .btn-volver {
@@ -336,17 +392,42 @@
 @media print {
   body * { visibility: hidden; }
   .comprobante-card, .comprobante-card * { visibility: visible; }
+  .comprobante-page {
+    padding: 0;
+    background: #fff;
+  }
   .comprobante-card {
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: static;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
     box-shadow: none;
     border: none;
+    border-radius: 0;
+    overflow: visible;
   }
-  .compras-close-btn,
+  .comprobante-bloque {
+    page-break-inside: avoid;
+  }
+  .comprobante-corte {
+    visibility: visible;
+    background: #fff9f0;
+    border-top: 2px dashed #e0a800;
+    border-bottom: 2px dashed #e0a800;
+    padding: 10px 24px;
+    margin: 8px 0;
+  }
+  .corte-linea {
+    border-top: 2px dashed #e0a800;
+  }
+  .corte-icono,
+  .corte-texto {
+    color: #b38600;
+  }
+  .comprobante-actions-screen,
   .btn-print,
-  .btn-download {
+  .btn-download,
+  .btn-volver {
     display: none !important;
   }
 }

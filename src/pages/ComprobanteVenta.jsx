@@ -99,86 +99,114 @@ function ComprobanteVenta() {
     navigate('/miscomprasmodal');
   };
 
+  const renderComprobante = (tipo = 'cliente') => (
+    <div className={`comprobante-bloque comprobante-${tipo}`}>
+      <header className="comprobante-header">
+        <div className="comprobante-brand">
+          <div className="logo-placeholder">SG</div>
+          <div>
+            <h2 className="brand-name">Sistema SG</h2>
+            <div className="brand-sub">
+              {tipo === 'cliente' ? 'Comprobante de Venta — Original' : 'Comprobante de Venta — Copia Vendedor'}
+            </div>
+          </div>
+        </div>
+        <div className="comprobante-meta">
+          <div><strong>Venta:</strong> <span className="meta-value">{venta._id || venta.id}</span></div>
+          <div><strong>Fecha:</strong> <span className="meta-value">{formatFecha(venta.fechaCompra)}</span></div>
+          <div><strong>Estado:</strong> <span className={`badge estado-${(venta.estado||'').toLowerCase().replace(/\s+/g,'-')}`}>{venta.estado || '—'}</span></div>
+        </div>
+      </header>
+
+      <section className="comprobante-body">
+        <div className="cliente-info">
+          <h3>Datos del cliente</h3>
+          <p><strong>Usuario:</strong> {venta.username}</p>
+          {venta.nombreCliente && <p><strong>Nombre:</strong> {venta.nombreCliente}</p>}
+          {venta.direccion && <p><strong>Dirección:</strong> {venta.direccion}</p>}
+          <p><strong>Método de pago: </strong>  {venta.metodoPago || '—'}</p>
+        </div>
+
+        <div className="productos-table-wrap">
+          <table className="productos-table">
+            <thead>
+              <tr>
+                <th>Producto / Servicio</th>
+                <th>Cant.</th>
+                <th>Precio unit.</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(venta.productosComprados || []).map((p, i) => (
+                <tr key={i}>
+                  <td className="td-nombre">{p.nombre}</td>
+                  <td>{p.cantidad || 0}</td>
+                  <td>{formatCurrency(p.precioUnitario || 0)}</td>
+                  <td>{formatCurrency((p.subtotal != null) ? p.subtotal : ((p.precioUnitario || 0) * (p.cantidad || 0)))}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="3" className="td-total-label">Total</td>
+                <td className="td-total-value">{formatCurrency(venta.totalVenta != null ? venta.totalVenta : totalCalc(venta.productosComprados))}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {venta.notas && <div className="comprobante-notes"><strong>Notas:</strong> <div>{venta.notas}</div></div>}
+      </section>
+
+      {tipo === 'cliente' ? (
+        <footer className="comprobante-footer">
+          <div className="footer-left">Gracias por tu compra.</div>
+        </footer>
+      ) : (
+        <footer className="comprobante-footer comprobante-footer-vendedor">
+          <div className="footer-left">Control interno — No válido como factura.</div>
+        </footer>
+      )}
+    </div>
+  );
+
   return (
     <div className="comprobante-page">
       <div className="comprobante-card">
-        <header className="comprobante-header">
-          <div className="comprobante-brand">
-            <div className="logo-placeholder">SG</div>
-            <div>
-              <h2 className="brand-name">Sistema SG</h2>
-              <div className="brand-sub">Comprobante de Venta</div>
-            </div>
-          </div>
-          <div className="comprobante-meta">
-            <div><strong>Venta:</strong> <span className="meta-value">{venta._id || venta.id}</span></div>
-            <div><strong>Fecha:</strong> <span className="meta-value">{formatFecha(venta.fechaCompra)}</span></div>
-            <div><strong>Estado:</strong> <span className={`badge estado-${(venta.estado||'').toLowerCase().replace(/\s+/g,'-')}`}>{venta.estado || '—'}</span></div>
-          </div>
-        </header>
+        {/* ORIGINAL PARA EL CLIENTE */}
+        {renderComprobante('cliente')}
 
-        <section className="comprobante-body">
-          <div className="cliente-info">
-            <h3>Datos del cliente</h3>
-            <p><strong>Usuario:</strong> {venta.username}</p>
-            {venta.nombreCliente && <p><strong>Nombre:</strong> {venta.nombreCliente}</p>}
-            {venta.direccion && <p><strong>Dirección:</strong> {venta.direccion}</p>}
-            <p><strong>Método de pago: </strong>  {venta.metodoPago || '—'}</p>
-          </div>
+        {/* LÍNEA DE CORTE */}
+        <div className="comprobante-corte">
+          <div className="corte-linea"></div>
+          <div className="corte-icono">✂</div>
+          <div className="corte-texto">Recortar aquí</div>
+          <div className="corte-linea"></div>
+        </div>
 
-          <div className="productos-table-wrap">
-            <table className="productos-table">
-              <thead>
-                <tr>
-                  <th>Producto / Servicio</th>
-                  <th>Cant.</th>
-                  <th>Precio unit.</th>
-                  <th>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(venta.productosComprados || []).map((p, i) => (
-                  <tr key={i}>
-                    <td className="td-nombre">{p.nombre}</td>
-                    <td>{p.cantidad || 0}</td>
-                    <td>{formatCurrency(p.precioUnitario || 0)}</td>
-                    <td>{formatCurrency((p.subtotal != null) ? p.subtotal : ((p.precioUnitario || 0) * (p.cantidad || 0)))}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="3" className="td-total-label">Total</td>
-                  <td className="td-total-value">{formatCurrency(venta.totalVenta != null ? venta.totalVenta : totalCalc(venta.productosComprados))}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+        {/* COPIA PARA EL VENDEDOR */}
+        {renderComprobante('vendedor')}
 
-          {venta.notas && <div className="comprobante-notes"><strong>Notas:</strong> <div>{venta.notas}</div></div>}
-        </section>
-
-        <footer className="comprobante-footer">
-          <div className="footer-left">Gracias por tu compra.</div>
-          <div className="footer-actions">
-            <button className="btn-volver" onClick={handleVolver}>← Volver</button>
-            <button className="btn-print" onClick={() => window.print()}>Imprimir</button>
-            <button 
-              className="btn-download" 
-              onClick={handleDescargarPDF}
-              disabled={downloadingPDF}
-            >
-              {downloadingPDF ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Descargando...
-                </>
-              ) : (
-                'Descargar PDF'
-              )}
-            </button>
-          </div>
-        </footer>
+        {/* BOTONES DE ACCIÓN (solo visibles en pantalla, no en impresión) */}
+        <div className="comprobante-actions-screen">
+          <button className="btn-volver" onClick={handleVolver}>← Volver</button>
+          <button className="btn-print" onClick={() => window.print()}>Imprimir</button>
+          <button 
+            className="btn-download" 
+            onClick={handleDescargarPDF}
+            disabled={downloadingPDF}
+          >
+            {downloadingPDF ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2"></span>
+                Descargando...
+              </>
+            ) : (
+              'Descargar PDF'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
