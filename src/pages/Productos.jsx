@@ -9,9 +9,7 @@ import {
   FaFilter,
   FaHeadphonesAlt,
   FaHeart,
-  FaLaptop,
   FaList,
-  FaMicrochip,
   FaMouse,
   FaSearch,
   FaShoppingCart,
@@ -27,7 +25,6 @@ import {
   FaUsb,
   FaCar,
   FaEllipsisH,
-  FaToolbox,
 } from "react-icons/fa";
 import { BsPhone } from "react-icons/bs";
 import { api } from "../services/api";
@@ -38,15 +35,11 @@ import "./Productos.css";
 const DEFAULT_CATEGORIES = [
   "todos",
   "accesorio para auto",
-  "accesorios",
-  "audio",
   "auriculares",
   "cables usb",
   "camaras",
   "cargadores",
   "celulares",
-  "componentes",
-  "computadoras",
   "hogar",
   "linternas",
   "mouse",
@@ -58,10 +51,6 @@ const DEFAULT_CATEGORIES = [
 const categoryMeta = {
   todos: { label: "Todos los productos", icon: <FaThLarge /> },
   celulares: { label: "Celulares", icon: <BsPhone /> },
-  computadoras: { label: "Computadoras", icon: <FaLaptop /> },
-  audio: { label: "Audio", icon: <FaHeadphonesAlt /> },
-  accesorios: { label: "Accesorios", icon: <FaToolbox /> },
-  componentes: { label: "Componentes", icon: <FaMicrochip /> },
   perifericos: { label: "Periféricos", icon: <FaMouse /> },
   auriculares: { label: "Auriculares", icon: <FaHeadphonesAlt /> },
   parlantes: { label: "Parlantes", icon: <FaVolumeUp /> },
@@ -77,13 +66,13 @@ const categoryMeta = {
 
 const fallbackProducts = [
   { id: "demo-iphone", nombre: "iPhone 15 Pro Max", categoria: "celulares", descripcion: "256GB - Titanio Negro", precio: 1199.99, stock: 8, imagen: "/img/fondo3.png" },
-  { id: "demo-rog", nombre: "ASUS ROG Zephyrus G14", categoria: "computadoras", descripcion: "Ryzen 9 7940HS - 16GB RAM", precio: 1299.99, stock: 5, imagen: "/img/fondo2.png" },
-  { id: "demo-airpods", nombre: "AirPods Pro 2", categoria: "audio", descripcion: "2da generación", precio: 249.99, stock: 12, imagen: "/img/image.png" },
-  { id: "demo-keyboard", nombre: "Teclado Mecánico RGB", categoria: "accesorios", descripcion: "Switch blue", precio: 79.99, stock: 10, imagen: "/img/fondo1.jpg" },
   { id: "demo-samsung", nombre: "Samsung Galaxy S24", categoria: "celulares", descripcion: "128GB - Negro", precio: 809.99, stock: 7, imagen: "/img/fondo3.png" },
-  { id: "demo-macbook", nombre: "MacBook Air M2", categoria: "computadoras", descripcion: "13.6 - 8GB RAM - 256GB", precio: 1099.99, stock: 3, imagen: "/img/fondo2.png" },
-  { id: "demo-sony", nombre: "Sony WH-1000XM5", categoria: "audio", descripcion: "Cancelación de ruido", precio: 349.99, stock: 6, imagen: "/img/image.png" },
   { id: "demo-mouse", nombre: "Mouse Gamer Logitech G502", categoria: "perifericos", descripcion: "Hero - 16K DPI", precio: 59.99, stock: 14, imagen: "/img/fondo4.png" },
+  { id: "demo-cargador", nombre: "Cargador Rápido 65W", categoria: "cargadores", descripcion: "USB-C Power Delivery", precio: 29.99, stock: 20, imagen: "/img/fondo1.jpg" },
+  { id: "demo-camara", nombre: "Cámara de Seguridad WiFi", categoria: "camaras", descripcion: "1080p - Visión nocturna", precio: 89.99, stock: 15, imagen: "/img/image.png" },
+  { id: "demo-auricular", nombre: "Auriculares Bluetooth Pro", categoria: "auriculares", descripcion: "Cancelación de ruido activa", precio: 149.99, stock: 10, imagen: "/img/fondo2.png" },
+  { id: "demo-parlante", nombre: "Parlante Portátil 20W", categoria: "parlantes", descripcion: "Bluetooth 5.0 - Waterproof", precio: 49.99, stock: 18, imagen: "/img/sonidos.png" },
+  { id: "demo-linterna", nombre: "Linterna Táctica LED", categoria: "linternas", descripcion: "1000 lúmenes - Recargable", precio: 34.99, stock: 25, imagen: "/img/fondo4.png" },
 ];
 
 const normalize = (value) => String(value || "").trim().toLowerCase();
@@ -107,13 +96,6 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const slides = [
     {
-      imagen: "/img/fondo2.png",
-      titulo: "Laptops Gaming",
-      subtitulo: "Rendimiento extremo para gamers y creadores.",
-      cta: "Ver colección",
-      categoria: "computadoras",
-    },
-    {
       imagen: "/img/fondo3.png",
       titulo: "Smartphones 2024",
       subtitulo: "La última tecnología en la palma de tu mano.",
@@ -121,18 +103,25 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
       categoria: "celulares",
     },
     {
+      imagen: "/img/fondo2.png",
+      titulo: "Auriculares Premium",
+      subtitulo: "Calidad de sonido profesional para todos.",
+      cta: "Ver colección",
+      categoria: "auriculares",
+    },
+    {
       imagen: "/img/pc.png",
       titulo: "Setup Perfecto",
-      subtitulo: "Accesorios y periféricos para tu estación de trabajo.",
+      subtitulo: "Periféricos y accesorios para tu estación de trabajo.",
       cta: "Descubrir",
-      categoria: "accesorios",
+      categoria: "perifericos",
     },
     {
       imagen: "/img/sonidos.png",
-      titulo: "Musica y Sonido",
+      titulo: "Música y Sonido",
       subtitulo: "Sumergite en el sonido con cancelación de ruido.",
       cta: "Escuchar",
-      categoria: "audio",
+      categoria: "parlantes",
     },
   ];
 

@@ -46,24 +46,6 @@ const heroSlides = [
 
 const fallbackProducts = [
   {
-    id: "home-airpods",
-    nombre: "Auriculares Pro",
-    categoria: "Audio",
-    precio: 249.99,
-    stock: 8,
-    imagen: "/img/image.png",
-    descripcion: "Audio inalámbrico con estuche de carga.",
-  },
-  {
-    id: "home-laptop",
-    nombre: "Notebook Gamer",
-    categoria: "Computadoras",
-    precio: 1299.99,
-    stock: 5,
-    imagen: "/img/fondo2.png",
-    descripcion: "Notebook de alto rendimiento para trabajo y juegos.",
-  },
-  {
     id: "home-phone",
     nombre: "Smartphone Pro Max",
     categoria: "Celulares",
@@ -73,13 +55,31 @@ const fallbackProducts = [
     descripcion: "Celular premium con pantalla de alta definición.",
   },
   {
-    id: "home-keyboard",
-    nombre: "Teclado Mecánico RGB",
-    categoria: "Accesorios",
-    precio: 79.99,
-    stock: 12,
+    id: "home-auriculares",
+    nombre: "Auriculares Pro",
+    categoria: "Auriculares",
+    precio: 249.99,
+    stock: 8,
+    imagen: "/img/image.png",
+    descripcion: "Audio inalámbrico con estuche de carga.",
+  },
+  {
+    id: "home-cargador",
+    nombre: "Cargador Rápido 65W",
+    categoria: "Cargadores",
+    precio: 29.99,
+    stock: 20,
     imagen: "/img/fondo1.jpg",
-    descripcion: "Teclado mecánico con iluminación RGB.",
+    descripcion: "Carga rápida USB-C para todos tus dispositivos.",
+  },
+  {
+    id: "home-camara",
+    nombre: "Cámara de Seguridad WiFi",
+    categoria: "Camaras",
+    precio: 89.99,
+    stock: 15,
+    imagen: "/img/fondo2.png",
+    descripcion: "1080p con visión nocturna y detección de movimiento.",
   },
 ];
 
@@ -99,14 +99,10 @@ const benefits = [
 
 const CATEGORIAS_BASE = [
   "celulares",
-  "computadoras",
-  "audio",
-  "accesorios",
   "auriculares",
   "parlantes",
   "cargadores",
   "camaras",
-  "componentes",
   "hogar",
   "linternas",
   "mouse",

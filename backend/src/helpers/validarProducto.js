@@ -2,15 +2,11 @@ import { body } from "express-validator";
 
 const CATEGORIAS_VALIDAS = [
     "accesorio para auto",
-    "accesorios",
-    "audio",
     "auriculares",
     "cables usb",
     "camaras",
     "cargadores",
     "celulares",
-    "componentes",
-    "computadoras",
     "hogar",
     "linternas",
     "mouse",

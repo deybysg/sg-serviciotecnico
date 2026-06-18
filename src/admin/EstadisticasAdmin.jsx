@@ -26,8 +26,8 @@ const KNOWN_SERVICE_TYPES = ['celulares', 'computadora', 'parlantes', 'otros'];
 
 const CATEGORY_COLORS = {
     'celulares': '#e74c3c',
-    'computadoras': '#3498db',
-    'accesorios': '#f39c12'
+    'auriculares': '#3498db',
+    'cargadores': '#f39c12'
 };
 
 const getCategoryColor = (cat) => CATEGORY_COLORS[cat.toLowerCase()] || '#3498db';
@@ -308,7 +308,7 @@ const analyzeSalesData = (sales, filterYear, filterMonth) => {
             }
             
             // Distribución por categoría
-            const categoria = producto.categoria || 'accesorios';
+            const categoria = producto.categoria || 'celulares';
             categoryDistributionMap[categoria] = (categoryDistributionMap[categoria] || 0) + cantidad;
         });
     });
