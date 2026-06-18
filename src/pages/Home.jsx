@@ -136,14 +136,38 @@ function Home() {
   const [categoriaIndex, setCategoriaIndex] = useState(0);
 
   const activeHero = heroSlides[heroIndex];
-  const categoriaActiva = CATEGORIAS_ROTATIVAS[categoriaIndex];
 
+  // Mezclar productos rotando el orden de las categorías cada hora
   const featuredProducts = useMemo(() => {
-    const filtrados = products.filter(
-      (p) => String(p.categoria).toLowerCase() === categoriaActiva
-    );
-    return filtrados.length > 0 ? filtrados : products.slice(0, 8);
-  }, [products, categoriaActiva]);
+    if (products.length === 0) return [];
+
+    // Agrupar productos por categoría
+    const byCategory = {};
+    products.forEach((p) => {
+      const cat = String(p.categoria || "varios").toLowerCase();
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(p);
+    });
+
+    // Orden de categorías para esta hora (determinístico basado en categoriaIndex)
+    const order = CATEGORIAS_ROTATIVAS.slice(categoriaIndex)
+      .concat(CATEGORIAS_ROTATIVAS.slice(0, categoriaIndex));
+
+    // Concatenar productos en ese orden de categorías
+    const mezclados = [];
+    order.forEach((cat) => {
+      if (byCategory[cat]) {
+        mezclados.push(...byCategory[cat]);
+      }
+    });
+
+    // Si quedan productos de categorías no listadas, agregarlos al final
+    products.forEach((p) => {
+      if (!mezclados.includes(p)) mezclados.push(p);
+    });
+
+    return mezclados;
+  }, [products, categoriaIndex]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -295,12 +319,7 @@ function Home() {
         <div className="section-heading">
           <div>
             <span className="section-kicker">Lo mejor en tecnología</span>
-            <h2 id="productos-destacados">
-              {featuredProducts.length > 0 && featuredProducts !== products.slice(0, 8)
-                ? <>{categoriaActiva.charAt(0).toUpperCase() + categoriaActiva.slice(1)} <span>destacados</span></>
-                : <>Productos <span>destacados</span></>
-              }
-            </h2>
+            <h2 id="productos-destacados">Productos <span>destacados</span></h2>
           </div>
           <Link className="neon-btn neon-btn-outline" to="/productos">
             Ver todos <FaArrowRight />
