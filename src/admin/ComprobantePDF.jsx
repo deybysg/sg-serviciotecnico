@@ -188,7 +188,7 @@ const S = {
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '8.5pt',
         color: '#222',
-        padding: '3mm',
+        padding: '3mm 3mm 20mm 3mm',
         backgroundColor: '#fff',
         margin: '0 auto',
         boxSizing: 'border-box',
@@ -197,12 +197,12 @@ const S = {
     },
 
     // Cliente
-    cliente: {
-        border: '1px solid #999',
-        padding: '5mm',
-        backgroundColor: '#fff',
-        minHeight: '195mm',
-    },
+  cliente: {
+    border: '1px solid #999',
+    padding: '5mm',
+    backgroundColor: '#fff',
+    maxHeight: '260mm',
+},
     header: {
         display: 'flex',
         justifyContent: 'space-between',
