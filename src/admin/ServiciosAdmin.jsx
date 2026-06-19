@@ -25,7 +25,7 @@ import {
   METODO_PAGO_OPTIONS,
 } from "../constants";
 
-const URL_BASE_PUBLICA = import.meta.env.VITE_FRONTEND_URL || 'https://sg-serviciotecnico.onrender.com';
+const URL_BASE_PUBLICA = 'https://sg-serviciotecnico.vercel.app';
 
 // Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
 function normalizeServicio(s) {

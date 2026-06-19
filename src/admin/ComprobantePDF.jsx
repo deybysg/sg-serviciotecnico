@@ -30,7 +30,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
     const servicioNumero = service.servicioNumero || 'N/A';
-    const urlSeguimiento = `${import.meta.env.VITE_FRONTEND_URL || 'https://sg-serviciotecnico.onrender.com'}/seguimiento/${servicioNumero}`;
+    const urlSeguimiento = `https://sg-serviciotecnico.vercel.app/seguimiento/${servicioNumero}`;
 
     return (
         <div style={S.wrap}>
