@@ -6,6 +6,12 @@ import Swal from "sweetalert2";
 import { FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiTool, FiEdit3, FiTrash2, FiEye, FiSearch, FiPlus, FiUsers, FiGrid, FiList } from "react-icons/fi";
 import { getEstadoLabel } from "../constants";
 
+// Capitaliza la primera letra de cada palabra
+function capitalizeWords(str) {
+    if (!str) return str;
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 // ------------------------------------------------------------------
 // NUEVO COMPONENTE MODAL DE SERVICIOS
 // Se trasladados aquí desde el código que proporcionaste como referencia.
@@ -343,7 +349,14 @@ function Clientes() {
             
             if (editId) {
                 // PUT /clientes/:id (requiere auth)
-                result = await api.put(`/clientes/${editId}`, formData);
+                result = await api.put(`/clientes/${editId}`, {
+                    nombreCompleto: capitalizeWords(formData.nombreCompleto),
+                    celular: formData.celular,
+                    correo: formData.correo,
+                    direccion: capitalizeWords(formData.direccion),
+                    dni: formData.dni,
+                    serviciosRealizados: formData.serviciosRealizados || []
+                });
                 successMessage = "Cliente editado correctamente. ";
                 
                 // Actualizar en la lista local con el resultado del servidor (normalizado)
@@ -356,7 +369,11 @@ function Clientes() {
             } else {
                 // POST /clientes (requiere auth)
                 result = await api.post('/clientes', {
-                    ...formData, 
+                    nombreCompleto: capitalizeWords(formData.nombreCompleto),
+                    celular: formData.celular,
+                    correo: formData.correo,
+                    direccion: capitalizeWords(formData.direccion),
+                    dni: formData.dni,
                     serviciosRealizados: []
                 });
                 

@@ -14,7 +14,7 @@ import {
   FiTool, FiSmartphone, FiTag, FiList, FiFileText, FiDollarSign,
   FiCreditCard, FiActivity, FiPlus, FiSave, FiX, FiSearch,
   FiEye, FiFile, FiTrash2, FiClipboard, FiClock, FiCheckCircle,
-  FiAlertTriangle, FiTruck, FiSettings, FiCalendar, FiUserPlus
+  FiAlertTriangle, FiTruck, FiSettings, FiCalendar, FiUserPlus, FiPrinter
 } from "react-icons/fi";
 import {
   TIPO_SERVICIO_OPTIONS,
@@ -27,6 +27,12 @@ import {
 
 const URL_BASE_PUBLICA = 'https://sg-serviciotecnico.vercel.app';
 
+// Capitaliza la primera letra de cada palabra
+function capitalizeWords(str) {
+    if (!str) return str;
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 // Normaliza propiedades snake_case a camelCase para compatibilidad entre MongoDB y PostgreSQL
 function normalizeServicio(s) {
     if (!s) return s;
@@ -34,7 +40,7 @@ function normalizeServicio(s) {
     let clienteId;
     if (s.cliente_id != null) {
         clienteId = String(s.cliente_id);
-    } else if (s.clienteId != null) {
+    } else if (s.clienteId != null)  {
         clienteId = String(s.clienteId);
     } else if (s.cliente && typeof s.cliente === 'object') {
         clienteId = String(s.cliente.id || s.cliente._id);
@@ -125,8 +131,12 @@ function ServiciosAdmin() {
     const [editId, setEditId] = useState(null);
     const [editData, setEditData] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [filterMonth, setFilterMonth] = useState("");
+    const [filterDay, setFilterDay] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [modalService, setModalService] = useState(null);
+    const [viewModalOpen, setViewModalOpen] = useState(false);
+    const [viewService, setViewService] = useState(null);
     const [serviceToPrint, setServiceToPrint] = useState(null);
     const [isPrinting, setIsPrinting] = useState(false);
 
@@ -334,10 +344,10 @@ function ServiciosAdmin() {
                 } else {
                     try {
                         const nuevoCliente = await api.post('/clientes', {
-                            nombreCompleto: clientData.nombreCompleto,
+                            nombreCompleto: capitalizeWords(clientData.nombreCompleto),
                             celular: clientData.celular,
                             correo: clientData.correo,
-                            direccion: clientData.direccion,
+                            direccion: capitalizeWords(clientData.direccion),
                             dni: clientData.dni,
                         });
                         const nuevoClienteNormalizado = normalizeCliente(nuevoCliente);
@@ -354,10 +364,10 @@ function ServiciosAdmin() {
             } else {
                 try {
                     const nuevoCliente = await api.post('/clientes', {
-                        nombreCompleto: clientData.nombreCompleto,
+                        nombreCompleto: capitalizeWords(clientData.nombreCompleto),
                         celular: clientData.celular,
                         correo: clientData.correo,
-                        direccion: clientData.direccion,
+                        direccion: capitalizeWords(clientData.direccion),
                         dni: clientData.dni,
                     });
                     const nuevoClienteNormalizado = normalizeCliente(nuevoCliente);
@@ -388,16 +398,16 @@ function ServiciosAdmin() {
             cliente: clienteIdToUse,
             tipoServicio: serviceData.tipoServicio,
             tipoEquipo: serviceData.tipoEquipo,
-            marcaProducto: serviceData.marcaProducto,
-            modeloProducto: serviceData.modeloProducto,
-            fallaReportada: serviceData.fallaReportada,
-            asunto: serviceData.asunto,
-            detalles: serviceData.asunto,
-            notasAdicionales: serviceData.notasAdicionales,
+            marcaProducto: capitalizeWords(serviceData.marcaProducto),
+            modeloProducto: capitalizeWords(serviceData.modeloProducto),
+            fallaReportada: capitalizeWords(serviceData.fallaReportada),
+            asunto: capitalizeWords(serviceData.asunto),
+            detalles: capitalizeWords(serviceData.asunto),
+            notasAdicionales: capitalizeWords(serviceData.notasAdicionales),
             anticipo: Number(serviceData.anticipo) || 0,
             metodoPago: serviceData.metodoPago,
             presupuesto: {
-                items: [{ descripcion: serviceData.asunto || serviceData.fallaReportada || 'Servicio', costo: Number(serviceData.totalEstimado) || 0 }],
+                items: [{ descripcion: capitalizeWords(serviceData.asunto || serviceData.fallaReportada || 'Servicio'), costo: Number(serviceData.totalEstimado) || 0 }],
                 subtotal: Number(serviceData.totalEstimado) || 0,
                 iva: 0,
                 total: Number(serviceData.totalEstimado) || 0,
@@ -509,10 +519,31 @@ function ServiciosAdmin() {
 
     const closeModal = () => { setModalOpen(false); setModalService(null); };
 
+    const openViewModal = async (service) => {
+        let serviceToShow = service;
+        const cid = service.clienteId || service.cliente;
+        if (cid) {
+            try {
+                const clienteFull = await api.get(`/clientes/${cid}`);
+                serviceToShow = { ...service, cliente: clienteFull };
+            } catch (err) {
+                const clienteLocal = clientes.find(c => String(c.id) === String(cid));
+                if (clienteLocal) {
+                    serviceToShow = { ...service, cliente: clienteLocal };
+                }
+            }
+        }
+        setViewService(serviceToShow);
+        setViewModalOpen(true);
+    };
+
+    const closeViewModal = () => { setViewModalOpen(false); setViewService(null); };
+
     const handleModalSave = async (id, dataToSave) => {
         try {
             const updated = await api.put(`/servicios/${id}`, dataToSave);
-            setServicios((prev) => prev.map(s => (s._id || s.id) === (updated._id || updated.id) ? updated : s));
+            const updatedNormalized = normalizeServicio(updated);
+            setServicios((prev) => prev.map(s => (s._id || s.id) === (updatedNormalized._id || updatedNormalized.id) ? updatedNormalized : s));
             closeModal();
             Swal.fire({ icon: 'success', title: 'Servicio actualizado', timer: 2000, showConfirmButton: false });
         } catch (err) {
@@ -533,7 +564,29 @@ function ServiciosAdmin() {
         const servicioNumero = s.servicioNumero ? s.servicioNumero.toString() : "";
         const marca = (s.marcaProducto || '').toString().toLowerCase();
         const tipo = (s.tipoServicio || '').toString().toLowerCase();
-        return servicioNumero.includes(query) || marca.includes(query) || tipo.includes(query) || (clienteNombre || '').toString().toLowerCase().includes(query);
+        const matchText = !query || servicioNumero.includes(query) || marca.includes(query) || tipo.includes(query) || (clienteNombre || '').toString().toLowerCase().includes(query);
+
+        let matchMonth = true;
+        let matchDay = true;
+
+        if (s.fechaEntrada) {
+            const fecha = new Date(s.fechaEntrada);
+            if (filterMonth) {
+                const mesServicio = String(fecha.getMonth() + 1).padStart(2, '0');
+                matchMonth = mesServicio === filterMonth;
+            }
+            if (filterDay) {
+                const diaServicio = String(fecha.getDate()).padStart(2, '0');
+                matchDay = diaServicio === filterDay;
+            }
+        } else {
+            if (filterMonth || filterDay) {
+                matchMonth = false;
+                matchDay = false;
+            }
+        }
+
+        return matchText && matchMonth && matchDay;
     });
 
     const serviciosOrdenados = [...serviciosFiltrados].sort((a, b) => {
@@ -869,76 +922,95 @@ function ServiciosAdmin() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+                        <div className="sn-filter-group">
+                            <div className="sn-filter-item">
+                                <FiCalendar size={14} />
+                                <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
+                                    <option value="">Todos los meses</option>
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                            </div>
+                            <div className="sn-filter-item">
+                                <FiCalendar size={14} />
+                                <select value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
+                                    <option value="">Todos los días</option>
+                                    {Array.from({ length: 31 }, (_, i) => (
+                                        <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {(filterMonth || filterDay || searchQuery) && (
+                                <button
+                                    className="sn-filter-clear"
+                                    onClick={() => { setFilterMonth(""); setFilterDay(""); setSearchQuery(""); }}
+                                >
+                                    <FiX size={14} /> Limpiar
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
                 {showListaServicios && (
-                    <div className="sn-servicios-grid">
+                    <div className="sn-servicios-lista">
+                        <div className="sn-lista-header">
+                            <span className="sn-lista-col sn-col-orden"># Orden</span>
+                            <span className="sn-lista-col sn-col-cliente">Cliente</span>
+                            <span className="sn-lista-col sn-col-equipo">Equipo</span>
+                            <span className="sn-lista-col sn-col-tipo">Tipo</span>
+                            <span className="sn-lista-col sn-col-fecha">Fecha Entrada</span>
+                            <span className="sn-lista-col sn-col-estado">Estado</span>
+                            <span className="sn-lista-col sn-col-acciones">Acciones</span>
+                        </div>
                         {serviciosOrdenados.map((s) => {
                             const clienteData = getClienteData(s.clienteId);
                             const clienteNombre = clienteData?.nombreCompleto || "Cliente desconocido";
                             const servicioId = s._id || s.id;
                             const servicioNumero = s.servicioNumero || 'N/A';
-                            const qrUrl = `${URL_BASE_PUBLICA}/seguimiento/${servicioNumero}`;
                             const estadoClass = s.estado || 'pendiente';
                             const iniciales = clienteNombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
                             const fechaEntrada = s.fechaEntrada ? new Date(s.fechaEntrada).toLocaleDateString('es-AR') : 'N/A';
                             const equipo = [s.marcaProducto, s.modeloProducto].filter(Boolean).join(' ') || 'Sin equipo';
+                            const tipoLabel = TIPO_EQUIPO_OPTIONS.find(o => o.value === s.tipoEquipo)?.label || s.tipoServicio || 'N/A';
 
                             return (
-                                <div key={servicioId} className="sn-servicio-card">
-                                    <div className="sn-servicio-card-header">
-                                        <div className="sn-servicio-card-avatar">
-                                            {iniciales}
+                                <div key={servicioId} className="sn-lista-row">
+                                    <span className="sn-lista-col sn-col-orden">
+                                        <span className="sn-lista-orden-num">{servicioNumero}</span>
+                                    </span>
+                                    <span className="sn-lista-col sn-col-cliente">
+                                        <div className="sn-lista-cliente">
+                                            <div className="sn-lista-avatar">{iniciales}</div>
+                                            <span className="sn-lista-nombre">{clienteNombre}</span>
                                         </div>
-                                        <div className="sn-servicio-card-header-info">
-                                            <h4>{clienteNombre}</h4>
-                                            <span className="sn-servicio-card-orden">Orden #{servicioNumero}</span>
-                                        </div>
-                                        <div className={`sn-servicio-card-estado ${estadoClass}`}>
+                                    </span>
+                                    <span className="sn-lista-col sn-col-equipo">{equipo}</span>
+                                    <span className="sn-lista-col sn-col-tipo">{tipoLabel}</span>
+                                    <span className="sn-lista-col sn-col-fecha">{fechaEntrada}</span>
+                                    <span className="sn-lista-col sn-col-estado">
+                                        <span className={`sn-lista-badge ${estadoClass}`}>
                                             {ESTADO_OPTIONS.find(o => o.value === s.estado)?.label || s.estado}
-                                        </div>
-                                    </div>
-
-                                    <div className="sn-servicio-card-body">
-                                        <div className="sn-servicio-data-row">
-                                            <span className="sn-servicio-data-icon"><FiSmartphone size={14} /></span>
-                                            <span className="sn-servicio-data-label">Equipo</span>
-                                            <span className="sn-servicio-data-value">{equipo}</span>
-                                        </div>
-                                        <div className="sn-servicio-data-row">
-                                            <span className="sn-servicio-data-icon"><FiTool size={14} /></span>
-                                            <span className="sn-servicio-data-label">Tipo</span>
-                                            <span className="sn-servicio-data-value">{TIPO_EQUIPO_OPTIONS.find(o => o.value === s.tipoEquipo)?.label || s.tipoServicio || 'N/A'}</span>
-                                        </div>
-                                        <div className="sn-servicio-data-row">
-                                            <span className="sn-servicio-data-icon"><FiTag size={14} /></span>
-                                            <span className="sn-servicio-data-label">Marca</span>
-                                            <span className="sn-servicio-data-value">{s.marcaProducto || 'N/A'}</span>
-                                        </div>
-                                        <div className="sn-servicio-data-row">
-                                            <span className="sn-servicio-data-icon"><FiSettings size={14} /></span>
-                                            <span className="sn-servicio-data-label">Modelo</span>
-                                            <span className="sn-servicio-data-value">{s.modeloProducto || 'N/A'}</span>
-                                        </div>
-                                        <div className="sn-servicio-data-row">
-                                            <span className="sn-servicio-data-icon"><FiCalendar size={14} /></span>
-                                            <span className="sn-servicio-data-label">Entrada</span>
-                                            <span className="sn-servicio-data-value">{fechaEntrada}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="sn-servicio-card-footer">
-                                        <button onClick={() => openModal(s)} className="sn-servicio-card-btn sn-servicio-btn-detail">
-                                            <FiEye size={14} /> Ver
+                                        </span>
+                                    </span>
+                                    <span className="sn-lista-col sn-col-acciones">
+                                        <button onClick={() => openViewModal(s)} className="sn-lista-btn-ver">
+                                            Ver más
                                         </button>
-                                        <button onClick={() => generarComprobante(s)} className="sn-servicio-card-btn sn-servicio-btn-pdf">
-                                            <FiFile size={14} /> PDF
+                                        <button onClick={() => openModal(s)} className="sn-lista-btn-editar">
+                                            Editar
                                         </button>
-                                        <button onClick={() => handleDeleteServicio(servicioId)} className="sn-servicio-card-btn sn-servicio-btn-delete">
-                                            <FiTrash2 size={14} />
-                                        </button>
-                                    </div>
+                                    </span>
                                 </div>
                             );
                         })}
@@ -968,6 +1040,96 @@ function ServiciosAdmin() {
                     onDelete={handleModalDelete}
                     onPrint={generarComprobante}
                 />
+            )}
+
+            {viewModalOpen && viewService && (
+                <div className="sv-backdrop">
+                    <div className="sv-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="sv-header">
+                            <div className="sv-header-left">
+                                <div className="sv-header-icon">
+                                    <FiTool size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="sv-title">Detalle del Servicio</h3>
+                                    <span className="sv-subtitle">
+                                        #{viewService.servicioNumero || 'N/A'}
+                                    </span>
+                                </div>
+                            </div>
+                            <button className="sv-close-btn" onClick={closeViewModal}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+
+                        <div className="sv-body">
+                            <div className="sv-section">
+                                <div className="sv-grid">
+                                    <div className="sv-field">
+                                        <span className="sv-label">Cliente</span>
+                                        <span className="sv-value">{viewService.cliente?.nombreCompleto || viewService.cliente_nombre || 'N/A'}</span>
+                                    </div>
+                                    <div className="sv-field">
+                                        <span className="sv-label">Tipo de Servicio</span>
+                                        <span className="sv-value">{TIPO_SERVICIO_OPTIONS.find(o => o.value === viewService.tipoServicio)?.label || 'N/A'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="sv-grid">
+                                    <div className="sv-field">
+                                        <span className="sv-label">Tipo de Equipo</span>
+                                        <span className="sv-value">{TIPO_EQUIPO_OPTIONS.find(o => o.value === viewService.tipoEquipo)?.label || 'N/A'}</span>
+                                    </div>
+                                    <div className="sv-field">
+                                        <span className="sv-label">Marca</span>
+                                        <span className="sv-value">{viewService.marcaProducto || 'N/A'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="sv-grid">
+                                    <div className="sv-field">
+                                        <span className="sv-label">Modelo</span>
+                                        <span className="sv-value">{viewService.modeloProducto || 'N/A'}</span>
+                                    </div>
+                                    <div className="sv-field">
+                                        <span className="sv-label">Seña / Anticipo</span>
+                                        <span className="sv-value sv-money">${Number(viewService.anticipo || 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="sv-field-full">
+                                    <span className="sv-label">Falla Reportada</span>
+                                    <span className="sv-value">{viewService.fallaReportada || 'N/A'}</span>
+                                </div>
+
+                                <div className="sv-field-full">
+                                    <span className="sv-label">Asunto / Detalle</span>
+                                    <span className="sv-value">{viewService.detalles || viewService.asunto || 'N/A'}</span>
+                                </div>
+
+                                <div className="sv-total-box">
+                                    <span>Total Estimado</span>
+                                    <span className="sv-total-amount">${Number(viewService.presupuesto?.total || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="sv-footer">
+                            <div className="sv-footer-left">
+                                <button onClick={() => { closeViewModal(); handleDeleteServicio(viewService._id || viewService.id); }} className="sv-btn-delete">
+                                    <FiTrash2 size={14} /> Eliminar
+                                </button>
+                                <button onClick={() => { generarComprobante(viewService); }} className="sv-btn-print">
+                                    <FiPrinter size={14} /> Imprimir
+                                </button>
+                            </div>
+                            <div className="sv-footer-right">
+                                <button onClick={closeViewModal} className="sv-btn-close">Cerrar</button>
+                                <button onClick={() => { closeViewModal(); openModal(viewService); }} className="sv-btn-edit">Editar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
