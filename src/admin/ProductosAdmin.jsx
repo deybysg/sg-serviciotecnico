@@ -22,6 +22,12 @@ const CATEGORIAS_VALIDAS = [
 ];
 const UMBRAL_STOCK_BAJO = 5; // Constante para el umbral de stock bajo o crítico
 
+// Función para capitalizar la primera letra de cada palabra
+function capitalizeWords(str) {
+    if (!str || typeof str !== 'string') return str;
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 // =================================================================
 // 2. COMPONENTE INTERNO: AlertaStockModal (Muestra la lista de detalles)
 // El modal que se abre al tocar el icono ☰
@@ -244,6 +250,10 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         if (!useFileMode && finalData.imagen.trim() === "") {
             finalData.imagen = "https://placehold.co/400x300/e9ecef/868e96?text=Sin+Imagen";
         }
+
+        // Capitalizar campos de texto
+        finalData.nombre = capitalizeWords(finalData.nombre);
+        finalData.descripcion = capitalizeWords(finalData.descripcion);
 
         onGuardar(finalData);
     };    return (
@@ -708,7 +718,7 @@ function ProductosAdmin() {
                                         {/* Categoría */}
                                         <div className="col-cat">
                                             <span className="admin-producto-fila-cat">
-                                                {producto.categoria.charAt(0).toUpperCase() + producto.categoria.slice(1)}
+                                                {capitalizeWords(producto.categoria)}
                                             </span>
                                         </div>
 

@@ -990,6 +990,48 @@
   text-shadow: 0 0 14px rgba(35, 221, 95, 0.5);
 }
 
+.sv-resumen-pago {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+  border: 1px solid rgba(191, 50, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(191, 50, 255, 0.04);
+}
+
+.sv-pago-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.sv-pago-row .sv-money {
+  color: var(--neon-amber);
+  font-weight: 700;
+}
+
+.sv-pago-divider {
+  height: 1px;
+  background: rgba(191, 50, 255, 0.2);
+  margin: 4px 0;
+}
+
+.sv-pago-total {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.sv-pago-total span:last-child {
+  color: var(--neon-green);
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px rgba(35, 221, 95, 0.4);
+}
+
 .sv-footer {
   display: flex;
   justify-content: space-between;

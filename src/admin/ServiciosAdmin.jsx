@@ -1107,9 +1107,20 @@ function ServiciosAdmin() {
                                     <span className="sv-value">{viewService.detalles || viewService.asunto || 'N/A'}</span>
                                 </div>
 
-                                <div className="sv-total-box">
-                                    <span>Total Estimado</span>
-                                    <span className="sv-total-amount">${Number(viewService.presupuesto?.total || 0).toFixed(2)}</span>
+                                <div className="sv-resumen-pago">
+                                    <div className="sv-pago-row">
+                                        <span>Subtotal</span>
+                                        <span>${Number(viewService.presupuesto?.subtotal || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div className="sv-pago-row">
+                                        <span>Seña / Anticipo</span>
+                                        <span className="sv-money">-${Number(viewService.anticipo || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div className="sv-pago-divider"></div>
+                                    <div className="sv-pago-row sv-pago-total">
+                                        <span>Total</span>
+                                        <span>${(Number(viewService.presupuesto?.subtotal || 0) - Number(viewService.anticipo || 0)).toFixed(2)}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
