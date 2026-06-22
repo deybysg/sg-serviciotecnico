@@ -151,7 +151,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     {/* Equipo */}
                     <div style={S.ticketField}>
                         <div style={S.ticketLabel2}>EQUIPO</div>
-                        <div style={S.ticketValue2}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''}</div>
+                        <div style={S.ticketValue2}>{service.tipoEquipo || service.tipo_equipo || '—'} {service.marcaProducto || service.marca_producto || ''} {service.modeloProducto || service.modelo_producto || ''}</div>
                     </div>
 
                     {/* Falla */}

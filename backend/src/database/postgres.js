@@ -107,6 +107,25 @@ export async function initPostgres() {
       );
     `);
 
+    // Migración: agregar columnas que puedan faltar en tablas existentes
+    const columnasServicios = [
+      { name: 'motivo_notificacion', definition: 'TEXT DEFAULT NULL' },
+      { name: 'estado_anterior', definition: 'VARCHAR(50) DEFAULT NULL' },
+      { name: 'detalle_cliente', definition: 'TEXT DEFAULT NULL' },
+    ];
+    for (const col of columnasServicios) {
+      const check = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'servicios' AND column_name = $1
+        ) AS exists
+      `, [col.name]);
+      if (!check.rows[0].exists) {
+        await client.query(`ALTER TABLE servicios ADD COLUMN ${col.name} ${col.definition}`);
+        console.log(`Columna ${col.name} agregada a servicios`);
+      }
+    }
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS ventas (
         id SERIAL PRIMARY KEY,

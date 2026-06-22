@@ -293,6 +293,42 @@
   font-size: 1rem;
 }
 
+.btn-scroll-down {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.2);
+  color: var(--ns-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: bounceDown 2s infinite;
+}
+
+.btn-scroll-down:hover {
+  border-color: var(--ns-cyan);
+  color: var(--ns-cyan);
+  background: rgba(0,212,255,0.08);
+  box-shadow: 0 0 20px rgba(0,212,255,0.15);
+  transform: translateY(-3px);
+}
+
+.scroll-down-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
 /* Guarantee float */
 .guarantee-float {
   position: absolute;

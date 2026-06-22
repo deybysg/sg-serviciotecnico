@@ -196,9 +196,6 @@ function NuestrosServicios() {
             <span className="hero-sub-accent">Calidad, garantía y confianza.</span>
           </p>
           <div className="servicios-hero-actions">
-            <Link className="btn-primary" to="/nuestros-servicios">
-              VER SERVICIOS <FaArrowRight />
-            </Link>
             <a
               className="btn-secondary"
               href="https://wa.me/543816491380"
@@ -207,6 +204,22 @@ function NuestrosServicios() {
             >
               <FaWhatsapp /> CONTÁCTANOS
             </a>
+          </div>
+          <div className="scroll-down-center">
+            <button
+              className="btn-scroll-down"
+              onClick={() => {
+                const section = document.querySelector('.servicios-grid-section');
+                if (section) {
+                  const rect = section.getBoundingClientRect();
+                  const scrollY = window.scrollY || window.pageYOffset;
+                  window.scrollTo({ top: scrollY + rect.top - 120, behavior: 'smooth' });
+                }
+              }}
+              aria-label="Ver más servicios"
+            >
+              <FaArrowDown />
+            </button>
           </div>
         </div>
 
