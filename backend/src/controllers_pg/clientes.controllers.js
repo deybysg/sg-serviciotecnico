@@ -3,8 +3,42 @@ import { getPool } from '../database/postgres.js';
 export const obtenerClientes = async (req, res) => {
   try {
     const pool = getPool();
-    const { rows } = await pool.query('SELECT * FROM clientes ORDER BY id');
-    res.json(rows);
+    const { rows: clientes } = await pool.query('SELECT * FROM clientes ORDER BY id');
+
+    // Enriquecer cada cliente con los servicios asociados por cliente_id
+    const idsClientes = clientes.map(c => c.id);
+    let serviciosMap = {};
+    if (idsClientes.length > 0) {
+      const { rows: servicios } = await pool.query(
+        `SELECT * FROM servicios WHERE cliente_id = ANY($1) ORDER BY fecha_entrada DESC`,
+        [idsClientes]
+      );
+      servicios.forEach(s => {
+        if (!serviciosMap[s.cliente_id]) serviciosMap[s.cliente_id] = [];
+        serviciosMap[s.cliente_id].push(s);
+      });
+    }
+
+    const clientesEnriquecidos = clientes.map(c => {
+      const serviciosBD = serviciosMap[c.id] || [];
+      // Merge: servicios de la BD + servicios guardados en servicios_realizados (sin duplicados)
+      let serviciosRealizados = [...serviciosBD];
+      const idsExistentes = new Set(serviciosBD.map(s => String(s.id)));
+      const guardados = c.servicios_realizados || [];
+      guardados.forEach(s => {
+        const sid = String(s.id);
+        if (!idsExistentes.has(sid)) {
+          serviciosRealizados.push(s);
+        }
+      });
+
+      return {
+        ...c,
+        servicios_realizados: serviciosRealizados
+      };
+    });
+
+    res.json(clientesEnriquecidos);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: error.message });
@@ -13,11 +47,30 @@ export const obtenerClientes = async (req, res) => {
 
 export const obtenerCliente = async (req, res) => {
   try {
-    const pool = getPool();
     const { id } = req.params;
+    const pool = getPool();
     const { rows } = await pool.query('SELECT * FROM clientes WHERE id = $1', [id]);
     if (rows.length === 0) return res.status(404).json({ mensaje: "Cliente no encontrado" });
-    res.json(rows[0]);
+    const cliente = rows[0];
+
+    // Obtener servicios asociados por cliente_id
+    const { rows: serviciosBD } = await pool.query(
+      'SELECT * FROM servicios WHERE cliente_id = $1 ORDER BY fecha_entrada DESC',
+      [id]
+    );
+
+    // Merge sin duplicados
+    let serviciosRealizados = [...serviciosBD];
+    const idsExistentes = new Set(serviciosBD.map(s => String(s.id)));
+    const guardados = cliente.servicios_realizados || [];
+    guardados.forEach(s => {
+      const sid = String(s.id);
+      if (!idsExistentes.has(sid)) {
+        serviciosRealizados.push(s);
+      }
+    });
+
+    res.json({ ...cliente, servicios_realizados: serviciosRealizados });
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: error.message });

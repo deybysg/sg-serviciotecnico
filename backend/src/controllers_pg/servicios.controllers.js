@@ -118,6 +118,51 @@ export const actualizarServicio = async (req, res) => {
       `UPDATE servicios SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${idx} RETURNING *`,
       values
     );
+
+    // Cuando pasa a "entregado", guardar detalles del servicio en el cliente
+    if (body.estado === 'entregado' && rows.length > 0) {
+      const servicio = rows[0];
+      const clienteId = servicio.cliente_id;
+      if (clienteId) {
+        try {
+          const { rows: clienteRows } = await pool.query('SELECT servicios_realizados FROM clientes WHERE id = $1', [clienteId]);
+          if (clienteRows.length > 0) {
+            let serviciosRealizados = clienteRows[0].servicios_realizados || [];
+            if (typeof serviciosRealizados === 'string') serviciosRealizados = JSON.parse(serviciosRealizados);
+
+            const yaExiste = serviciosRealizados.some(s => String(s.id) === String(servicio.id));
+            if (!yaExiste) {
+              serviciosRealizados.push({
+                id: servicio.id,
+                servicioNumero: servicio.servicio_numero,
+                tipoServicio: servicio.tipo_servicio,
+                marcaProducto: servicio.marca_producto,
+                modeloProducto: servicio.modelo_producto,
+                fallaReportada: servicio.falla_reportada,
+                detalles: servicio.detalles,
+                presupuesto: {
+                  items: servicio.presupuesto_items || [],
+                  subtotal: servicio.presupuesto_subtotal || 0,
+                  iva: servicio.presupuesto_iva || 0,
+                  total: servicio.presupuesto_total || 0
+                },
+                estado: 'entregado',
+                fechaEntrada: servicio.fecha_entrada,
+                fechaSalida: servicio.fecha_salida,
+                entregadoEn: new Date()
+              });
+              await pool.query(
+                'UPDATE clientes SET servicios_realizados = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+                [JSON.stringify(serviciosRealizados), clienteId]
+              );
+            }
+          }
+        } catch (err) {
+          console.error('Error al guardar servicio en cliente:', err);
+        }
+      }
+    }
+
     res.json(rows[0]);
   } catch (error) {
     console.error(error);
@@ -134,6 +179,49 @@ export const marcarEntregado = async (req, res) => {
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ mensaje: "Servicio no encontrado" });
+
+    // Guardar detalles del servicio en el cliente
+    const servicio = rows[0];
+    const clienteId = servicio.cliente_id;
+    if (clienteId) {
+      try {
+        const { rows: clienteRows } = await pool.query('SELECT servicios_realizados FROM clientes WHERE id = $1', [clienteId]);
+        if (clienteRows.length > 0) {
+          let serviciosRealizados = clienteRows[0].servicios_realizados || [];
+          if (typeof serviciosRealizados === 'string') serviciosRealizados = JSON.parse(serviciosRealizados);
+
+          const yaExiste = serviciosRealizados.some(s => String(s.id) === String(servicio.id));
+          if (!yaExiste) {
+            serviciosRealizados.push({
+              id: servicio.id,
+              servicioNumero: servicio.servicio_numero,
+              tipoServicio: servicio.tipo_servicio,
+              marcaProducto: servicio.marca_producto,
+              modeloProducto: servicio.modelo_producto,
+              fallaReportada: servicio.falla_reportada,
+              detalles: servicio.detalles,
+              presupuesto: {
+                items: servicio.presupuesto_items || [],
+                subtotal: servicio.presupuesto_subtotal || 0,
+                iva: servicio.presupuesto_iva || 0,
+                total: servicio.presupuesto_total || 0
+              },
+              estado: 'entregado',
+              fechaEntrada: servicio.fecha_entrada,
+              fechaSalida: servicio.fecha_salida,
+              entregadoEn: new Date()
+            });
+            await pool.query(
+              'UPDATE clientes SET servicios_realizados = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+              [JSON.stringify(serviciosRealizados), clienteId]
+            );
+          }
+        }
+      } catch (err) {
+        console.error('Error al guardar servicio en cliente:', err);
+      }
+    }
+
     res.json(rows[0]);
   } catch (error) {
     console.error(error);

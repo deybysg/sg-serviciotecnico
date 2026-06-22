@@ -56,7 +56,7 @@ function normalizeCliente(c) {
     correo: c.correo || c.email || '',
     direccion: c.direccion || '',
     dni: c.dni || '',
-    serviciosRealizados: c.serviciosRealizados || [],
+    serviciosRealizados: c.servicios_realizados || c.serviciosRealizados || [],
     createdAt: c.created_at || c.createdAt,
     updatedAt: c.updated_at || c.updatedAt,
   };
@@ -1070,7 +1070,7 @@ const PanelTrabajo = () => {
           </div>
         </section>
 
-        {/* VISTA FILTRADA: Grid ordenado cuando hay filtros activos */}
+        {/* VISTA FILTRADA: Respetando el modo seleccionado (lista o cuadros) */}
         {hayFiltrosActivos && (
           <section className="workboard-filtered-results">
             <div className="filtered-results-header">
@@ -1092,6 +1092,71 @@ const PanelTrabajo = () => {
                 <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); setSearchType('todos'); }}>
                   Limpiar filtros
                 </button>
+              </div>
+            ) : vistaModo === 'lista' ? (
+              <div className="lista-moderna-body">
+                {serviciosFiltrados.map((servicio) => {
+                  const sId = servicio._id || servicio.id;
+                  const sNum = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(sId, 6)}`;
+                  const sCliente = getClienteName(servicio.cliente || servicio.clienteId, clientes);
+                  const sEquipo = getEquipoPanel(servicio);
+                  const sFalla = servicio.fallaReportada || 'Sin falla reportada';
+                  const sFecha = formatFechaPanel(servicio.fechaEntrada);
+                  const sDias = servicio.fechaEntrada ? Math.floor((Date.now() - new Date(servicio.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                  const estadoIdx = FLUJO_ESTADOS.indexOf(servicio.estado);
+                  return (
+                    <div key={sId} className={`lista-fila fila-${servicio.estado}`}>
+                      <div className="lista-fila-bar" />
+                      <button className="lista-fila-orden" onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : sId)}>
+                        {sNum}
+                      </button>
+                      <div className="lista-fila-dias">
+                        <FiClock size={11} />
+                        <span>{sDias}d</span>
+                      </div>
+                      <div className="lista-fila-cliente">
+                        <FiUser size={13} />
+                        <span>{sCliente}</span>
+                      </div>
+                      <div className="lista-fila-equipo">
+                        <FiSmartphone size={13} />
+                        <span>{sEquipo}</span>
+                      </div>
+                      <div className="lista-fila-falla">
+                        <FiTool size={12} />
+                        <span>{sFalla}</span>
+                      </div>
+                      <div className="lista-fila-fecha">
+                        <FiCalendar size={12} />
+                        <span>{sFecha}</span>
+                      </div>
+                      <span className={`lista-fila-badge badge-${servicio.estado}`}>
+                        {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
+                      </span>
+                      <div className="lista-fila-actions">
+                        <button
+                          className="stepper-btn stepper-prev"
+                          title="Retroceder"
+                          disabled={estadoIdx <= 0}
+                          onClick={() => handleRetrocederEstado(sId, servicio.estado)}
+                        >
+                          &#9664;
+                        </button>
+                        <button className="lista-fila-ver" onClick={() => handleVerDetalles(servicio)}>
+                          <FiEye size={14} />
+                        </button>
+                        <button
+                          className="stepper-btn stepper-next"
+                          title="Avanzar"
+                          disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
+                          onClick={() => handleAvanzarEstado(sId, servicio.estado)}
+                        >
+                          &#9654;
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="filtered-grid">

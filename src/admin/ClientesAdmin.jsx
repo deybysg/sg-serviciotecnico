@@ -177,7 +177,7 @@ function normalizeCliente(c) {
         correo: c.correo || c.email || '',
         direccion: c.direccion || '',
         dni: c.dni || '',
-        serviciosRealizados: c.serviciosRealizados || [],
+        serviciosRealizados: c.servicios_realizados || c.serviciosRealizados || [],
         createdAt: c.created_at || c.createdAt,
         updatedAt: c.updated_at || c.updatedAt,
     };
@@ -242,19 +242,36 @@ function Clientes() {
     const [editId, setEditId] = useState(null);
     const [search, setSearch] = useState("");
     const [mostrarLista, setMostrarLista] = useState(false);
+    const [vistaModo, setVistaModo] = useState('lista');
+    const [serviciosPorCliente, setServiciosPorCliente] = useState({});
 
     // ESTADOS para el Modal
     const [modalOpen, setModalOpen] = useState(false);
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [serviciosDetalle, setServiciosDetalle] = useState([]);
 
-    // Cargar clientes al inicio
+    // Cargar clientes y servicios al inicio
     useEffect(() => {
         const loadClientes = async () => {
             try {
-                const data = await api.get('/clientes');
+                const [data, serviciosData] = await Promise.all([
+                    api.get('/clientes'),
+                    api.get('/servicios')
+                ]);
                 const normalized = Array.isArray(data) ? data.map(normalizeCliente) : [];
                 setClientes(normalized);
+
+                // Calcular conteo de servicios por cliente
+                const conteo = {};
+                if (Array.isArray(serviciosData)) {
+                    serviciosData.forEach(s => {
+                        const clienteId = String(s.cliente_id || s.clienteId || '');
+                        if (clienteId && clienteId !== 'null' && clienteId !== 'undefined') {
+                            conteo[clienteId] = (conteo[clienteId] || 0) + 1;
+                        }
+                    });
+                }
+                setServiciosPorCliente(conteo);
             } catch (error) {
                 console.error("Error al cargar clientes:", error);
                 Swal.fire({
@@ -267,59 +284,37 @@ function Clientes() {
         loadClientes();
     }, []);
     
-    // Función para obtener detalles de los servicios
-    const fetchServiciosDetalle = async (serviciosRealizados) => {
-        if (!serviciosRealizados || serviciosRealizados.length === 0) {
+    // Función para obtener detalles de los servicios de un cliente
+    const fetchServiciosDetalle = async (clienteId) => {
+        if (!clienteId) {
             setServiciosDetalle([]);
             return;
         }
 
-        // El backend ya devuelve los servicios populados en el array serviciosRealizados
-        // Si son objetos completos, los usamos directamente
-        if (typeof serviciosRealizados[0] === 'object' && serviciosRealizados[0]._id) {
-            // Ya están populados, normalizar y ordenar por fecha de entrada más reciente primero
-            const serviciosOrdenados = serviciosRealizados
-                .map(normalizeServicio)
-                .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
-            setServiciosDetalle(serviciosOrdenados);
-            return;
-        }
-
-        // Si solo son IDs (fallback), traer todos y filtrar
         try {
             const todosLosServicios = await api.get('/servicios');
             const serviciosNormalizados = Array.isArray(todosLosServicios)
                 ? todosLosServicios.map(normalizeServicio)
                 : [];
 
-            // Convertir IDs a strings para comparar
-            const idsStrings = serviciosRealizados.map(id => String(id));
-
-            // Filtrar servicios que corresponden a los IDs del cliente
             const serviciosFiltrados = serviciosNormalizados
                 .filter(servicio => {
-                    const servicioId = String(servicio._id || servicio.id);
-                    return idsStrings.includes(servicioId);
+                    const servicioClienteId = String(servicio.clienteId || servicio.cliente);
+                    return servicioClienteId === String(clienteId);
                 })
-                // Ordenar por fecha de entrada más reciente primero
                 .sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
 
             setServiciosDetalle(serviciosFiltrados);
         } catch (error) {
             console.error("Error al cargar detalles de servicios:", error);
             setServiciosDetalle([]);
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: error.message || "No se pudieron cargar los detalles de los servicios.",
-            });
         }
     };
 
     // Función para abrir el modal
     const handleOpenModal = (cliente) => {
         setClienteSeleccionado(cliente);
-        fetchServiciosDetalle(cliente.serviciosRealizados);
+        fetchServiciosDetalle(cliente._id || cliente.id);
         setModalOpen(true); // Se establece a true
     };
 
@@ -616,6 +611,22 @@ function Clientes() {
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
+                                <div className="vista-toggle-group">
+                                    <button
+                                        className={`vista-toggle-btn ${vistaModo === 'lista' ? 'active' : ''}`}
+                                        onClick={() => setVistaModo('lista')}
+                                        title="Vista Lista"
+                                    >
+                                        <FiList size={14} /> Lista
+                                    </button>
+                                    <button
+                                        className={`vista-toggle-btn ${vistaModo === 'grid' ? 'active' : ''}`}
+                                        onClick={() => setVistaModo('grid')}
+                                        title="Vista Cuadros"
+                                    >
+                                        <FiGrid size={14} /> Cuadros
+                                    </button>
+                                </div>
                             </div>
 
                             {filteredClientes.length === 0 ? (
@@ -624,13 +635,69 @@ function Clientes() {
                                     <p>No se encontraron clientes</p>
                                     <span>Intentá con otro término de búsqueda</span>
                                 </div>
+                            ) : vistaModo === 'lista' ? (
+                                <div className="clientes-lista-body">
+                                    {filteredClientes.map((c) => {
+                                        const iniciales = c.nombreCompleto
+                                            ? c.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                            : '??';
+                                        const serviciosCount = serviciosPorCliente[String(c._id || c.id)] || 0;
+                                        return (
+                                            <div key={c._id || c.id} className={`cliente-fila fila-${c.dni ? 'con-dni' : 'sin-dni'}`}>
+                                                <div className="cliente-fila-avatar">
+                                                    {iniciales}
+                                                </div>
+                                                <div className="cliente-fila-nombre">
+                                                    <span className="fila-nombre-texto">{c.nombreCompleto}</span>
+                                                    {c.dni && <span className="fila-dni-texto"><FiHash size={10} /> {c.dni}</span>}
+                                                </div>
+                                                <div className="cliente-fila-celular">
+                                                    <FiPhone size={13} />
+                                                    <span>{c.celular || '—'}</span>
+                                                </div>
+                                                <div className="cliente-fila-correo">
+                                                    <FiMail size={13} />
+                                                    <span>{c.correo || '—'}</span>
+                                                </div>
+                                                <div className="cliente-fila-direccion">
+                                                    <FiMapPin size={13} />
+                                                    <span>{c.direccion || '—'}</span>
+                                                </div>
+                                                <div className="cliente-fila-servicios">
+                                                    <FiTool size={12} />
+                                                    <span>{serviciosCount}</span>
+                                                </div>
+                                                <div className="cliente-fila-actions">
+                                                    <button
+                                                        className="cliente-btn cliente-btn-historial"
+                                                        onClick={() => handleOpenModal(c)}
+                                                    >
+                                                        <FiEye size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="cliente-btn cliente-btn-edit"
+                                                        onClick={() => handleEdit(c)}
+                                                    >
+                                                        <FiEdit3 size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="cliente-btn cliente-btn-delete"
+                                                        onClick={() => handleDelete(c._id || c.id)}
+                                                    >
+                                                        <FiTrash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             ) : (
                                 <div className="clientes-grid">
                                     {filteredClientes.map((c) => {
                                         const iniciales = c.nombreCompleto
                                             ? c.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
                                             : '??';
-                                        const serviciosCount = c.serviciosRealizados?.length || 0;
+                                        const serviciosCount = serviciosPorCliente[String(c._id || c.id)] || 0;
                                         return (
                                             <div key={c._id || c.id} className="cliente-card-modern">
                                                 {/* Header: Avatar + Nombre + Badge */}

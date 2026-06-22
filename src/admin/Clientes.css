@@ -213,12 +213,13 @@
 .clientes-lista-wrapper {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    transition: max-height 0.01s, opacity 0.3s ease;
     opacity: 0;
 }
 
 .clientes-lista-wrapper.show {
-    max-height: 3000px;
+    max-height: none;
+    overflow: visible;
     opacity: 1;
 }
 
@@ -546,7 +547,195 @@
     color: var(--text-muted);
 }
 
-/* 14. MODAL */
+/* 13. VISTA TOGGLE (Lista/Cuadros) */
+.vista-toggle-group {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.vista-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(94, 164, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+}
+
+.vista-toggle-btn:hover {
+    border-color: rgba(0, 183, 255, 0.4);
+    color: var(--text-secondary);
+}
+
+.vista-toggle-btn.active {
+    border-color: var(--neon-blue);
+    background: rgba(0, 183, 255, 0.12);
+    color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 183, 255, 0.15);
+}
+
+/* 14. VISTA LISTA DE CLIENTES */
+.clientes-lista-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.cliente-fila {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cliente-fila::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
+    border-radius: 2px;
+}
+
+.cliente-fila:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(94, 164, 255, 0.2);
+    transform: translateX(3px);
+}
+
+.cliente-fila-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0, 183, 255, 0.2), rgba(191, 50, 255, 0.2));
+    border: 1px solid rgba(0, 183, 255, 0.3);
+    color: var(--neon-blue);
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-left: 8px;
+}
+
+.cliente-fila-nombre {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+    flex: 1;
+}
+
+.fila-nombre-texto {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fila-dni-texto {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.cliente-fila-celular,
+.cliente-fila-correo,
+.cliente-fila-direccion,
+.cliente-fila-servicios {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.cliente-fila-celular { min-width: 130px; }
+.cliente-fila-correo { min-width: 180px; }
+.cliente-fila-direccion { min-width: 160px; flex: 1; }
+.cliente-fila-servicios {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0, 183, 255, 0.08);
+    border: 1px solid rgba(0, 183, 255, 0.2);
+    color: var(--neon-blue);
+    font-weight: 700;
+    font-size: 0.8rem;
+    min-width: 40px;
+    justify-content: center;
+}
+
+.cliente-fila-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.cliente-fila-actions .cliente-btn {
+    padding: 6px 10px;
+}
+
+/* Responsive lista */
+@media (max-width: 1100px) {
+    .cliente-fila-direccion { display: none; }
+}
+
+@media (max-width: 900px) {
+    .cliente-fila-correo { display: none; }
+}
+
+@media (max-width: 768px) {
+    .clientes-lista-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .vista-toggle-group {
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .cliente-fila {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 14px;
+    }
+
+    .cliente-fila-celular,
+    .cliente-fila-correo,
+    .cliente-fila-direccion {
+        display: flex;
+        min-width: unset;
+        flex: 1 1 45%;
+    }
+
+    .cliente-fila-actions {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* 15. MODAL */
 .modal-overlay {
     position: fixed;
     top: 0;
