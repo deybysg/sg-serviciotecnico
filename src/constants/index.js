@@ -31,6 +31,7 @@ export const ESTADO_OPTIONS = [
     { value: "enRevision", label: "En Revisión" },
     { value: "revisionTerminada", label: "En Reparación" },
     { value: "terminado", label: "Listo para Entrega" },
+    { value: "notificacion", label: "Notificación" },
     { value: "entregado", label: "Entregado" },
 ];
 

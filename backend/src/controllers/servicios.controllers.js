@@ -178,8 +178,12 @@ export const agregarSeguimiento = async (req, res) => {
 
     // Si el payload indica marcar notificacion (o tipo === 'notificacion'), actualizar estado y detalleCliente
     if (entry.tipo === 'notificacion' || marcarNotificacion || marcarSinSolucion) {
+      if (!servicio.estadoAnterior) {
+        servicio.estadoAnterior = servicio.estado;
+      }
       servicio.estado = 'notificacion';
       servicio.detalleCliente = mensaje || servicio.detalleCliente || '';
+      servicio.motivoNotificacion = mensaje || servicio.motivoNotificacion || '';
     }
 
     await servicio.save();

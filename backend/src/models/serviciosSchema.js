@@ -32,6 +32,8 @@ const serviciosSchema = new Schema({
     enum: ["pendiente","enRevision","diagnostico","notificacion","sinSolucion","reparacion","terminado","entregado","presupuestoPendiente","revisionTerminada"],
     default: "pendiente"
   },
+  motivoNotificacion: { type: String, default: null },
+  estadoAnterior: { type: String, default: null },
   detalleCliente: { type: String, default: null },
   seguimiento: [{
     tipo: { type: String },

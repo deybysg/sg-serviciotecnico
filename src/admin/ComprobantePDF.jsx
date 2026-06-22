@@ -7,12 +7,12 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const getEstadoLabel = (value) => ESTADO_OPTIONS.find(o => o.value === value)?.label || value;
 
     const formatDate = (isoString) => {
-        if (!isoString) return 'N/A';
+        if (!isoString) return '—';
         const date = new Date(isoString.split('T')[0] + 'T12:00:00');
         return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
     };
     const formatDateTime = (isoString) => {
-        if (!isoString) return 'N/A';
+        if (!isoString) return '—';
         return new Date(isoString).toLocaleString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
@@ -29,7 +29,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
     const filasVacias = presupuestoCero ? Array(2).fill({ descripcion: '_________________________', costo: 0 }) : [];
     const filasAMostrar = presupuestoCero ? filasVacias : itemsPresupuesto;
 
-    const servicioNumero = service.servicioNumero || 'N/A';
+    const servicioNumero = service.servicioNumero || '—';
     const urlSeguimiento = `https://sg-serviciotecnico.vercel.app/seguimiento/${servicioNumero}`;
 
     return (
@@ -62,7 +62,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                         <div style={S.secTitle}>DATOS DEL CLIENTE</div>
                         <div style={S.line}><b>Cliente:</b> {service.clienteNombre || service.cliente?.nombreCompleto || '—'}</div>
                         <div style={S.line}><b>Email:</b> {service.clienteCorreo || service.cliente?.correo || '—'}</div>
-                        <div style={S.line}><b>Dir:</b> {service.clienteDireccion || service.cliente?.direccion || '—'}</div>
+                        <div style={S.line}><b>Dirección:</b> {service.clienteDireccion || service.cliente?.direccion || '—'}</div>
                     </div>
                     <div style={S.col}>
                         <div style={S.secTitle}>DATOS DEL EQUIPO</div>
@@ -169,6 +169,24 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     )}
 
                     <div style={S.ticketSep} />
+
+                    {/* Totales */}
+                    <div style={S.ticketTotales}>
+                        <div style={S.ticketTotalRow}>
+                            <span style={S.ticketTotalLabel}>Subtotal:</span>
+                            <span style={S.ticketTotalValue}>${Number(presupuestoTotal).toFixed(2)}</span>
+                        </div>
+                        {service.anticipo && Number(service.anticipo) > 0 && (
+                            <div style={S.ticketTotalRow}>
+                                <span style={S.ticketTotalLabel}>Seña / Anticipo:</span>
+                                <span style={S.ticketTotalValueSeña}>-${Number(service.anticipo).toFixed(2)}</span>
+                            </div>
+                        )}
+                        <div style={S.ticketTotalRowFinal}>
+                            <span style={S.ticketTotalLabelFinal}>Total:</span>
+                            <span style={S.ticketTotalValueFinal}>${Number(presupuestoTotal - (Number(service.anticipo) || 0)).toFixed(2)}</span>
+                        </div>
+                    </div>
 
                     {/* Fecha y Orden */}
                     <div style={S.ticketRow2}>
@@ -372,20 +390,25 @@ const S = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: '8px',
-        paddingTop: '6px',
-        borderTop: '1px solid #ddd',
+        marginTop: '12px',
+        paddingTop: '10px',
+        borderTop: '2px solid #007bff',
+        background: '#f0f7ff',
+        padding: '10px 14px',
+        borderRadius: '4px',
     },
     thanks: {
-        fontWeight: 'bold',
-        fontSize: '9pt',
-        color: '#0b2545',
+        fontWeight: '900',
+        fontSize: '11pt',
+        color: '#007bff',
         margin: 0,
+        letterSpacing: '0.02em',
     },
     small: {
-        fontSize: '7pt',
-        color: '#888',
-        margin: 0,
+        fontSize: '8.5pt',
+        color: '#444',
+        margin: '4px 0 0 0',
+        fontWeight: '600',
     },
     orderInfo: {
         textAlign: 'right',
@@ -498,6 +521,46 @@ const S = {
         height: 0,
         borderTop: '1.5px dashed #ccc',
         margin: '4px 0',
+    },
+    ticketTotales: {
+        background: '#fafbfc',
+        border: '1px solid #e8e8e8',
+        borderRadius: '3px',
+        padding: '6px 7px',
+    },
+    ticketTotalRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '8.5pt',
+        padding: '1px 0',
+    },
+    ticketTotalLabel: {
+        color: '#666',
+        fontWeight: '600',
+    },
+    ticketTotalValue: {
+        color: '#222',
+        fontWeight: '700',
+    },
+    ticketTotalValueSeña: {
+        color: '#222',
+        fontWeight: '700',
+    },
+    ticketTotalRowFinal: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '9.5pt',
+        padding: '4px 0 1px 0',
+        borderTop: '1px solid #ccc',
+        marginTop: '3px',
+    },
+    ticketTotalLabelFinal: {
+        color: '#222',
+        fontWeight: '800',
+    },
+    ticketTotalValueFinal: {
+        color: '#222',
+        fontWeight: '800',
     },
     ticketFoot: {
         textAlign: 'center',

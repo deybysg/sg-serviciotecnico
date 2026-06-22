@@ -107,6 +107,8 @@ export const actualizarServicio = async (req, res) => {
       fields.push(`presupuesto_total = $${idx}`); values.push(body.presupuesto.total || 0); idx++;
     }
     if (body.estado !== undefined) { fields.push(`estado = $${idx}`); values.push(body.estado); idx++; }
+    if (body.motivoNotificacion !== undefined) { fields.push(`motivo_notificacion = $${idx}`); values.push(body.motivoNotificacion); idx++; }
+    if (body.estadoAnterior !== undefined) { fields.push(`estado_anterior = $${idx}`); values.push(body.estadoAnterior); idx++; }
     if (body.detalleCliente !== undefined) { fields.push(`detalle_cliente = $${idx}`); values.push(body.detalleCliente); idx++; }
     if (body.fechaEntrada !== undefined) { fields.push(`fecha_entrada = $${idx}`); values.push(body.fechaEntrada); idx++; }
     if (body.fechaSalida !== undefined) { fields.push(`fecha_salida = $${idx}`); values.push(body.fechaSalida); idx++; }
@@ -173,8 +175,12 @@ export const agregarSeguimiento = async (req, res) => {
     let values = [JSON.stringify(seguimiento)];
     let idx = 2;
     if (entry.tipo === 'notificacion' || marcarNotificacion || marcarSinSolucion) {
+      if (!servicio.estado_anterior) {
+        updates.push(`estado_anterior = $${idx}`); values.push(servicio.estado); idx++;
+      }
       updates.push(`estado = $${idx}`); values.push('notificacion'); idx++;
       updates.push(`detalle_cliente = $${idx}`); values.push(mensaje || servicio.detalle_cliente || ''); idx++;
+      updates.push(`motivo_notificacion = $${idx}`); values.push(mensaje || servicio.motivo_notificacion || ''); idx++;
     }
     values.push(id);
     const { rows } = await pool.query(

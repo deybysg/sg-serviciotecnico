@@ -4,9 +4,11 @@ import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import './Paneltrabajos.css';
-import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle, FiSmartphone, FiTag, FiCalendar, FiHash } from 'react-icons/fi';
+import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle, FiSmartphone, FiTag, FiCalendar, FiHash, FiDollarSign } from 'react-icons/fi';
 import logoTech from '../assets/logo3.png';
-import { ESTADO_OPTIONS, getEstadoLabel } from '../constants';
+import { ESTADO_OPTIONS, getEstadoLabel, TIPO_SERVICIO_OPTIONS } from '../constants';
+
+const getTipoLabel = (value) => TIPO_SERVICIO_OPTIONS.find(o => o.value === value)?.label || value;
 
 const getEstadoIcon = (value) => {
   switch (value) {
@@ -18,6 +20,8 @@ const getEstadoIcon = (value) => {
       return <FiTool />;
     case 'terminado':
       return <FiTruck />;
+    case 'notificacion':
+      return <FiBell />;
     case 'entregado':
       return <FiCheckCircle />;
     default:
@@ -87,6 +91,8 @@ function normalizeServicio(s) {
     notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
     metodoPago: s.metodo_pago ?? s.metodoPago,
     anticipo: s.anticipo,
+    motivoNotificacion: s.motivo_notificacion ?? s.motivoNotificacion,
+    estadoAnterior: s.estado_anterior ?? s.estadoAnterior,
     presupuesto: s.presupuesto || {
       items: s.presupuesto_items || [],
       subtotal: s.presupuesto_subtotal || 0,
@@ -143,7 +149,10 @@ const PanelTrabajo = () => {
   const tooltipTimer = useRef(null);
   const [estadoMenuAbiertoId, setEstadoMenuAbiertoId] = useState(null);
   const [estadoFocusIndex, setEstadoFocusIndex] = useState(0);
-  const [vistaModo, setVistaModo] = useState('kanban'); // 'kanban' | 'lista'
+  const [vistaModo, setVistaModo] = useState('lista'); // 'kanban' | 'lista'
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [showResolverModal, setShowResolverModal] = useState(false);
+  const [resolverData, setResolverData] = useState(null);
 
   const navigate = useNavigate(); // 👈 2. Declarar useNavigate
 
@@ -194,6 +203,7 @@ const PanelTrabajo = () => {
       enRevision: 0,
       enReparacion: 0, // mapea a 'revisionTerminada'
       listoParaEntrega: 0, // mapea a 'terminado'
+      notificacion: 0,
     };
 
     serviciosActivos.forEach(servicio => {
@@ -205,6 +215,8 @@ const PanelTrabajo = () => {
         counts.enReparacion++;
       } else if (servicio.estado === "terminado") {
         counts.listoParaEntrega++;
+      } else if (servicio.estado === "notificacion") {
+        counts.notificacion++;
       }
     });
 
@@ -266,6 +278,9 @@ const PanelTrabajo = () => {
         case "listoParaEntrega":
           coincideFiltro = s.estado === "terminado";
           break;
+        case "notificacion":
+          coincideFiltro = s.estado === "notificacion";
+          break;
         default:
           coincideFiltro = true;
           break;
@@ -325,10 +340,13 @@ const PanelTrabajo = () => {
       if (estadoMenuAbiertoId && !e.target.closest('.dropdown-estado')) {
         setEstadoMenuAbiertoId(null);
       }
+      if (showNotifDropdown && !e.target.closest('.notif-dropdown-container')) {
+        setShowNotifDropdown(false);
+      }
     };
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [estadoMenuAbiertoId]);
+  }, [estadoMenuAbiertoId, showNotifDropdown]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -391,8 +409,75 @@ const PanelTrabajo = () => {
   };
 
   // Función para cambiar el estado desde el select en cada tarjeta
-  const handleCambiarEstado = async (idServicio, nuevoEstado) => {
-    // Pedir confirmación antes de aplicar el cambio
+  const handleCambiarEstado = async (idServicio, nuevoEstado, estadoActual) => {
+    // Si cambia A notificación, pedir motivo
+    if (nuevoEstado === 'notificacion') {
+      const { value: motivo, isConfirmed } = await Swal.fire({
+        title: 'Motivo de notificación',
+        input: 'textarea',
+        inputLabel: '¿Qué necesitás notificar al cliente?',
+        inputPlaceholder: 'Ej: El equipo no tiene solución, hay que cambiar una pieza, etc.',
+        inputAttributes: {
+          'aria-label': 'Motivo de notificación'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Notificar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#f59e0b'
+      });
+
+      if (!isConfirmed) return;
+
+      const datosActualizados = {
+        estado: 'notificacion',
+        estadoAnterior: estadoActual,
+        motivoNotificacion: motivo || 'Sin motivo especificado'
+      };
+
+      try {
+        await api.put(`/servicios/${idServicio}`, datosActualizados);
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+
+        Toast.fire({
+          icon: 'success',
+          title: 'Notificación enviada al cliente'
+        });
+
+        cargarDatos();
+      } catch (error) {
+        console.error('Error al notificar:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'No se pudo enviar la notificación.',
+          confirmButtonColor: '#3b82f6'
+        });
+      }
+      return;
+    }
+
+    // Si sale DE notificación, abrir modal de resolver
+    if (estadoActual === 'notificacion') {
+      const servicio = servicios.find(s => String(s._id || s.id) === String(idServicio));
+      setResolverData({
+        id: idServicio,
+        estadoAnterior: servicio?.estadoAnterior || 'pendiente',
+        fallaReportada: servicio?.fallaReportada || '',
+        anticipo: servicio?.anticipo || 0,
+        presupuestoTotal: servicio?.presupuesto?.total || 0
+      });
+      setShowResolverModal(true);
+      return;
+    }
+
+    // Flujo normal de estados
     const estadoLabel = getEstadoLabel(nuevoEstado);
     const confirm = await Swal.fire({
       title: 'Confirmar cambio de estado',
@@ -406,13 +491,11 @@ const PanelTrabajo = () => {
     });
 
     if (!confirm.isConfirmed) {
-      // Si cancela, no hacer nada (el select mostrará el valor controlado actual)
       return;
     }
 
     try {
       const datosActualizados = { estado: nuevoEstado };
-      // Si se marca como entregado, agregar fechaSalida
       if (nuevoEstado === 'entregado') {
         datosActualizados.fechaSalida = new Date().toISOString();
       }
@@ -436,7 +519,6 @@ const PanelTrabajo = () => {
         title: 'Estado actualizado'
       });
 
-      // Refrescar datos
       cargarDatos();
     } catch (error) {
       console.error('Error al cambiar estado:', error);
@@ -449,20 +531,85 @@ const PanelTrabajo = () => {
     }
   };
 
+  const handleResolverSubmit = async () => {
+    try {
+      const datosActualizados = {
+        estado: resolverData.estadoAnterior,
+        estadoAnterior: null,
+        motivoNotificacion: null,
+        fallaReportada: resolverData.fallaReportada,
+        anticipo: Number(resolverData.anticipo) || 0,
+        presupuesto: {
+          items: [],
+          subtotal: Number(resolverData.presupuestoTotal) || 0,
+          iva: 0,
+          total: Number(resolverData.presupuestoTotal) || 0
+        }
+      };
+
+      await api.put(`/servicios/${resolverData.id}`, datosActualizados);
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
+
+      Toast.fire({
+        icon: 'success',
+        title: `Estado restaurado a "${getEstadoLabel(resolverData.estadoAnterior)}"`
+      });
+
+      setShowResolverModal(false);
+      setResolverData(null);
+      cargarDatos();
+    } catch (error) {
+      console.error('Error al resolver notificación:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'No se pudo resolver la notificación.',
+        confirmButtonColor: '#3b82f6'
+      });
+    }
+  };
+
   // 🚀 Función para avanzar al siguiente estado en el flujo
   const handleAvanzarEstado = async (idServicio, estadoActual) => {
+    // Si está en notificación, no puede avanzar
+    if (estadoActual === 'notificacion') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Notificación pendiente',
+        text: 'Resolvé la notificación primero para continuar con el flujo.',
+        confirmButtonColor: '#3b82f6'
+      });
+      return;
+    }
     const idx = FLUJO_ESTADOS.indexOf(estadoActual);
     if (idx === -1 || idx >= FLUJO_ESTADOS.length - 1) return;
     const nuevoEstado = FLUJO_ESTADOS[idx + 1];
-    await handleCambiarEstado(idServicio, nuevoEstado);
+    await handleCambiarEstado(idServicio, nuevoEstado, estadoActual);
   };
 
   // 🚀 Función para retroceder al estado anterior en el flujo
   const handleRetrocederEstado = async (idServicio, estadoActual) => {
+    // Si está en notificación, no puede retroceder
+    if (estadoActual === 'notificacion') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Notificación pendiente',
+        text: 'Resolvé la notificación primero para continuar con el flujo.',
+        confirmButtonColor: '#3b82f6'
+      });
+      return;
+    }
     const idx = FLUJO_ESTADOS.indexOf(estadoActual);
     if (idx <= 0) return;
     const nuevoEstado = FLUJO_ESTADOS[idx - 1];
-    await handleCambiarEstado(idServicio, nuevoEstado);
+    await handleCambiarEstado(idServicio, nuevoEstado, estadoActual);
   };
 
   // 🚨 Función de Entrega modificada para redirigir 🚨
@@ -645,7 +792,7 @@ const PanelTrabajo = () => {
             <button onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : servicioId)}>{numero}</button>
           </div>
           <span className={`priority-pill priority-${servicio.estado}`}>
-            {servicio.estado === 'pendiente' ? 'Alta' : servicio.estado === 'revisionTerminada' ? 'Media' : 'Normal'}
+            {servicio.estado === 'notificacion' ? 'Urgente' : servicio.estado === 'pendiente' ? 'Alta' : servicio.estado === 'revisionTerminada' ? 'Media' : 'Normal'}
           </span>
         </div>
 
@@ -685,6 +832,14 @@ const PanelTrabajo = () => {
           </div>
         </div>
 
+        {/* NOTIFICACIÓN: Banner de motivo */}
+        {servicio.estado === 'notificacion' && (servicio.motivoNotificacion || servicio.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje) && (
+          <div className="kanban-card-notificacion">
+            <FiBell size={12} />
+            <span>{servicio.motivoNotificacion || servicio.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje}</span>
+          </div>
+        )}
+
         {/* FOOTER: Acciones - Stepper de Estado */}
         <div className="kanban-card-actions">
           <div className="estado-stepper">
@@ -692,7 +847,7 @@ const PanelTrabajo = () => {
               type="button"
               className="stepper-btn stepper-prev"
               title="Retroceder estado"
-              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) <= 0}
+              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) <= 0 || servicio.estado === 'notificacion'}
               onClick={() => handleRetrocederEstado(servicioId, servicio.estado)}
             >
               &#9664;
@@ -723,7 +878,7 @@ const PanelTrabajo = () => {
                       role="option"
                       aria-selected={opt.value === servicio.estado}
                       className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
-                      onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value); }}
+                      onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value, servicio.estado); }}
                     >
                       <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
                       <span className="estado-label">{opt.label}</span>
@@ -736,7 +891,7 @@ const PanelTrabajo = () => {
               type="button"
               className="stepper-btn stepper-next"
               title="Avanzar estado"
-              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) >= FLUJO_ESTADOS.length - 1}
+              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) >= FLUJO_ESTADOS.length - 1 || servicio.estado === 'notificacion'}
               onClick={() => handleAvanzarEstado(servicioId, servicio.estado)}
             >
               &#9654;
@@ -765,10 +920,69 @@ const PanelTrabajo = () => {
             <button className="workboard-primary-btn" onClick={() => navigate('/seguimiento')}>
               <FiSearch /> Seguimiento
             </button>
-            <button className="workboard-icon-btn" aria-label="Alertas">
-              <FiBell />
-              {(trabajosAltaPrioridad + trabajosPendientesViejos) > 0 && <strong>{trabajosAltaPrioridad + trabajosPendientesViejos}</strong>}
-            </button>
+            <div className="notif-dropdown-container">
+              <button 
+                className={`workboard-icon-btn ${conteosEstado.notificacion > 0 ? 'has-notifications' : ''}`} 
+                aria-label="Notificaciones pendientes"
+                title={conteosEstado.notificacion > 0 ? `${conteosEstado.notificacion} notificación(es) pendiente(s)` : 'Sin notificaciones pendientes'}
+                onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+              >
+                <FiBell />
+                {conteosEstado.notificacion > 0 && <strong>{conteosEstado.notificacion}</strong>}
+              </button>
+              {showNotifDropdown && conteosEstado.notificacion > 0 && (
+                <div className="notif-dropdown">
+                  <div className="notif-dropdown-header">
+                    <FiBell size={14} />
+                    <span>Notificaciones Pendientes</span>
+                  </div>
+                  <div className="notif-dropdown-list">
+                    {serviciosActivos.filter(s => s.estado === 'notificacion').map(servicio => {
+                      const sId = servicio._id || servicio.id;
+                      const sNum = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(sId, 6)}`;
+                      const sCliente = getClienteName(servicio.cliente || servicio.clienteId, clientes);
+                      const sEquipo = getEquipoPanel(servicio);
+                      const msgNotif = servicio.motivoNotificacion || servicio.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje || '';
+                      return (
+                        <div 
+                          key={sId} 
+                          className="notif-dropdown-item"
+                          onClick={() => {
+                            setShowNotifDropdown(false);
+                            handleVerDetalles(servicio);
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div className="notif-item-info">
+                            <div className="notif-item-top">
+                              <span className="notif-item-orden">{sNum}</span>
+                              <span className="notif-item-cliente">{sCliente}</span>
+                            </div>
+                            <span className="notif-item-equipo">{sEquipo}</span>
+                            {msgNotif && (
+                              <div className="notif-item-motivo">
+                                <FiBell size={10} />
+                                <span>{msgNotif}</span>
+                              </div>
+                            )}
+                          </div>
+                          <button 
+                            className="notif-item-resolver"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowNotifDropdown(false);
+                              handleCambiarEstado(sId, 'resolver', servicio.estado);
+                            }}
+                          >
+                            <FiCheckCircle size={12} /> Resolver
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -833,24 +1047,25 @@ const PanelTrabajo = () => {
             <option value="enRevision">En Revisión</option>
             <option value="enReparacion">En Reparación</option>
             <option value="listoParaEntrega">Listo para Entregar</option>
+            <option value="notificacion">Notificación</option>
           </select>
           <button className="workboard-filter-btn" onClick={() => { setFiltroEstado('todos'); setSearchQuery(''); setSearchType('todos'); }}>
             <FiSearch /> Limpiar Filtros
           </button>
           <div className="vista-toggle-group">
             <button
-              className={`vista-toggle-btn ${vistaModo === 'kanban' ? 'active' : ''}`}
-              onClick={() => setVistaModo('kanban')}
-              title="Vista Cuadros"
-            >
-              <span>&#9638;</span> Cuadros
-            </button>
-            <button
               className={`vista-toggle-btn ${vistaModo === 'lista' ? 'active' : ''}`}
               onClick={() => setVistaModo('lista')}
               title="Vista Lista"
             >
               <span>&#9776;</span> Lista
+            </button>
+            <button
+              className={`vista-toggle-btn ${vistaModo === 'kanban' ? 'active' : ''}`}
+              onClick={() => setVistaModo('kanban')}
+              title="Vista Cuadros"
+            >
+              <span>&#9638;</span> Cuadros
             </button>
           </div>
         </section>
@@ -986,68 +1201,70 @@ const PanelTrabajo = () => {
                   const sNum = servicio.servicioNumero ? `#TFX-${formatServicioNumero(servicio.servicioNumero)}` : `#TFX-${shortId(sId, 6)}`;
                   const sCliente = getClienteName(servicio.cliente || servicio.clienteId, clientes);
                   const sEquipo = getEquipoPanel(servicio);
-                  const sDetalle = getDetallePanel(servicio);
+                  const sFalla = servicio.fallaReportada || 'Sin falla reportada';
                   const sFecha = formatFechaPanel(servicio.fechaEntrada);
                   const sDias = servicio.fechaEntrada ? Math.floor((Date.now() - new Date(servicio.fechaEntrada).getTime()) / (1000 * 60 * 60 * 24)) : 0;
                   const estadoIdx = FLUJO_ESTADOS.indexOf(servicio.estado);
                   return (
-                    <div key={sId} className={`lista-item item-${servicio.estado}`}>
-                      <div className="lista-item-left">
-                        <div className="lista-item-orden">
-                          <button onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : sId)}>{sNum}</button>
-                        </div>
-                        <div className="lista-item-info">
-                          <div className="lista-item-cliente">
-                            <FiUser size={15} />
-                            <span>{sCliente}</span>
-                          </div>
-                          <div className="lista-item-equipo">{sEquipo}</div>
-                          <div className="lista-item-detalle">{sDetalle}</div>
-                        </div>
+                    <div key={sId} className={`lista-fila fila-${servicio.estado}`}>
+                      <div className="lista-fila-bar" />
+                      <button className="lista-fila-orden" onClick={() => handleCopyId(servicio.servicioNumero ? formatServicioNumero(servicio.servicioNumero) : sId)}>
+                        {sNum}
+                      </button>
+                      <div className="lista-fila-dias">
+                        <FiClock size={11} />
+                        <span>{sDias}d</span>
                       </div>
-                      <div className="lista-item-center">
-                        <div className="lista-item-fecha">
-                          <FiCalendar size={14} />
-                          <span>{sFecha}</span>
-                        </div>
-                        <div className="lista-item-dias">{sDias}d</div>
+                      <div className="lista-fila-cliente">
+                        <FiUser size={13} />
+                        <span>{sCliente}</span>
                       </div>
-                      <div className="lista-item-right">
-                        <span className={`lista-item-badge badge-${servicio.estado}`}>
-                          {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
-                        </span>
-                        <div className="lista-item-actions">
-                          <button
-                            className="stepper-btn stepper-prev"
-                            title="Retroceder"
-                            disabled={estadoIdx <= 0}
-                            onClick={() => handleRetrocederEstado(sId, servicio.estado)}
-                          >
-                            &#9664;
-                          </button>
-                          <button className="lista-item-ver" onClick={() => handleVerDetalles(servicio)}>
-                            <FiEye size={15} />
-                          </button>
-                          <button
-                            className="stepper-btn stepper-next"
-                            title="Avanzar"
-                            disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
-                            onClick={() => handleAvanzarEstado(sId, servicio.estado)}
-                          >
-                            &#9654;
-                          </button>
-                        </div>
+                      <div className="lista-fila-equipo">
+                        <FiSmartphone size={13} />
+                        <span>{sEquipo}</span>
+                      </div>
+                      <div className="lista-fila-falla">
+                        <FiTool size={12} />
+                        <span>{sFalla}</span>
+                      </div>
+                      <div className="lista-fila-fecha">
+                        <FiCalendar size={12} />
+                        <span>{sFecha}</span>
+                      </div>
+                      <span className={`lista-fila-badge badge-${servicio.estado}`}>
+                        {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
+                      </span>
+                      <div className="lista-fila-actions">
+                        <button
+                          className="stepper-btn stepper-prev"
+                          title="Retroceder"
+                          disabled={estadoIdx <= 0}
+                          onClick={() => handleRetrocederEstado(sId, servicio.estado)}
+                        >
+                          &#9664;
+                        </button>
+                        <button className="lista-fila-ver" onClick={() => handleVerDetalles(servicio)}>
+                          <FiEye size={14} />
+                        </button>
+                        <button
+                          className="stepper-btn stepper-next"
+                          title="Avanzar"
+                          disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
+                          onClick={() => handleAvanzarEstado(sId, servicio.estado)}
+                        >
+                          &#9654;
+                        </button>
                       </div>
                     </div>
                   );
                 })
               )}
             </div>
-</section>
+          </section>
         )}
       </section>
       {modalOpen && servicioSeleccionado && (
-        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
+        <div className="modal-backdrop">
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, margin: 'auto', padding: 24 }}>
             <button
               type="button"
@@ -1061,37 +1278,142 @@ const PanelTrabajo = () => {
             <div style={{ marginBottom: 16 }}>
               <strong>Orden:</strong> {servicioSeleccionado.servicioNumero ? `#${formatServicioNumero(servicioSeleccionado.servicioNumero)}` : shortId(servicioSeleccionado._id || servicioSeleccionado.id)}<br />
               <strong>Estado:</strong> {getEstadoLabel(servicioSeleccionado.estado)}<br />
-              <strong>Entrada:</strong> {servicioSeleccionado.fechaEntrada ? new Date(servicioSeleccionado.fechaEntrada).toLocaleString() : '—'}<br />
-              <strong>Fecha de Salida:</strong> {servicioSeleccionado.fechaSalida ? new Date(servicioSeleccionado.fechaSalida).toLocaleString() : '—'}<br />
-              <hr />
-              <strong>Datos del Cliente:</strong><br />
-              {(() => {
-                const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
-                  ? servicioSeleccionado.cliente
-                  : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
-                if (!clienteObj) return <span>Cliente no encontrado</span>;
-                return (
-                  <div style={{ marginBottom: 8 }}>
-                    <div><strong>Nombre:</strong> {clienteObj.nombreCompleto}</div>
-                    <div><strong>Teléfono:</strong> {clienteObj.telefono || '—'}</div>
-                    <div><strong>Email:</strong> {clienteObj.email || '—'}</div>
-                    <div><strong>DNI:</strong> {clienteObj.dni || '—'}</div>
-                    <div><strong>Dirección:</strong> {clienteObj.direccion || '—'}</div>
+
+              {servicioSeleccionado.estado === 'notificacion' ? (
+                <>
+                  {/* Vista simplificada para notificación */}
+                  <div className="modal-notificacion-banner">
+                    <FiBell size={16} />
+                    <div className="modal-notificacion-content">
+                      <strong>Mensaje de Notificación:</strong>
+                      <p>{servicioSeleccionado.motivoNotificacion || servicioSeleccionado.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje || 'Sin mensaje'}</p>
+                    </div>
                   </div>
-                );
-              })()}
-              <hr />
-              <strong>Datos del Producto:</strong><br />
-              <div style={{ marginBottom: 8 }}>
-                <div><strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}</div>
-                <div><strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}</div>
-                <div><strong>Tipo de Servicio:</strong> {servicioSeleccionado.tipoServicio || '—'}</div>
-                <div><strong>Detalles:</strong> {servicioSeleccionado.detalles || '—'}</div>
-              </div>
+                  <hr />
+                  <strong>Cliente:</strong> {(() => {
+                    const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
+                      ? servicioSeleccionado.cliente
+                      : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
+                    return clienteObj?.nombreCompleto || '—';
+                  })()}<br />
+                  <strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}<br />
+                  <strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}<br />
+                  <strong>Tipo de Servicio:</strong> {getTipoLabel(servicioSeleccionado.tipoServicio) || '—'}<br />
+                </>
+              ) : (
+                <>
+                  {/* Vista completa para otros estados */}
+                  <strong>Entrada:</strong> {servicioSeleccionado.fechaEntrada ? new Date(servicioSeleccionado.fechaEntrada).toLocaleString() : '—'}<br />
+                  <strong>Fecha de Salida:</strong> {servicioSeleccionado.fechaSalida ? new Date(servicioSeleccionado.fechaSalida).toLocaleString() : '—'}<br />
+                  <hr />
+                  <strong>Datos del Cliente:</strong><br />
+                  {(() => {
+                    const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
+                      ? servicioSeleccionado.cliente
+                      : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
+                    if (!clienteObj) return <span>Cliente no encontrado</span>;
+                    return (
+                      <div style={{ marginBottom: 8 }}>
+                        <div><strong>Nombre:</strong> {clienteObj.nombreCompleto}</div>
+                        <div><strong>Teléfono:</strong> {clienteObj.telefono || '—'}</div>
+                        <div><strong>Email:</strong> {clienteObj.email || '—'}</div>
+                        <div><strong>DNI:</strong> {clienteObj.dni || '—'}</div>
+                        <div><strong>Dirección:</strong> {clienteObj.direccion || '—'}</div>
+                      </div>
+                    );
+                  })()}
+                  <hr />
+                  <strong>Datos del Producto:</strong><br />
+                  <div style={{ marginBottom: 8 }}>
+                    <div><strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}</div>
+                    <div><strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}</div>
+                    <div><strong>Tipo de Servicio:</strong> {servicioSeleccionado.tipoServicio || '—'}</div>
+                    <div><strong>Detalles:</strong> {servicioSeleccionado.detalles || '—'}</div>
+                  </div>
+                </>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button className="btn-sinsolucion" onClick={() => { setModalOpen(false); handleMarcarNotificacion(servicioSeleccionado); }}>Notificar</button>
-              <button className="btn-entregar" onClick={() => { setModalOpen(false); handleEntregarServicio(servicioSeleccionado._id || servicioSeleccionado.id); }}>Entregar</button>
+              {servicioSeleccionado.estado === 'notificacion' ? (
+                <button className="modal-btn-resolver" onClick={() => { setModalOpen(false); handleCambiarEstado(servicioSeleccionado._id || servicioSeleccionado.id, 'resolver', servicioSeleccionado.estado); }}>
+                  <FiCheckCircle size={14} /> Resolver Notificación
+                </button>
+              ) : (
+                <>
+                  <button className="btn-sinsolucion" onClick={() => { setModalOpen(false); handleMarcarNotificacion(servicioSeleccionado); }}>Notificar</button>
+                  <button className="btn-entregar" onClick={() => { setModalOpen(false); handleEntregarServicio(servicioSeleccionado._id || servicioSeleccionado.id); }}>Entregar</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal Resolver Notificación */}
+      {showResolverModal && resolverData && (
+        <div className="modal-backdrop">
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 450, margin: 'auto', padding: 24 }}>
+            <button
+              type="button"
+              onClick={() => setShowResolverModal(false)}
+              style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', fontSize: 24, cursor: 'pointer' }}
+              aria-label="Cerrar"
+            >
+              &times;
+            </button>
+            <h3>Resolver Notificación</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: 16 }}>
+              Modificá los datos antes de volver al estado <strong>{getEstadoLabel(resolverData.estadoAnterior)}</strong>
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                  <FiTool size={12} /> Falla Reportada
+                </label>
+                <textarea
+                  value={resolverData.fallaReportada}
+                  onChange={(e) => setResolverData({ ...resolverData, fallaReportada: e.target.value })}
+                  rows={3}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box' }}
+                  placeholder="Describe la falla del equipo..."
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                    <FiTag size={12} /> Seña / Anticipo ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={resolverData.anticipo}
+                    onChange={(e) => setResolverData({ ...resolverData, anticipo: e.target.value })}
+                    min="0"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                    <FiDollarSign size={12} /> Total Estimado ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={resolverData.presupuestoTotal}
+                    onChange={(e) => setResolverData({ ...resolverData, presupuestoTotal: e.target.value })}
+                    min="0"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
+              <button
+                onClick={() => setShowResolverModal(false)}
+                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: '#94a3b8', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button className="modal-btn-resolver" onClick={handleResolverSubmit}>
+                <FiCheckCircle size={14} /> Guardar y Resolver
+              </button>
             </div>
           </div>
         </div>

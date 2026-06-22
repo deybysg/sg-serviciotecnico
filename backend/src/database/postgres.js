@@ -96,6 +96,8 @@ export async function initPostgres() {
         presupuesto_iva DECIMAL(10,2) DEFAULT 0,
         presupuesto_total DECIMAL(10,2) DEFAULT 0,
         estado VARCHAR(50) NOT NULL DEFAULT 'pendiente',
+        motivo_notificacion TEXT DEFAULT NULL,
+        estado_anterior VARCHAR(50) DEFAULT NULL,
         detalle_cliente TEXT DEFAULT NULL,
         seguimiento JSONB DEFAULT '[]',
         fecha_entrada TIMESTAMP NOT NULL,

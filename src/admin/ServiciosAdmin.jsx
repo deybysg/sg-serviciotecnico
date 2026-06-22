@@ -231,11 +231,11 @@ function ServiciosAdmin() {
         if (clienteData) clienteData = normalizeCliente(clienteData);
         const serviceEnriched = {
             ...service,
-            clienteNombre: clienteData?.nombreCompleto || service.clienteNombre || service.cliente_nombre || 'N/A',
-            clienteTelefono: clienteData?.celular || service.clienteTelefono || service.cliente_celular || 'N/A',
-            clienteDni: clienteData?.dni || service.clienteDni || service.cliente_dni || 'N/A',
-            clienteCorreo: clienteData?.correo || service.clienteCorreo || service.cliente_correo || 'N/A',
-            clienteDireccion: clienteData?.direccion || service.clienteDireccion || service.cliente_direccion || 'N/A',
+            clienteNombre: clienteData?.nombreCompleto || service.clienteNombre || service.cliente_nombre || '—',
+            clienteTelefono: clienteData?.celular || service.clienteTelefono || service.cliente_celular || '—',
+            clienteDni: clienteData?.dni || service.clienteDni || service.cliente_dni || '—',
+            clienteCorreo: clienteData?.correo || service.clienteCorreo || service.cliente_correo || '—',
+            clienteDireccion: clienteData?.direccion || service.clienteDireccion || service.cliente_direccion || '—',
             cliente: clienteData || service.cliente,
             presupuesto: service.presupuesto || {
                 items: service.presupuesto_items || [],
