@@ -86,9 +86,9 @@ app.use('/api/carts', cartsRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/mercadopago', mercadopagoRoutes);
 
-// Endpoint simple para verificar que el servidor está corriendo
+// Endpoint simple para verificar que el servidor está corriendo (Uptime Robot)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', origin: req.headers.origin });
+  res.status(200).send('OK');
 });
 
 // Endpoint de verificación de datos en PostgreSQL

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaArrowRight,
   FaArrowDown,
@@ -21,7 +22,6 @@ import {
   FaArrowCircleRight,
   FaStar,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import "./NuestrosServicios.css";
 
 const servicios = [
@@ -234,10 +234,6 @@ function NuestrosServicios() {
             <small>EN TODOS NUESTROS SERVICIOS</small>
           </div>
         </div>
-
-        <div className="scroll-indicator">
-          <FaArrowDown />
-        </div>
       </section>
 
       {/* Servicios grid */}
@@ -259,12 +255,14 @@ function NuestrosServicios() {
               key={s.id}
               style={{ animationDelay: `${i * 0.08}s` }}
             >
-              <div className={`card-icon-neon ${s.color}`}>{s.icono}</div>
+              <Link to={`/nuestros-servicios/${s.id}`} className={`card-icon-neon ${s.color}`}>
+                {s.icono}
+              </Link>
               <h3 className={`card-title-${s.color}`}>{s.titulo}</h3>
               <p>{s.descripcion}</p>
-              <div className="card-arrow">
+              <Link to={`/nuestros-servicios/${s.id}`} className="card-arrow">
                 <FaArrowCircleRight />
-              </div>
+              </Link>
             </article>
           ))}
         </div>
