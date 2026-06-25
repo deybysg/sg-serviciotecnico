@@ -24,9 +24,9 @@ const serviciosData = [
     descripcionLarga:
       "Ofrecemos un servicio completo de reparación de computadoras. Diagnosticamos y solucionamos todo tipo de fallas, desde problemas de hardware hasta virus y errores de software.",
     imagenes: [
-      "https://picsum.photos/seed/pc1/600/400",
-      "https://picsum.photos/seed/pc2/600/400",
-      "https://picsum.photos/seed/pc3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/PliGEhGKcJYBahCXKsjvvv9Fsa9BChAD7P8MxclzVUE0rZwBCknGTk7_rAX1_WZX6rbOHPMHE_OHIFPSjIuViFriSet1SDkEk3bmi40vOf06gw8UZu4_MF6M9abrVxoX5FEQAURyj49-qDuy8QUIC4BjIBV0yxG1G7AzAXMuR6otgQDHOC4671Mr0GMHu4f4.jpg?updatedAt=1782424598283",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/U4VLQ7pPvNZwxK1Wl1AFoRcDbMnB-sN04CVxxfhKrph-3eIuMpsljPSUXYYn1N2_xgNOuynoDA91YQegST4hbMwgIAf0IM2XGmP5G93paQJifffdsykkEW-G3DuN6vLyK6lWOwQJU7TsjHEO-yrU6gmNsctczbsmJXgMRU8_OxsvqORVtOiFqwculvlN2xRe.jpg?updatedAt=1782424595173",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/i956aoXNhC5ksAziPATy9Gw0CIISmtKrAvkDXg2l10hLkJ6fTPEzZwSbHVaMb0b0atOhcvEzmNbSMjiWNEeT4D0-ivkcFa00lsYk4D44wSmXdSqeLAK_0HlCRG3sTiikS5_wXD8ixyQQ6cT9w-_XR1mY50ks9noiC_aIuEx1vJhQB2XiGHMDXVq1y5Ep3jsf.jpg?updatedAt=1782424594734",
     ],
     caracteristicas: [
       "Diagnóstico gratuito y sin compromiso",
@@ -55,9 +55,9 @@ const serviciosData = [
     descripcionLarga:
       "Instalamos y configuramos Windows 10 o 11 de forma profesional. Nos encargamos de todos los drivers, programas esenciales y la personalización según tus necesidades. Tu equipo listo para usar desde el primer momento.",
     imagenes: [
-      "https://picsum.photos/seed/win1/600/400",
-      "https://picsum.photos/seed/win2/600/400",
-      "https://picsum.photos/seed/win3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/KypXW8bH25kqHTu6ohXVveq76W5EvTsy113kA6BYMStN-Cx6MXwuNcZ2htgWUIOz0CBk5C4_cg8Ac3vb1GOBeM48SCdJON2sSa7vZhYzXnJnomPbEMtKfXh6WOdXkoVqlcGUIKTF7VUvkPWnfMNxG4c3L6FCH34I8Rj_NhvHlsM6dDuvHJWec3OJdTnhTa7H.jpg?updatedAt=1782424595790",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/i956aoXNhC5ksAziPATy9Gw0CIISmtKrAvkDXg2l10hLkJ6fTPEzZwSbHVaMb0b0atOhcvEzmNbSMjiWNEeT4D0-ivkcFa00lsYk4D44wSmXdSqeLAK_0HlCRG3sTiikS5_wXD8ixyQQ6cT9w-_XR1mY50ks9noiC_aIuEx1vJhQB2XiGHMDXVq1y5Ep3jsf.jpg?updatedAt=1782424594734",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/u-3V8Yfb4cF8tFv_w6KnIfhvRTkkwNrZnYbjkuIG1hJzzXRoc52bNIZCceRpZYpEH1_gGSm1YzjvapnSEL3qRVkEOB1rkadj1gJghvVRE_y3442lgDSphLkfHEuDEOjt8-PJAV-w2-4FIujEw3rQlhgSg5Q8RhqBE6cHNe9KLbu9iOUtABCrt5zAKqFImOY1.jpg?updatedAt=1782424594724",
     ],
     caracteristicas: [
       "Instalación limpia de Windows 10 / 11",
@@ -85,9 +85,9 @@ const serviciosData = [
     descripcionLarga:
       "Somos especialistas en la reparación de celulares de todas las marcas: Samsung, iPhone, Xiaomi, Motorola, Huawei y más. Solucionamos fallas de software como pantallas de error, y problemas hardware como placas, conectores y más.",
     imagenes: [
-      "https://picsum.photos/seed/cel1/600/400",
-      "https://picsum.photos/seed/cel2/600/400",
-      "https://picsum.photos/seed/cel3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/S-m8uNKgNlvgujzwr9_hKQKxMoe5rrRSY9LiBOo5nxLsWkyGvkByoTQ-VrKrobRRq-C3XgXESZljhGNC-W60HQB-Vb4jDE88z81eS6pK3vT4pz0sbCPylfFLvAcKAXLalYTn7OE2UzlsbbD_oga_PAsUFpa9xrjBUbfIivfodSf28phFPziKGbk_AIN0iviI.jpg?updatedAt=1782424599496",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/e8-mk0yh-QUfBNY1zwkrGBF80Rk7d6UE9X_AHQuGUeukw3q29KhGg2Cjw1uAKF65pEMtYyrvGLifeTRqrwyoL0eJ-CEJeDQGIglVqp6nhy9VqtUIYjNYcT3pyhb0V-QHLuKvKQc_7jJl4jwJ_LFRaNZurPx_TOuTYPNQqr_FsQUFdLe0eetqYEPqb_AD89Mw.jpg?updatedAt=1782424599161",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/6v4vYlfBqZzRp2fRSoSbqeEGrpHLMBRGdGZ0fZyN7sc9AuHoVgW2eEnMxZa0hXBzXcBTUgGPLaZM43owOWgQiQOQ80EAVUGU1hZpiGetVHFapxZI61FNVp9y-Vu3FMehbJsFVswBolnkOg88ZERmyXv3cgc6RaRgncH7MtBc_S_fnYict8bXDbhQbFkhzJDw.jpg?updatedAt=1782424598700",
     ],
     caracteristicas: [
       "Reparación de todas las marcas",
@@ -115,9 +115,9 @@ const serviciosData = [
     descripcionLarga:
       "Reemplazamos pantallas rotas o dañadas en celulares. Trabajamos con repuestos distintas calidades y ofrecemos garantía en cada cambio. Recuperá la vista perfecta de tu dispositivo.",
     imagenes: [
-      "https://picsum.photos/seed/pant1/600/400",
-      "https://picsum.photos/seed/pant2/600/400",
-      "https://picsum.photos/seed/pant3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/s0e-VNS0jisjxnLqAab28-5C16UcS85aSnhgEx1Qt9dJ1f7nZTdzpn-jTo4H6hHcAIGg3IiQg9uJradyBcg54TtGFVIHp-f9epG70EQluHSGt6yTOWpjvU5H1dZmTDz1PpCzRSeOCQEitiaKtYyyVAqQk0oyZBk5IcG7lsUKUI8s-_iPOgtRk4sT1IaBx0hV.jpg?updatedAt=1782424600089",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/YO_jJJmD9WU_cNzSznVg1I2b7Mlrk2sESM1B4w8_2HmWommFL6fmBkLKPELP_wZfV7B6y7-RHjdRrZkJkPs1gmJ8YEk9LoTG5470Twxx0WMolEyaBMbcVJqDImqf-LwFVZuhSwEf1inGBzGbjF1_HYwY9sRxLe4ovYrZeeG6XtRJaX16_4YsTyZdvch9bUqw.jpg",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/uq2huzRODP__62H7pQqf52563qle0pWF_7lts2bnSjqQ7nkVbd_L8eULqMUksElxt3YJi5AjTlQ_VhuKM30wb_SvW3RDh53vaHBre7fw_FuP07CS7PLDgtjQ7psm8bw8L0F3Td01JWN94NEVEQuvtH1S7gGjGyfKmKolZRmBVtXW2fAK6S5ZN3NJGcks0EgT.jpg?updatedAt=1782424594698",
     ],
     caracteristicas: [
       "Pantallas originales y de alta calidad",
@@ -145,9 +145,9 @@ const serviciosData = [
     descripcionLarga:
       "Si tu celular no carga, carga lento o el puerto está suelto, solucionamos el problema. Reparamos y reemplazamos puertos de carga USB-C, Lightning y micro USB con repuestos de calidad.",
     imagenes: [
-      "https://picsum.photos/seed/carga1/600/400",
-      "https://picsum.photos/seed/carga2/600/400",
-      "https://picsum.photos/seed/carga3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/nFW-aDHMFaG14jH1hHJk2z6Uw02LJpEU0KWUyM5W657zKFRs6vXp3xhe5NO5F546DFxTrNcYWBXVqJz0sdZyWFmxfgPdWl-psRuJdl5Pzr4gn4KLQywuRzLQIDYMyrmOj-S5wzePes5LIW5ctCKJwPgc9tS2gSmy73TxGt7_2xAKtPWdzcpgA-65GMtOCNJy.jpg?updatedAt=1782424595472",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/g5bc0yfUSluMIOBT9xK8dSS8cAMD-4dNs6V9_rH92rg9EvxKDuGk8e9DZ_qr8n9tdbgAgZ_Yg7uiBzsTPn7FH0_NtC_MzuXhpaac0HkNYXgc5FD-7xvWlrsRrI_JpBPFtpeLUQyTVU5mWfQa5bH8o5Rh_4509ubepn3R2ZKL6Nh1rM93TOdT4eccYkv3tJWU.jpg",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/wYt0_GKoT2UqSOMUPtP2FzPJn-oDOUQbavs1w98F7FbkfCIgQFT2MIpeSUXU07aFw1UpsjbldAPSp5dkcVJOq_NfqK0Te3YSZV_YSkn4tzSx4pCiuardjcyR22AXskK1gziLh0_-avD6vrkFWrjNSzHdm9Lil2EmM_a9gIgK9-zd3fN_rC3UFjdZWaUJs-yD.jpg?updatedAt=1782424596485",
     ],
     caracteristicas: [
       "Reparación de puertos USB-C, Lightning y micro USB",
@@ -175,9 +175,9 @@ const serviciosData = [
     descripcionLarga:
       "¿Tu batería no dura nada o se hincho? Cambiamos la batería de tu celular o tablet con repuestos de calidad. Recuperá la autonomía original de tu dispositivo.",
     imagenes: [
-      "https://picsum.photos/seed/bat1/600/400",
-      "https://picsum.photos/seed/bat2/600/400",
-      "https://picsum.photos/seed/bat3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/KlDB39_yqaxuBM9NnWB_ZEjEEoxe5766uI4XH_e9JAbC4Lc3Gffe3vgxqpslo1xWlmviGGwg9wURwoy-Hacex_FxyRrOxclktKaI53CFZXODWUcevYto737wjDSFZadOoWp6HgMpboW_Sea6Ph1LLAMx9jPtPUj2G1sR7AjPBW97kpHQAxI3mTwID3Wj-Yfm.jpg?updatedAt=1782424597679",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/yegWSIWeY2sx0KY3TffoQ5ggJ4aaoDRYdklO1vFmiQYD01Vmjo7WCu6D5076W_57Xbtt5NsWgC6lodFEoyS5ZeWtUxJtxqC56Svhle9T0Jfbs5oj-qD3942WJDxtDzJN7_RfugB9VLAYcVGnw6T2EiATwlLcBrNLnDAipacTyCx_SUUUEkMPIvS2N4BhmyZH.jpg?updatedAt=1782424596083",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/7bQGzrj_csXtQiQz4i09xxzUfXh3at1yt28CuVX1LJZUIamxOcnss9eUP8zi1lNrpPV0bYUAKEO2v_YwKTYv9x-DTuoFnoV2hrTXCRQdrKhcgWrk8bUD2YM7MR5SDmZS-FV21mMGQcHfpwrnueia3XKCvsMJCRh82cdmMFams6KvnacbrzsLVGxU_tI0z5lR.jpg?updatedAt=1782424597285",
     ],
     caracteristicas: [
       "Baterías de capacidad",
@@ -204,9 +204,9 @@ const serviciosData = [
     descripcionLarga:
       "¿Se te rompió el glass de la pantalla? Lo reemplazamos con repuestos de calidad. Trabajamos con todas las marcas y modelos, devolviéndole la protección y el aspecto original a tu dispositivo.",
     imagenes: [
-      "https://picsum.photos/seed/glass1/600/400",
-      "https://picsum.photos/seed/glass2/600/400",
-      "https://picsum.photos/seed/glass3/600/400",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/UupJ94vuXpd8zY6rT2JXLsqqD3arx4d8bBJE8R8xuhQRSH3kHcpgli1l4KR1UDJdkwzzlodd4HPBXR6reaK-zrKgPTTOKL9IP7P-oDSG07HeicbmKFe1QoKInX_NuNg17Q2KSxWOPcA0aKs_78IgRxX4gnEUVYYb35cpZvumOXIUDtfID86MlOYFz-5bgxsV.jpg?updatedAt=1782424593600",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/99udt-7CUQG6j8Fs-Kk87AVBB5X-uLh_r2d7Ao4sDpaKd-GKLNiqj2ZRJAlM4MisDh_faSTkXUNDnJjAJ7XuzvJpJ_8WIayP3NHdnQoBwP7KB9e7bdPjrM7SbOBAti4Q74fZZyNC-WrgxShRTBRnx4z8PrP69kA7ceBYfB9KtwIkqEjewHDvbFUAdBTdWUwI.jpg?updatedAt=1782424596074",
+      "https://ik.imagekit.io/2upopbnzjh/imagenes%20de%20servicios/vhbAqLbeaFdmPQOG0wLvx0af3d5YnggPUQ8c17Ra0SB-r5Q_f7eLgLavqyLtWt-Alzd6uhV4mg561vppYLkqyYHEmy-mlAsnFZCVP0u9TXmk-c37VOCPkcT-AxAUkAnserAouVegQNa-_eU1lhnzL5jv5JnLsrcqu9yIduifpdxRVs750dJgIZe-p1jVOR6q.jpg?updatedAt=1782424598028",
     ],
     caracteristicas: [
       "Repuestos de alta calidad",
@@ -234,9 +234,9 @@ const serviciosData = [
     descripcionLarga:
       "Además de todos nuestros servicios especializados, ofrecemos una amplia gama de soluciones: actualizaciones de software, formateo profesional, respaldo y recuperación de información, configuración de redes y mucho más.",
     imagenes: [
-      "https://picsum.photos/seed/mas1/600/400",
-      "https://picsum.photos/seed/mas2/600/400",
-      "https://picsum.photos/seed/mas3/600/400",
+      "https://images.openai.com/static-rsc-4/pkxgBpA8t6Z6KQK3vYvByu3q231Ww9J9vh17Feu9NQDmzhEqlDVquzvQr8oAvPQU2VHYcRubHFPYLptVE4Y6oiVqoijlRD3gVwiaK3Fjod801mY3RDVlZ7gNyXbkI8oh8kWM3PA9OiM4yxZLipTu8OfnPTZPK0gVF-yddZeRNvIMgs_HTm9wldXObJgQa6cQ?purpose=fullsize",
+      "https://images.openai.com/static-rsc-4/ttu-DtZHG_bri9MEfAnMwuWYyWy6jJEW3V2ZqZaUCgfaGvEnEB5Kwag5VYbw1dDe4EjkqS9EMlx1bibNKi_yMGu9AdiRhYpt_k8ZzmL3c15Aq_Bg19d7KrjIFux1CaHYgXNHSPVJlrExBLREOWYo5JE761qKLg84_G7QM5wjGi5impqCwny0vSG_AgLfjJxc?purpose=fullsize",
+      "https://images.openai.com/static-rsc-4/He58jxoB448dwuOTT_AaLrhT7ojGPhmWdQtNPEAQq1ySDtFflufXPLuc1PCuwKiwteeJVZHNY9Ly1hSrYsbl0W5XF8BYmUylRfn-otp9lAT4zom4kMHxWXBDeVbUhEbOOxY_-7TIpwRH9l-sim_ps0EEAe9boaOLvKqZHlgMWi4ia_zD9erNpO5DbTILHDQG?purpose=fullsize",
     ],
     caracteristicas: [
       "Actualizaciones de software",
