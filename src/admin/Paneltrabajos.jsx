@@ -840,66 +840,16 @@ const PanelTrabajo = () => {
           </div>
         )}
 
-        {/* FOOTER: Acciones - Stepper de Estado */}
+        {/* FOOTER: Acciones */}
         <div className="kanban-card-actions">
-          <div className="estado-stepper">
-            <button
-              type="button"
-              className="stepper-btn stepper-prev"
-              title="Retroceder estado"
-              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) <= 0 || servicio.estado === 'notificacion'}
-              onClick={() => handleRetrocederEstado(servicioId, servicio.estado)}
-            >
-              &#9664;
-            </button>
-            <div className="dropdown-estado">
-              <button
-                type="button"
-                className={`estado-trigger estado-${servicio.estado} modern-estado-btn`}
-                aria-haspopup="listbox"
-                aria-expanded={estadoMenuAbiertoId === servicioId}
-                onClick={() => {
-                  const open = estadoMenuAbiertoId === servicioId ? null : servicioId;
-                  setEstadoMenuAbiertoId(open);
-                  if (open) {
-                    const idx = ESTADO_OPTIONS.findIndex((o) => o.value === servicio.estado);
-                    setEstadoFocusIndex(idx >= 0 ? idx : 0);
-                  }
-                }}
-              >
-                <span className="estado-ico">{getEstadoIcon(servicio.estado)}</span>
-                <span className="estado-label">{getEstadoLabel(servicio.estado)}</span>
-              </button>
-              {estadoMenuAbiertoId === servicioId && (
-                <ul className="estado-menu" role="listbox">
-                  {ESTADO_OPTIONS.map((opt, idx) => (
-                    <li
-                      key={opt.value}
-                      role="option"
-                      aria-selected={opt.value === servicio.estado}
-                      className={`estado-option ${opt.value === servicio.estado ? 'selected' : ''} ${idx === estadoFocusIndex ? 'focused' : ''} estado-${opt.value}`}
-                      onClick={() => { setEstadoMenuAbiertoId(null); handleCambiarEstado(servicioId, opt.value, servicio.estado); }}
-                    >
-                      <span className="estado-ico">{getEstadoIcon(opt.value)}</span>
-                      <span className="estado-label">{opt.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <button
-              type="button"
-              className="stepper-btn stepper-next"
-              title="Avanzar estado"
-              disabled={FLUJO_ESTADOS.indexOf(servicio.estado) >= FLUJO_ESTADOS.length - 1 || servicio.estado === 'notificacion'}
-              onClick={() => handleAvanzarEstado(servicioId, servicio.estado)}
-            >
-              &#9654;
-            </button>
-          </div>
           <button className="detail-link" onClick={() => handleVerDetalles(servicio)}>
             <FiEye size={14} /> Ver
           </button>
+          {servicio.estado !== 'notificacion' && (
+            <button className="card-btn-entregar" onClick={() => handleEntregarServicio(servicioId)}>
+              <FiCheckCircle size={14} /> Entregar
+            </button>
+          )}
         </div>
       </div>
     );
@@ -1134,25 +1084,14 @@ const PanelTrabajo = () => {
                         {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
                       </span>
                       <div className="lista-fila-actions">
-                        <button
-                          className="stepper-btn stepper-prev"
-                          title="Retroceder"
-                          disabled={estadoIdx <= 0}
-                          onClick={() => handleRetrocederEstado(sId, servicio.estado)}
-                        >
-                          &#9664;
-                        </button>
                         <button className="lista-fila-ver" onClick={() => handleVerDetalles(servicio)}>
                           <FiEye size={14} />
                         </button>
-                        <button
-                          className="stepper-btn stepper-next"
-                          title="Avanzar"
-                          disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
-                          onClick={() => handleAvanzarEstado(sId, servicio.estado)}
-                        >
-                          &#9654;
-                        </button>
+                        {servicio.estado !== 'notificacion' && (
+                          <button className="lista-fila-entregar" onClick={() => handleEntregarServicio(sId)}>
+                            <FiCheckCircle size={13} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -1218,24 +1157,8 @@ const PanelTrabajo = () => {
                       </div>
                     </div>
                     <div className="card-item-actions">
-                      <button
-                        className="stepper-btn stepper-prev"
-                        disabled={estadoIdx <= 0}
-                        onClick={() => handleRetrocederEstado(servicioId, servicio.estado)}
-                        title="Retroceder estado"
-                      >
-                        &#9664;
-                      </button>
                       <button className="card-item-ver" onClick={() => handleVerDetalles(servicio)}>
                         <FiEye size={15} /> Ver
-                      </button>
-                      <button
-                        className="stepper-btn stepper-next"
-                        disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
-                        onClick={() => handleAvanzarEstado(servicioId, servicio.estado)}
-                        title="Avanzar estado"
-                      >
-                        &#9654;
                       </button>
                     </div>
                   </div>
@@ -1300,25 +1223,14 @@ const PanelTrabajo = () => {
                         {getEstadoIcon(servicio.estado)} {getEstadoLabel(servicio.estado)}
                       </span>
                       <div className="lista-fila-actions">
-                        <button
-                          className="stepper-btn stepper-prev"
-                          title="Retroceder"
-                          disabled={estadoIdx <= 0}
-                          onClick={() => handleRetrocederEstado(sId, servicio.estado)}
-                        >
-                          &#9664;
-                        </button>
                         <button className="lista-fila-ver" onClick={() => handleVerDetalles(servicio)}>
                           <FiEye size={14} />
                         </button>
-                        <button
-                          className="stepper-btn stepper-next"
-                          title="Avanzar"
-                          disabled={estadoIdx >= FLUJO_ESTADOS.length - 1}
-                          onClick={() => handleAvanzarEstado(sId, servicio.estado)}
-                        >
-                          &#9654;
-                        </button>
+                        {servicio.estado !== 'notificacion' && (
+                          <button className="lista-fila-entregar" onClick={() => handleEntregarServicio(sId)}>
+                            <FiCheckCircle size={13} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -1329,84 +1241,191 @@ const PanelTrabajo = () => {
         )}
       </section>
       {modalOpen && servicioSeleccionado && (
-        <div className="modal-backdrop">
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, margin: 'auto', padding: 24 }}>
+        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
+          <div className="modal-detalle-servicio modal-compact" onClick={e => e.stopPropagation()}>
             <button
               type="button"
+              className="modal-detalle-close"
               onClick={() => setModalOpen(false)}
-              style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', fontSize: 24, cursor: 'pointer' }}
               aria-label="Cerrar modal"
             >
               &times;
             </button>
-            <h3>Detalle de Servicio</h3>
-            <div style={{ marginBottom: 16 }}>
-              <strong>Orden:</strong> {servicioSeleccionado.servicioNumero ? `#${formatServicioNumero(servicioSeleccionado.servicioNumero)}` : shortId(servicioSeleccionado._id || servicioSeleccionado.id)}<br />
-              <strong>Estado:</strong> {getEstadoLabel(servicioSeleccionado.estado)}<br />
 
-              {servicioSeleccionado.estado === 'notificacion' ? (
-                <>
-                  {/* Vista simplificada para notificación */}
-                  <div className="modal-notificacion-banner">
-                    <FiBell size={16} />
-                    <div className="modal-notificacion-content">
-                      <strong>Mensaje de Notificación:</strong>
-                      <p>{servicioSeleccionado.motivoNotificacion || servicioSeleccionado.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje || 'Sin mensaje'}</p>
-                    </div>
-                  </div>
-                  <hr />
-                  <strong>Cliente:</strong> {(() => {
+            <div className="modal-detalle-header">
+              <div className="modal-detalle-orden">
+                <FiHash size={14} />
+                <span>{servicioSeleccionado.servicioNumero ? `TFX-${formatServicioNumero(servicioSeleccionado.servicioNumero)}` : `TFX-${shortId(servicioSeleccionado._id || servicioSeleccionado.id, 6)}`}</span>
+              </div>
+              <span className={`modal-detalle-badge badge-${servicioSeleccionado.estado}`}>
+                {getEstadoIcon(servicioSeleccionado.estado)} {getEstadoLabel(servicioSeleccionado.estado)}
+              </span>
+            </div>
+
+            {servicioSeleccionado.estado === 'notificacion' && (
+              <div className="modal-notificacion-banner modal-notif-compact">
+                <FiBell size={14} />
+                <span>{servicioSeleccionado.motivoNotificacion || servicioSeleccionado.seguimiento?.filter(s => s.tipo === 'notificacion').pop()?.mensaje || 'Sin mensaje'}</span>
+              </div>
+            )}
+
+            <div className="modal-compact-grid">
+              <div className="modal-compact-col">
+                <div className="modal-compact-row">
+                  <span className="modal-compact-label"><FiUser size={12} /> Cliente</span>
+                  <span className="modal-compact-value">{(() => {
                     const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
                       ? servicioSeleccionado.cliente
                       : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
                     return clienteObj?.nombreCompleto || '—';
-                  })()}<br />
-                  <strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}<br />
-                  <strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}<br />
-                  <strong>Tipo de Servicio:</strong> {getTipoLabel(servicioSeleccionado.tipoServicio) || '—'}<br />
-                </>
-              ) : (
-                <>
-                  {/* Vista completa para otros estados */}
-                  <strong>Entrada:</strong> {servicioSeleccionado.fechaEntrada ? new Date(servicioSeleccionado.fechaEntrada).toLocaleString() : '—'}<br />
-                  <strong>Fecha de Salida:</strong> {servicioSeleccionado.fechaSalida ? new Date(servicioSeleccionado.fechaSalida).toLocaleString() : '—'}<br />
-                  <hr />
-                  <strong>Datos del Cliente:</strong><br />
-                  {(() => {
-                    const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
-                      ? servicioSeleccionado.cliente
-                      : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
-                    if (!clienteObj) return <span>Cliente no encontrado</span>;
-                    return (
-                      <div style={{ marginBottom: 8 }}>
-                        <div><strong>Nombre:</strong> {clienteObj.nombreCompleto}</div>
-                        <div><strong>Teléfono:</strong> {clienteObj.telefono || '—'}</div>
-                        <div><strong>Email:</strong> {clienteObj.email || '—'}</div>
-                        <div><strong>DNI:</strong> {clienteObj.dni || '—'}</div>
-                        <div><strong>Dirección:</strong> {clienteObj.direccion || '—'}</div>
-                      </div>
-                    );
-                  })()}
-                  <hr />
-                  <strong>Datos del Producto:</strong><br />
-                  <div style={{ marginBottom: 8 }}>
-                    <div><strong>Marca:</strong> {servicioSeleccionado.marcaProducto || '—'}</div>
-                    <div><strong>Modelo:</strong> {servicioSeleccionado.modeloProducto || '—'}</div>
-                    <div><strong>Tipo de Servicio:</strong> {servicioSeleccionado.tipoServicio || '—'}</div>
-                    <div><strong>Detalles:</strong> {servicioSeleccionado.detalles || '—'}</div>
+                  })()}</span>
+                </div>
+                {(() => {
+                  const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
+                    ? servicioSeleccionado.cliente
+                    : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
+                  return clienteObj?.celular || clienteObj?.telefono ? (
+                    <div className="modal-compact-row">
+                      <span className="modal-compact-label"><FiPhone size={12} /> Teléfono</span>
+                      <span className="modal-compact-value">{clienteObj.celular || clienteObj.telefono}</span>
+                    </div>
+                  ) : null;
+                })()}
+                {(() => {
+                  const clienteObj = typeof servicioSeleccionado.cliente === 'object' && servicioSeleccionado.cliente !== null
+                    ? servicioSeleccionado.cliente
+                    : clientes.find(c => String(c._id || c.id) === String(servicioSeleccionado.clienteId));
+                  return clienteObj?.correo ? (
+                    <div className="modal-compact-row">
+                      <span className="modal-compact-label"><FiClipboard size={12} /> Email</span>
+                      <span className="modal-compact-value">{clienteObj.correo}</span>
+                    </div>
+                  ) : null;
+                })()}
+                <div className="modal-compact-row">
+                  <span className="modal-compact-label"><FiSmartphone size={12} /> Equipo</span>
+                  <span className="modal-compact-value">{[servicioSeleccionado.marcaProducto, servicioSeleccionado.modeloProducto].filter(Boolean).join(' ') || servicioSeleccionado.tipoServicio || '—'}</span>
+                </div>
+                {servicioSeleccionado.tipoServicio && (
+                  <div className="modal-compact-row">
+                    <span className="modal-compact-label"><FiTool size={12} /> Servicio</span>
+                    <span className="modal-compact-value">{getTipoLabel(servicioSeleccionado.tipoServicio) || servicioSeleccionado.tipoServicio}</span>
                   </div>
-                </>
-              )}
+                )}
+              </div>
+
+              <div className="modal-compact-col">
+                <div className="modal-compact-row">
+                  <span className="modal-compact-label modal-compact-label-falla"><FiTool size={12} /> Falla</span>
+                  <span className="modal-compact-value modal-compact-value-falla">{servicioSeleccionado.fallaReportada || 'Sin falla reportada'}</span>
+                </div>
+                {servicioSeleccionado.detalles && (
+                  <div className="modal-compact-row">
+                    <span className="modal-compact-label"><FiClipboard size={12} /> Detalles</span>
+                    <span className="modal-compact-value">{servicioSeleccionado.detalles}</span>
+                  </div>
+                )}
+                {servicioSeleccionado.notasAdicionales && (
+                  <div className="modal-compact-row">
+                    <span className="modal-compact-label"><FiClipboard size={12} /> Notas</span>
+                    <span className="modal-compact-value">{servicioSeleccionado.notasAdicionales}</span>
+                  </div>
+                )}
+                <div className="modal-compact-row">
+                  <span className="modal-compact-label"><FiCalendar size={12} /> Entrada</span>
+                  <span className="modal-compact-value">{servicioSeleccionado.fechaEntrada ? new Date(servicioSeleccionado.fechaEntrada).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span>
+                </div>
+                {servicioSeleccionado.fechaSalida && (
+                  <div className="modal-compact-row">
+                    <span className="modal-compact-label"><FiCalendar size={12} /> Salida</span>
+                    <span className="modal-compact-value">{new Date(servicioSeleccionado.fechaSalida).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                )}
+                {servicioSeleccionado.metodoPago && (
+                  <div className="modal-compact-row">
+                    <span className="modal-compact-label"><FiDollarSign size={12} /> Pago</span>
+                    <span className="modal-compact-value">{servicioSeleccionado.metodoPago}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+
+            <div className="modal-compact-precios">
+              <div className="modal-precio-compact-item">
+                <span>Costo</span>
+                <span>${servicioSeleccionado.presupuesto?.subtotal?.toLocaleString() || '0'}</span>
+              </div>
+              {servicioSeleccionado.presupuesto?.iva > 0 && (
+                <div className="modal-precio-compact-item">
+                  <span>IVA</span>
+                  <span>${servicioSeleccionado.presupuesto?.iva?.toLocaleString() || '0'}</span>
+                </div>
+              )}
+              <div className="modal-precio-compact-item modal-precio-compact-sena">
+                <span>Seña</span>
+                <span>-${servicioSeleccionado.anticipo?.toLocaleString() || '0'}</span>
+              </div>
+              <div className="modal-precio-compact-divider" />
+              <div className="modal-precio-compact-item modal-precio-compact-total">
+                <span>Total</span>
+                <span>${((servicioSeleccionado.presupuesto?.subtotal || 0) - (servicioSeleccionado.anticipo || 0)).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="modal-estado-control">
+              <div className="modal-estado-select-group">
+                <span className="modal-estado-select-label">Estado:</span>
+                <select
+                  className="modal-estado-select"
+                  value={servicioSeleccionado.estado}
+                  onChange={(e) => { handleCambiarEstado(servicioSeleccionado._id || servicioSeleccionado.id, e.target.value, servicioSeleccionado.estado); setModalOpen(false); }}
+                >
+                  {ESTADO_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-detalle-actions">
               {servicioSeleccionado.estado === 'notificacion' ? (
                 <button className="modal-btn-resolver" onClick={() => { setModalOpen(false); handleCambiarEstado(servicioSeleccionado._id || servicioSeleccionado.id, 'resolver', servicioSeleccionado.estado); }}>
                   <FiCheckCircle size={14} /> Resolver Notificación
                 </button>
               ) : (
                 <>
-                  <button className="btn-sinsolucion" onClick={() => { setModalOpen(false); handleMarcarNotificacion(servicioSeleccionado); }}>Notificar</button>
-                  <button className="btn-entregar" onClick={() => { setModalOpen(false); handleEntregarServicio(servicioSeleccionado._id || servicioSeleccionado.id); }}>Entregar</button>
+                  <button className="modal-btn-notificar-rojo" onClick={() => { setModalOpen(false); handleMarcarNotificacion(servicioSeleccionado); }}>
+                    <FiBell size={14} /> Notificar
+                  </button>
+                  <button className="modal-btn-sena" onClick={async () => {
+                    setModalOpen(false);
+                    const { value: monto, isConfirmed } = await Swal.fire({
+                      title: 'Agregar Seña',
+                      input: 'number',
+                      inputLabel: `Anticipo actual: $${(servicioSeleccionado.anticipo || 0).toLocaleString()}`,
+                      inputPlaceholder: 'Monto a agregar',
+                      inputAttributes: { min: 1 },
+                      showCancelButton: true,
+                      confirmButtonText: 'Agregar',
+                      cancelButtonText: 'Cancelar',
+                      confirmButtonColor: '#10b981',
+                      inputValidator: (value) => {
+                        if (!value || Number(value) <= 0) return 'Ingresá un monto válido';
+                      }
+                    });
+                    if (!isConfirmed) return;
+                    try {
+                      const id = servicioSeleccionado._id || servicioSeleccionado.id;
+                      const nuevoAnticipo = (servicioSeleccionado.anticipo || 0) + Number(monto);
+                      await api.put(`/servicios/${id}`, { anticipo: nuevoAnticipo });
+                      Swal.fire({ icon: 'success', title: 'Seña agregada', timer: 1500, showConfirmButton: false });
+                      cargarDatos();
+                    } catch (err) {
+                      Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'No se pudo agregar la seña.' });
+                    }
+                  }}>
+                    <FiDollarSign size={14} /> Agregar Seña
+                  </button>
                 </>
               )}
             </div>
