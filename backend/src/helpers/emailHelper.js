@@ -64,6 +64,11 @@ export const sendResetEmail = async (to, token, username) => {
     html
   };
 
-  const info = await sgMail.send(msg);
-  return info;
+  try {
+    const info = await sgMail.send(msg);
+    return info;
+  } catch (error) {
+    console.error('SendGrid error:', error.response?.body || error.message);
+    throw error;
+  }
 };
