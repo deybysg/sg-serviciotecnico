@@ -64,13 +64,14 @@ export const crearServicio = async (req, res) => {
     }
     const servicioNumero = await getNextServicioNumero();
     const presupuestoItems = presupuesto?.items || [];
-    const presupuestoSubtotal = presupuesto?.subtotal || 0;
-    const presupuestoIva = presupuesto?.iva || 0;
-    const presupuestoTotal = presupuesto?.total || 0;
+    const presupuestoSubtotal = Number(presupuesto?.subtotal) || 0;
+    const presupuestoIva = Number(presupuesto?.iva) || 0;
+    const presupuestoTotal = Number(presupuesto?.total) || 0;
+    const anticipoNum = Number(anticipo) || 0;
     const { rows } = await pool.query(
       `INSERT INTO servicios (servicio_numero, cliente_id, tipo_equipo, marca_producto, modelo_producto, tipo_servicio, falla_reportada, asunto, detalles, notas_adicionales, metodo_pago, anticipo, presupuesto_items, presupuesto_subtotal, presupuesto_iva, presupuesto_total, estado, fecha_entrada)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
-      [servicioNumero, cliente, tipoEquipo || '', marcaProducto || 'Sin marca', modeloProducto || '', tipoServicio || 'reparacion', fallaReportada || '', asunto || '', detalles || '', notasAdicionales || '', metodoPago || '', anticipo || 0, JSON.stringify(presupuestoItems), presupuestoSubtotal, presupuestoIva, presupuestoTotal, estado || 'pendiente', fechaEntrada || new Date()]
+      [servicioNumero, cliente, tipoEquipo || '', marcaProducto || 'Sin marca', modeloProducto || '', tipoServicio || 'reparacion', fallaReportada || '', asunto || '', detalles || '', notasAdicionales || '', metodoPago || '', anticipoNum, JSON.stringify(presupuestoItems), presupuestoSubtotal, presupuestoIva, presupuestoTotal, estado || 'pendiente', fechaEntrada || new Date()]
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -99,12 +100,12 @@ export const actualizarServicio = async (req, res) => {
     if (body.detalles !== undefined) { fields.push(`detalles = $${idx}`); values.push(body.detalles); idx++; }
     if (body.notasAdicionales !== undefined) { fields.push(`notas_adicionales = $${idx}`); values.push(body.notasAdicionales); idx++; }
     if (body.metodoPago !== undefined) { fields.push(`metodo_pago = $${idx}`); values.push(body.metodoPago); idx++; }
-    if (body.anticipo !== undefined) { fields.push(`anticipo = $${idx}`); values.push(body.anticipo); idx++; }
+    if (body.anticipo !== undefined) { fields.push(`anticipo = $${idx}`); values.push(body.anticipo === '' || body.anticipo === null ? 0 : Number(body.anticipo)); idx++; }
     if (body.presupuesto !== undefined) {
       fields.push(`presupuesto_items = $${idx}`); values.push(JSON.stringify(body.presupuesto.items || [])); idx++;
-      fields.push(`presupuesto_subtotal = $${idx}`); values.push(body.presupuesto.subtotal || 0); idx++;
-      fields.push(`presupuesto_iva = $${idx}`); values.push(body.presupuesto.iva || 0); idx++;
-      fields.push(`presupuesto_total = $${idx}`); values.push(body.presupuesto.total || 0); idx++;
+      fields.push(`presupuesto_subtotal = $${idx}`); values.push(Number(body.presupuesto.subtotal) || 0); idx++;
+      fields.push(`presupuesto_iva = $${idx}`); values.push(Number(body.presupuesto.iva) || 0); idx++;
+      fields.push(`presupuesto_total = $${idx}`); values.push(Number(body.presupuesto.total) || 0); idx++;
     }
     if (body.estado !== undefined) { fields.push(`estado = $${idx}`); values.push(body.estado); idx++; }
     if (body.motivoNotificacion !== undefined) { fields.push(`motivo_notificacion = $${idx}`); values.push(body.motivoNotificacion); idx++; }

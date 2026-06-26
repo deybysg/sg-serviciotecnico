@@ -404,11 +404,11 @@ function ServiciosAdmin() {
             asunto: capitalizeWords(serviceData.asunto),
             detalles: capitalizeWords(serviceData.asunto),
             notasAdicionales: capitalizeWords(serviceData.notasAdicionales),
-            anticipo: Number(serviceData.anticipo) || 0,
+            anticipo: Math.round(Number(serviceData.anticipo) || 0),
             metodoPago: serviceData.metodoPago,
             presupuesto: {
-                items: [{ descripcion: capitalizeWords(serviceData.asunto || serviceData.fallaReportada || 'Servicio'), costo: Number(serviceData.totalEstimado) || 0 }],
-                subtotal: Number(serviceData.totalEstimado) || 0,
+                items: [{ descripcion: capitalizeWords(serviceData.asunto || serviceData.fallaReportada || 'Servicio'), costo: Math.round(Number(serviceData.totalEstimado) || 0) }],
+                subtotal: Math.round(Number(serviceData.totalEstimado) || 0),
                 iva: 0,
                 total: Number(serviceData.totalEstimado) || 0,
             },
@@ -1119,7 +1119,7 @@ function ServiciosAdmin() {
                                     <div className="sv-pago-divider"></div>
                                     <div className="sv-pago-row sv-pago-total">
                                         <span>Total</span>
-                                        <span>${(Number(viewService.presupuesto?.subtotal || 0) - Number(viewService.anticipo || 0)).toFixed(2)}</span>
+                                        <span>${Math.round(Number(viewService.presupuesto?.subtotal || 0) - Number(viewService.anticipo || 0)).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>

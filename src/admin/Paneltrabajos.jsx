@@ -90,7 +90,7 @@ function normalizeServicio(s) {
     detalles: s.detalles,
     notasAdicionales: s.notas_adicionales ?? s.notasAdicionales,
     metodoPago: s.metodo_pago ?? s.metodoPago,
-    anticipo: s.anticipo,
+    anticipo: Number(s.anticipo) || 0,
     motivoNotificacion: s.motivo_notificacion ?? s.motivoNotificacion,
     estadoAnterior: s.estado_anterior ?? s.estadoAnterior,
     presupuesto: s.presupuesto || {
@@ -470,8 +470,8 @@ const PanelTrabajo = () => {
         id: idServicio,
         estadoAnterior: servicio?.estadoAnterior || 'pendiente',
         fallaReportada: servicio?.fallaReportada || '',
-        anticipo: servicio?.anticipo || 0,
-        presupuestoTotal: servicio?.presupuesto?.total || 0
+        anticipo: Number(servicio?.anticipo) || 0,
+        presupuestoTotal: Number(servicio?.presupuesto?.total) || 0
       });
       setShowResolverModal(true);
       return;
@@ -538,12 +538,12 @@ const PanelTrabajo = () => {
         estadoAnterior: null,
         motivoNotificacion: null,
         fallaReportada: resolverData.fallaReportada,
-        anticipo: Number(resolverData.anticipo) || 0,
+        anticipo: Math.round(Number(resolverData.anticipo) || 0),
         presupuesto: {
           items: [],
-          subtotal: Number(resolverData.presupuestoTotal) || 0,
+          subtotal: Math.round(Number(resolverData.presupuestoTotal) || 0),
           iva: 0,
-          total: Number(resolverData.presupuestoTotal) || 0
+          total: Math.round(Number(resolverData.presupuestoTotal) || 0)
         }
       };
 
@@ -1363,12 +1363,12 @@ const PanelTrabajo = () => {
               )}
               <div className="modal-precio-compact-item modal-precio-compact-sena">
                 <span>Seña</span>
-                <span>-${servicioSeleccionado.anticipo?.toLocaleString() || '0'}</span>
+                <span>-${(servicioSeleccionado.anticipo || 0).toFixed(2)}</span>
               </div>
               <div className="modal-precio-compact-divider" />
               <div className="modal-precio-compact-item modal-precio-compact-total">
                 <span>Total</span>
-                <span>${((servicioSeleccionado.presupuesto?.subtotal || 0) - (servicioSeleccionado.anticipo || 0)).toLocaleString()}</span>
+                <span>${((servicioSeleccionado.presupuesto?.subtotal || 0) - (servicioSeleccionado.anticipo || 0)).toFixed(2)}</span>
               </div>
             </div>
 
@@ -1402,7 +1402,7 @@ const PanelTrabajo = () => {
                     const { value: monto, isConfirmed } = await Swal.fire({
                       title: 'Agregar Seña',
                       input: 'number',
-                      inputLabel: `Anticipo actual: $${(servicioSeleccionado.anticipo || 0).toLocaleString()}`,
+                      inputLabel: `Anticipo actual: $${(servicioSeleccionado.anticipo || 0).toFixed(2)}`,
                       inputPlaceholder: 'Monto a agregar',
                       inputAttributes: { min: 1 },
                       showCancelButton: true,
@@ -1416,7 +1416,7 @@ const PanelTrabajo = () => {
                     if (!isConfirmed) return;
                     try {
                       const id = servicioSeleccionado._id || servicioSeleccionado.id;
-                      const nuevoAnticipo = Math.round((servicioSeleccionado.anticipo || 0) + Number(monto));
+                      const nuevoAnticipo = (servicioSeleccionado.anticipo || 0) + Number(monto);
                       await api.put(`/servicios/${id}`, { anticipo: nuevoAnticipo });
                       const actualizado = { ...servicioSeleccionado, anticipo: nuevoAnticipo };
                       setServicioSeleccionado(actualizado);

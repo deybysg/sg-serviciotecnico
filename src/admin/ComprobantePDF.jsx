@@ -109,7 +109,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                         )}
                         <div style={S.totalRowFinal}>
                             <span style={S.totalLabelFinal}>TOTAL A PAGAR:</span>
-                            <span style={S.totalValueFinal}>${Number(presupuestoTotal - (Number(service.anticipo) || 0)).toFixed(2)}</span>
+                            <span style={S.totalValueFinal}>${Math.round(Number(presupuestoTotal - (Number(service.anticipo) || 0))).toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -184,7 +184,7 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                         )}
                         <div style={S.ticketTotalRowFinal}>
                             <span style={S.ticketTotalLabelFinal}>Total:</span>
-                            <span style={S.ticketTotalValueFinal}>${Number(presupuestoTotal - (Number(service.anticipo) || 0)).toFixed(2)}</span>
+                            <span style={S.ticketTotalValueFinal}>${Math.round(Number(presupuestoTotal - (Number(service.anticipo) || 0))).toFixed(2)}</span>
                         </div>
                     </div>
 
