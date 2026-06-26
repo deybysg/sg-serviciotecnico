@@ -17,6 +17,7 @@ const CATEGORIAS_VALIDAS = [
 ];
 
 const productosSchema = new Schema({
+  codigo: { type: String, required: true, unique: true },
   nombre: { type: String, required: true },
   categoria: {
     type: String,

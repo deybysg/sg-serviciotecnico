@@ -52,6 +52,7 @@ export async function initPostgres() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS productos (
         id SERIAL PRIMARY KEY,
+        codigo VARCHAR(50) NOT NULL UNIQUE,
         nombre VARCHAR(255) NOT NULL,
         categoria VARCHAR(50) NOT NULL DEFAULT 'General',
         precio DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -62,6 +63,40 @@ export async function initPostgres() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Agregar columna 'codigo' si la tabla ya existe sin ella
+    const colCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns WHERE table_name = 'productos' AND column_name = 'codigo'
+      ) AS exists
+    `);
+    if (!colCheck.rows[0].exists) {
+      // La columna no existe: la agregamos como nullable primero
+      await client.query(`ALTER TABLE productos ADD COLUMN codigo VARCHAR(50)`);
+      console.log('Columna codigo agregada a productos');
+    }
+
+    // Asignar códigos únicos a productos que tengan codigo NULL o vacío
+    await client.query(`
+      UPDATE productos
+      SET codigo = 'PROD-' || id
+      WHERE codigo IS NULL OR TRIM(codigo) = ''
+    `);
+
+    // Ahora sí: asegurar NOT NULL y UNIQUE
+    await client.query(`ALTER TABLE productos ALTER COLUMN codigo SET NOT NULL`);
+    
+    // Eliminar constraint UNIQUE existente si hay duplicados, y recrearlo
+    const uniqCheck = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conrelid = 'productos'::regclass AND contype = 'u' AND array_position(conkey, (
+        SELECT attnum FROM pg_attribute WHERE attrelid = 'productos'::regclass AND attname = 'codigo'
+      )) IS NOT NULL
+    `);
+    if (uniqCheck.rows.length > 0) {
+      await client.query(`ALTER TABLE productos DROP CONSTRAINT ${uniqCheck.rows[0].conname}`);
+    }
+    await client.query(`ALTER TABLE productos ADD CONSTRAINT productos_codigo_key UNIQUE (codigo)`);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS clientes (

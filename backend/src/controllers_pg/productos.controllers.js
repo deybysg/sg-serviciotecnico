@@ -27,8 +27,19 @@ export const obtenerProducto = async (req, res) => {
 export const crearProducto = async (req, res) => {
   try {
     const pool = getPool();
-    const { nombre, categoria, precio, stock, descripcion, imagen } = req.body;
+    const { codigo, nombre, categoria, precio, stock, descripcion, imagen } = req.body;
     
+    // Validar que el código no esté vacío
+    if (!codigo || codigo.trim() === '') {
+      return res.status(400).json({ mensaje: "El código del producto es obligatorio" });
+    }
+
+    // Validar que el código no esté duplicado
+    const codigoExistente = await pool.query('SELECT id FROM productos WHERE LOWER(codigo) = LOWER($1)', [codigo.trim()]);
+    if (codigoExistente.rows.length > 0) {
+      return res.status(400).json({ mensaje: "Ya existe un producto con ese código" });
+    }
+
     // Validar que el nombre no esté vacío
     if (!nombre || nombre.trim() === '') {
       return res.status(400).json({ mensaje: "El nombre del producto es obligatorio" });
@@ -42,9 +53,9 @@ export const crearProducto = async (req, res) => {
     const stockFinal = stock || 0;
     
     const { rows } = await pool.query(
-      `INSERT INTO productos (nombre, categoria, precio, stock, descripcion, imagen)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [nombre, categoriaFinal, precioFinal, stockFinal, descripcionFinal, imagenFinal]
+      `INSERT INTO productos (codigo, nombre, categoria, precio, stock, descripcion, imagen)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [codigo.trim(), nombre, categoriaFinal, precioFinal, stockFinal, descripcionFinal, imagenFinal]
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -57,7 +68,20 @@ export const actualizarProducto = async (req, res) => {
   try {
     const pool = getPool();
     const { id } = req.params;
-    const { nombre, categoria, precio, stock, descripcion, imagen } = req.body;
+    const { codigo, nombre, categoria, precio, stock, descripcion, imagen } = req.body;
+
+    if (!codigo || codigo.trim() === '') {
+      return res.status(400).json({ mensaje: "El código del producto es obligatorio" });
+    }
+
+    // Validar que el código no esté duplicado (excluyendo el producto actual)
+    const codigoExistente = await pool.query(
+      'SELECT id FROM productos WHERE LOWER(codigo) = LOWER($1) AND id != $2', 
+      [codigo.trim(), id]
+    );
+    if (codigoExistente.rows.length > 0) {
+      return res.status(400).json({ mensaje: "Ya existe un producto con ese código" });
+    }
     
     if (!nombre || nombre.trim() === '') {
       return res.status(400).json({ mensaje: "El nombre del producto es obligatorio" });
@@ -70,9 +94,9 @@ export const actualizarProducto = async (req, res) => {
     const stockFinal = stock || 0;
     
     const { rows } = await pool.query(
-      `UPDATE productos SET nombre = $1, categoria = $2, precio = $3, stock = $4, descripcion = $5, imagen = $6, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7 RETURNING *`,
-      [nombre, categoriaFinal, precioFinal, stockFinal, descripcionFinal, imagenFinal, id]
+      `UPDATE productos SET codigo = $1, nombre = $2, categoria = $3, precio = $4, stock = $5, descripcion = $6, imagen = $7, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $8 RETURNING *`,
+      [codigo.trim(), nombre, categoriaFinal, precioFinal, stockFinal, descripcionFinal, imagenFinal, id]
     );
     if (rows.length === 0) return res.status(404).json({ message: "Producto no encontrado" });
     res.json(rows[0]);

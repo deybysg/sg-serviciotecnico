@@ -224,7 +224,7 @@
 /* Header de la tabla */
 .admin-producto-lista-header {
   display: grid;
-  grid-template-columns: 2.2fr 1fr 1fr 0.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr 0.8fr 1fr;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
@@ -241,7 +241,7 @@
 /* Fila de producto */
 .admin-producto-fila {
   display: grid;
-  grid-template-columns: 2.2fr 1fr 1fr 0.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr 0.8fr 1fr;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
@@ -315,6 +315,26 @@
   font-size: 0.7rem;
   color: var(--text-muted);
   font-weight: 500;
+}
+
+/* Columna Código */
+.col-codigo {
+  display: flex;
+  align-items: center;
+}
+
+.admin-producto-codigo-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--neon-purple);
+  background: rgba(191, 50, 255, 0.1);
+  border: 1px solid rgba(191, 50, 255, 0.25);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 /* Columna Categoría */
@@ -649,6 +669,18 @@
 .modal-producto-input:focus {
   border-color: var(--neon-blue);
   box-shadow: 0 0 20px rgba(0, 183, 255, 0.25), 0 0 28px rgba(191, 50, 255, 0.22);
+}
+
+.modal-producto-error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.modal-producto-input-error {
+  border-color: #ef4444 !important;
 }
 
 .modal-producto-select {
@@ -1027,6 +1059,7 @@
     width: 100%;
   }
 
+  .col-codigo,
   .col-cat,
   .col-precio,
   .col-stock {
@@ -1035,6 +1068,7 @@
     gap: 8px;
   }
 
+  .col-codigo::before { content: 'Código:'; font-size: 0.7rem; color: var(--text-muted); }
   .col-cat::before { content: 'Categoría:'; font-size: 0.7rem; color: var(--text-muted); }
   .col-precio::before { content: 'Precio:'; font-size: 0.7rem; color: var(--text-muted); }
   .col-stock::before { content: 'Stock:'; font-size: 0.7rem; color: var(--text-muted); }

@@ -104,9 +104,10 @@ function AlertaStockModal({ productosAAlertar, onClose }) {
 // 3. COMPONENTE INTERNO: ProductoFormModal (Formulario de Edición/Creación)
 // Este componente no se modifica
 // =================================================================
-function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
+function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExistentes }) {
     const [formData, setFormData] = useState({
         _id: productoInicial?._id || productoInicial?.id || "",
+        codigo: productoInicial?.codigo || "",
         nombre: productoInicial?.nombre || "",
         categoria: productoInicial?.categoria || CATEGORIAS_VALIDAS[0],
         descripcion: productoInicial?.descripcion || "",
@@ -116,6 +117,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
     });    const [useFileMode, setUseFileMode] = useState(false);
     const [localFile, setLocalFile] = useState(null);
     const [localFileBase64, setLocalFileBase64] = useState(null);
+    const [codigoDuplicado, setCodigoDuplicado] = useState("");
 
     const isEditing = !!productoInicial;
 
@@ -125,6 +127,30 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
             ...prev,
             [name]: name === 'precio' || name === 'stock' ? (value === '' ? '' : Number(value)) : value,
         }));
+
+        // Validación en tiempo real del código
+        if (name === "codigo") {
+            const trimValue = value.trim().toLowerCase();
+            if (trimValue === "") {
+                setCodigoDuplicado("");
+                return;
+            }
+            const duplicado = productosExistentes?.find(p =>
+                p.codigo?.toLowerCase() === trimValue &&
+                (p._id || p.id) !== (productoInicial?._id || productoInicial?.id)
+            );
+            if (duplicado) {
+                setCodigoDuplicado("Ya existe un producto con ese código");
+            } else {
+                setCodigoDuplicado("");
+            }
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+        }
     };
     
     const handleFileChange = (e) => {
@@ -160,6 +186,28 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
         
         // ===== VALIDACIONES FRONTEND =====
         
+        // Validar código no vacío
+        if (!formData.codigo || formData.codigo.trim() === "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Código requerido',
+                text: 'El código del producto es obligatorio',
+                timer: 2000
+            });
+            return;
+        }
+
+        // Validar código duplicado
+        if (codigoDuplicado) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Código duplicado',
+                text: 'Ya existe un producto con ese código',
+                timer: 2500
+            });
+            return;
+        }
+
         // Validar nombre no vacío
         if (!formData.nombre || formData.nombre.trim() === "") {
             Swal.fire({
@@ -275,8 +323,26 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
 
                 <form onSubmit={handleSubmit} className="modal-producto-form">
                     <div className="modal-producto-body">
-                        {/* Row 1: Nombre + Categoría */}
+                        {/* Row 1: Código + Nombre */}
                         <div className="modal-producto-row">
+                            <div className="modal-producto-field">
+                                <label className="modal-producto-label">
+                                    <FiHash size={12} /> Código <span className="modal-producto-required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="codigo"
+                                    className={`modal-producto-input ${codigoDuplicado ? "modal-producto-input-error" : ""}`}
+                                    placeholder="Ej: PROD-001"
+                                    value={formData.codigo}
+                                    onChange={handleChange}
+                                    onKeyDown={handleKeyDown}
+                                    required
+                                />
+                                {codigoDuplicado && (
+                                    <span className="modal-producto-error">{codigoDuplicado}</span>
+                                )}
+                            </div>
                             <div className="modal-producto-field">
                                 <label className="modal-producto-label">
                                     <FiTag size={12} /> Nombre <span className="modal-producto-required">*</span>
@@ -291,6 +357,10 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
                                     required
                                 />
                             </div>
+                        </div>
+
+                        {/* Row 2: Categoría + Precio */}
+                        <div className="modal-producto-row">
                             <div className="modal-producto-field">
                                 <label className="modal-producto-label">
                                     <FiPackage size={12} /> Categoría <span className="modal-producto-required">*</span>
@@ -309,10 +379,6 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
                                     ))}
                                 </select>
                             </div>
-                        </div>
-
-                        {/* Row 2: Precio + Stock */}
-                        <div className="modal-producto-row">
                             <div className="modal-producto-field">
                                 <label className="modal-producto-label">
                                     <FiDollarSign size={12} /> Precio ($) <span className="modal-producto-required">*</span>
@@ -328,6 +394,10 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar }) {
                                     step="0.01"
                                 />
                             </div>
+                        </div>
+
+                        {/* Row 3: Stock */}
+                        <div className="modal-producto-row">
                             <div className="modal-producto-field">
                                 <label className="modal-producto-label">
                                     <FiHash size={12} /> Stock <span className="modal-producto-required">*</span>
@@ -495,11 +565,12 @@ function ProductosAdmin() {
         // Si el término de búsqueda está vacío, muestra todos
         if (!lowerCaseSearch) return true;
 
-        // Filtra por nombre o categoría
-        return (
-            producto.nombre.toLowerCase().includes(lowerCaseSearch) ||
-            producto.categoria.toLowerCase().includes(lowerCaseSearch)
-        );
+        // Filtra por nombre, categoría o código
+        return (
+            producto.nombre.toLowerCase().includes(lowerCaseSearch) ||
+            producto.categoria.toLowerCase().includes(lowerCaseSearch) ||
+            producto.codigo?.toLowerCase().includes(lowerCaseSearch)
+        );
     });
 
 
@@ -692,6 +763,7 @@ function ProductosAdmin() {
                             {/* Header de la tabla */}
                             <div className="admin-producto-lista-header">
                                 <span className="col-foto">Producto</span>
+                                <span className="col-codigo">Código</span>
                                 <span className="col-cat">Categoría</span>
                                 <span className="col-precio">Precio</span>
                                 <span className="col-stock">Stock</span>
@@ -713,6 +785,13 @@ function ProductosAdmin() {
                                                 <h4>{producto.nombre}</h4>
                                                 <span className="admin-producto-fila-id">{shortId(producto._id || producto.id, 6)}</span>
                                             </div>
+                                        </div>
+
+                                        {/* Código */}
+                                        <div className="col-codigo">
+                                            <span className="admin-producto-codigo-badge">
+                                                {producto.codigo || '—'}
+                                            </span>
                                         </div>
 
                                         {/* Categoría */}
@@ -766,6 +845,7 @@ function ProductosAdmin() {
                         productoInicial={productoSeleccionado}
                         onClose={() => setShowModal(false)}
                         onGuardar={handleGuardar}
+                        productosExistentes={productos}
                     />
                 )}
 
