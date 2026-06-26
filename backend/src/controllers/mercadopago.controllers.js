@@ -55,10 +55,13 @@ export const createPreference = async (req, res) => {
         console.log('[MP] Creando preferencia con:', {
             items: mpItems.length,
             email,
-            frontend: process.env.FRONTEND_URL,
-            backend: process.env.BACKEND_URL
+            frontend: frontendUrl,
+            backend: backendUrl
         });
         
+        const frontendUrl = (process.env.FRONTEND_URL || '').trim();
+        const backendUrl = (process.env.BACKEND_URL || '').trim();
+
         const result = await preference.create({
             body: {
                 items: mpItems,
@@ -66,11 +69,11 @@ export const createPreference = async (req, res) => {
                     email: email
                 },
                 back_urls: {
-                    success: `${process.env.FRONTEND_URL}/pago-exitoso`,
-                    failure: `${process.env.FRONTEND_URL}/pago-fallido`,
-                    pending: `${process.env.FRONTEND_URL}/pago-pendiente`
+                    success: `${frontendUrl}/pago-exitoso`,
+                    failure: `${frontendUrl}/pago-fallido`,
+                    pending: `${frontendUrl}/pago-pendiente`
                 },
-                notification_url: `${process.env.BACKEND_URL}/api/mercadopago/webhook`,
+                notification_url: `${backendUrl}/api/mercadopago/webhook`,
                 metadata: {
                     userId: userId,
                     username: username,
