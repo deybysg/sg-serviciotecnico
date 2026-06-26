@@ -8,10 +8,13 @@ const SMTP_PASS = process.env.SMTP_PASS;
 
 // Crear transporte (ajustable vía variables de entorno)
 const transporter = nodemailer.createTransport({
-  host: SMTP_HOST || 'smtp.example.com',
+  host: SMTP_HOST || 'smtp.gmail.com',
   port: SMTP_PORT ? Number(SMTP_PORT) : 587,
-  secure: SMTP_PORT == 465, // true para 465
-  auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
+  secure: Number(SMTP_PORT) === 465,
+  auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 export const sendResetEmail = async (to, token, username) => {
