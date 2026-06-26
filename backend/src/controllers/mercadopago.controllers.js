@@ -3,6 +3,7 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import nodemailer from 'nodemailer';
 import PDFDocument from 'pdfkit';
+import QRCode from 'qrcode';
 import Venta from '../models/ventasSchema.js';
 import Producto from '../models/productosSchema.js';
 
@@ -94,6 +95,71 @@ export const createPreference = async (req, res) => {
         // Pasar mensaje más detallado si viene de la API de MP
         const msg = error?.message || 'Error al crear preferencia de pago';
         res.status(500).json({ error: msg });
+    }
+};
+
+export const createQR = async (req, res) => {
+    try {
+        if (!process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN.trim() === '') {
+            return res.status(500).json({ error: 'Access Token de Mercado Pago no configurado' });
+        }
+
+        const { items, email, userId, username } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).json({ error: 'No hay items en el carrito' });
+        }
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email es requerido' });
+        }
+
+        const frontendUrl = (process.env.FRONTEND_URL || '').trim();
+        const backendUrl = (process.env.BACKEND_URL || '').trim();
+
+        const mpItems = items.map(item => ({
+            title: item.nombre,
+            quantity: item.cantidad,
+            unit_price: parseFloat(item.precio),
+            currency_id: 'ARS'
+        }));
+
+        const preference = new Preference(client);
+
+        const result = await preference.create({
+            body: {
+                items: mpItems,
+                payer: { email },
+                back_urls: {
+                    success: `${frontendUrl}/pago-exitoso`,
+                    failure: `${frontendUrl}/pago-fallido`,
+                    pending: `${frontendUrl}/pago-pendiente`
+                },
+                notification_url: `${backendUrl}/api/mercadopago/webhook`,
+                metadata: {
+                    userId,
+                    username,
+                    email,
+                    items: JSON.stringify(items)
+                }
+            }
+        });
+
+        const qrImage = await QRCode.toDataURL(result.init_point, {
+            width: 300,
+            margin: 2,
+            color: { dark: '#000000', light: '#ffffff' }
+        });
+
+        res.json({
+            preferenceId: result.id,
+            qrCode: qrImage,
+            initPoint: result.init_point
+        });
+
+    } catch (error) {
+        console.error('Error creando QR:', error?.message || error);
+        res.status(500).json({ error: error?.message || 'Error al crear código QR' });
     }
 };
 

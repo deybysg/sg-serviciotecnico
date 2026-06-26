@@ -58,6 +58,9 @@ function Carrito({ isOpen, onClose }) {
 
     // Estado para acordeón de Mercado Pago
     const [showMPInfo, setShowMPInfo] = useState(false);
+    const [showQR, setShowQR] = useState(false);
+    const [qrImage, setQrImage] = useState(null);
+    const [qrLoading, setQrLoading] = useState(false);
 
     // 💡 Obtiene el username o 'Invitado' si no hay usuario logueado
     const displayUsername = user?.username || 'Invitado';
@@ -161,6 +164,57 @@ function Carrito({ isOpen, onClose }) {
                 timer: 4000,
                 timerProgressBar: true
             });
+        }
+    };
+
+    const handleQR = async () => {
+        if (useCartStore.getState().checkExpiration()) return;
+
+        if (!user || user.role === 'Invitado') {
+            Swal.fire({ icon: 'info', title: 'Inicia Sesión', text: 'Debes iniciar sesión para realizar una compra.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            return;
+        }
+
+        if (cartItems.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'Carrito Vacío', text: 'No puedes comprar sin productos.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            return;
+        }
+
+        const { value: email } = await Swal.fire({
+            title: 'Confirmar email',
+            input: 'email',
+            inputLabel: 'Ingresa tu email para recibir el comprobante',
+            inputPlaceholder: 'tu-email@ejemplo.com',
+            inputValue: user.email || '',
+            showCancelButton: true,
+            confirmButtonText: 'Generar QR',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (!value) return 'Debes ingresar un email';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email inválido';
+            }
+        });
+
+        if (!email) return;
+
+        try {
+            setQrLoading(true);
+            setShowQR(true);
+
+            const response = await api.post('/mercadopago/create-qr', {
+                items: cartItems,
+                email,
+                userId: user._id || user.id,
+                username: user.username
+            });
+
+            setQrImage(response.qrCode);
+        } catch (error) {
+            console.error('Error creando QR:', error);
+            setShowQR(false);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error', text: 'No se pudo generar el código QR.', showConfirmButton: false, timer: 4000 });
+        } finally {
+            setQrLoading(false);
         }
     };
 
@@ -449,6 +503,19 @@ function Carrito({ isOpen, onClose }) {
                                 <div className="payment-divider">
                                     <span>o</span>
                                 </div>
+
+                                {/* Botón QR */}
+                                <button 
+                                    onClick={handleQR} 
+                                    className="btn-checkout btn-qr" 
+                                    disabled={totalItems === 0 || qrLoading}
+                                >
+                                    📱 Pagar con QR
+                                </button>
+                                
+                                <div className="payment-divider">
+                                    <span>o</span>
+                                </div>
                                 
                                 {/* Botón de Simulación */}
                                 <button 
@@ -469,6 +536,24 @@ function Carrito({ isOpen, onClose }) {
                     </div>
                 )}
             </div>
+
+            {/* Modal QR */}
+            {showQR && (
+                <div className="qr-modal-overlay" onClick={() => { setShowQR(false); setQrImage(null); }}>
+                    <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h3>Escaneá el código QR</h3>
+                        <p>Abre la app de Mercado Pago y escaneá para pagar</p>
+                        {qrLoading ? (
+                            <div className="qr-loading">Generando QR...</div>
+                        ) : qrImage ? (
+                            <img src={qrImage} alt="QR MercadoPago" className="qr-image" />
+                        ) : null}
+                        <button className="qr-modal-close" onClick={() => { setShowQR(false); setQrImage(null); }}>
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
