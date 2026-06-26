@@ -1416,7 +1416,7 @@ const PanelTrabajo = () => {
                     if (!isConfirmed) return;
                     try {
                       const id = servicioSeleccionado._id || servicioSeleccionado.id;
-                      const nuevoAnticipo = (servicioSeleccionado.anticipo || 0) + Number(monto);
+                      const nuevoAnticipo = Math.round((servicioSeleccionado.anticipo || 0) + Number(monto));
                       await api.put(`/servicios/${id}`, { anticipo: nuevoAnticipo });
                       const actualizado = { ...servicioSeleccionado, anticipo: nuevoAnticipo };
                       setServicioSeleccionado(actualizado);
