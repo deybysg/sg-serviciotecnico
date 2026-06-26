@@ -1421,7 +1421,6 @@ const PanelTrabajo = () => {
                       const actualizado = { ...servicioSeleccionado, anticipo: nuevoAnticipo };
                       setServicioSeleccionado(actualizado);
                       await cargarDatos();
-                      setModalOpen(true);
                       Swal.fire({ icon: 'success', title: 'Seña agregada', timer: 1500, showConfirmButton: false });
                     } catch (err) {
                       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'No se pudo agregar la seña.' });
