@@ -177,6 +177,25 @@ export async function initPostgres() {
       }
     }
 
+    // Migración: columnas de usuarios para recuperación de contraseña
+    const columnasUsuarios = [
+      { name: 'email', definition: "VARCHAR(255)" },
+      { name: 'reset_password_token_hash', definition: 'VARCHAR(255)' },
+      { name: 'reset_password_expires', definition: 'TIMESTAMP' },
+    ];
+    for (const col of columnasUsuarios) {
+      const check = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'usuarios' AND column_name = $1
+        ) AS exists
+      `, [col.name]);
+      if (!check.rows[0].exists) {
+        await client.query(`ALTER TABLE usuarios ADD COLUMN ${col.name} ${col.definition}`);
+        console.log(`Columna ${col.name} agregada a usuarios`);
+      }
+    }
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS ventas (
         id SERIAL PRIMARY KEY,
