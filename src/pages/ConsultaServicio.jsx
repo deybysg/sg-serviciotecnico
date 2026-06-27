@@ -508,7 +508,15 @@ function ConsultaServicio() {
                                     <FiFileText size={18} /> Ver Presupuesto
                                 </button>
                             )}
-                            <button className="btn-secondary" onClick={() => Swal.fire('Contacto', cliente?.telefono ? `Llamar a ${cliente.telefono}` : 'Datos de contacto no disponibles', 'info')}>
+                            <button className="btn-secondary" onClick={() => {
+                                const tel = cliente?.telefono || cliente?.celular || '';
+                                if (tel) {
+                                    const num = tel.replace(/\D/g, '');
+                                    window.open(`https://wa.me/${num}`, '_blank');
+                                } else {
+                                    Swal.fire('Contacto', 'Datos de contacto no disponibles', 'info');
+                                }
+                            }}>
                                 <FiUser size={18} /> Contactar Taller
                             </button>
                         </div>
