@@ -114,6 +114,11 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
                     </div>
                 </div>
 
+                {/* Aviso */}
+                <div style={S.aviso}>
+                    <span style={S.avisoLabel}>Aviso:</span> Los equipos deberán ser retirados dentro de los 60 días de finalizada la reparación. Pasado ese plazo, el local no se responsabiliza por su guarda ni conservación, y podrá disponer del equipo por considerarlo abandonado.
+                </div>
+
                 {/* Footer cliente */}
                 <div style={S.footerCliente}>
                     <div>
@@ -204,14 +209,16 @@ const ComprobantePDF = ({ service, TIPO_SERVICIO_OPTIONS, ESTADO_OPTIONS }) => {
 const S = {
     wrap: {
         fontFamily: 'Arial, Helvetica, sans-serif',
-        fontSize: '8.5pt',
+        fontSize: '9.5pt',
         color: '#222',
-        padding: '3mm 3mm 20mm 3mm',
+        padding: '0',
         backgroundColor: '#fff',
         margin: '0 auto',
         boxSizing: 'border-box',
-        maxWidth: '190mm',
-        lineHeight: 1.2,
+        width: '190mm',
+        maxHeight: '277mm',
+        overflow: 'hidden',
+        lineHeight: 1.25,
     },
 
     // Cliente
@@ -219,52 +226,53 @@ const S = {
     border: '1px solid #999',
     padding: '5mm',
     backgroundColor: '#fff',
-    maxHeight: '260mm',
+    maxHeight: '277mm',
+    overflow: 'hidden',
 },
     header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginBottom: '10px',
-        paddingBottom: '10px',
+        paddingBottom: '8px',
         borderBottom: '1.5px solid #007bff',
     },
     headerLeft: {
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: '8px',
     },
     logoImg: {
-        height: '36px',
+        height: '38px',
         width: 'auto',
         objectFit: 'contain',
     },
     title: {
-        fontSize: '11pt',
+        fontSize: '13pt',
         fontWeight: '900',
         color: '#007bff',
         margin: 0,
     },
     localInfo: {
-        fontSize: '8.5pt',
+        fontSize: '9pt',
         color: '#0b2545',
-        margin: '4px 0 0 0',
+        margin: '3px 0 0 0',
         fontWeight: '700',
     },
     qrBox: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: '10px',
+        gap: '8px',
     },
     qrTextBlock: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
-        gap: '4px',
+        gap: '3px',
     },
     qrOrder: {
-        fontSize: '9pt',
+        fontSize: '9.5pt',
         color: '#0b2545',
         fontWeight: '800',
         textAlign: 'right',
@@ -278,7 +286,7 @@ const S = {
     },
     headerRight: {
         textAlign: 'right',
-        fontSize: '7.5pt',
+        fontSize: '8pt',
         lineHeight: 1.3,
     },
     badge: (estado) => ({
@@ -293,63 +301,63 @@ const S = {
     cols2: {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '10px 16px',
-        marginTop: '12px',
-        marginBottom: '12px',
+        gap: '8px 14px',
+        marginTop: '10px',
+        marginBottom: '10px',
     },
     col: {
         border: '1px solid #e0e0e0',
         borderRadius: '4px',
-        padding: '10px 12px',
+        padding: '8px 10px',
         background: '#fafbfc',
     },
     secTitle: {
-        fontSize: '7.5pt',
+        fontSize: '8.5pt',
         fontWeight: 'bold',
         textTransform: 'uppercase',
         color: '#444',
         borderBottom: '1px solid #ddd',
-        paddingBottom: '2px',
+        paddingBottom: '3px',
         marginBottom: '4px',
     },
     line: {
-        fontSize: '8.5pt',
+        fontSize: '9.5pt',
         margin: '2px 0',
     },
     box: {
         border: '1px solid #e0e0e0',
         borderRadius: '4px',
-        padding: '10px 12px',
+        padding: '8px 10px',
         background: '#fafbfc',
-        marginTop: '12px',
+        marginTop: '8px',
     },
     falla: {
-        fontSize: '8.5pt',
+        fontSize: '9.5pt',
         whiteSpace: 'pre-wrap',
         background: '#fff',
         border: '1px solid #e0e0e0',
-        padding: '10px',
+        padding: '8px',
         borderRadius: '4px',
-        minHeight: '50px',
+        minHeight: '40px',
     },
 
     totalesBox: {
         border: '1px solid #ddd',
         borderRadius: '4px',
-        padding: '14px 18px',
+        padding: '10px 14px',
         background: '#fafbfc',
-        marginTop: '16px',
+        marginTop: '10px',
     },
     totalesGrid: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '4px',
+        gap: '3px',
     },
     totalRow: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: '9pt',
+        fontSize: '9.5pt',
         padding: '2px 0',
     },
     totalLabel: {
@@ -359,42 +367,56 @@ const S = {
     totalValue: {
         fontWeight: '700',
         color: '#222',
-        fontSize: '10pt',
+        fontSize: '10.5pt',
     },
     totalValueSeña: {
         fontWeight: '700',
         color: '#222',
-        fontSize: '10pt',
+        fontSize: '10.5pt',
     },
     totalRowFinal: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: '10pt',
-        padding: '6px 0 2px 0',
+        fontSize: '10.5pt',
+        padding: '5px 0 2px 0',
         borderTop: '1px solid #ccc',
-        marginTop: '2px',
+        marginTop: '3px',
     },
     totalLabelFinal: {
         fontWeight: '800',
         color: '#222',
-        fontSize: '11pt',
+        fontSize: '11.5pt',
     },
     totalValueFinal: {
         fontWeight: '800',
         color: '#222',
-        fontSize: '12pt',
+        fontSize: '12.5pt',
+    },
+
+    aviso: {
+        marginTop: '8px',
+        padding: '7px 10px',
+        fontSize: '8.5pt',
+        color: '#555',
+        background: '#fdf6ec',
+        border: '1px dashed #e0c97a',
+        borderRadius: '4px',
+        lineHeight: 1.4,
+    },
+    avisoLabel: {
+        fontWeight: '700',
     },
 
     footerCliente: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: '12px',
-        paddingTop: '10px',
+        marginTop: '10px',
+        paddingTop: '8px',
         borderTop: '2px solid #007bff',
         background: '#f0f7ff',
-        padding: '10px 14px',
+        padding: '8px 12px',
         borderRadius: '4px',
     },
     thanks: {
@@ -405,14 +427,14 @@ const S = {
         letterSpacing: '0.02em',
     },
     small: {
-        fontSize: '8.5pt',
+        fontSize: '9pt',
         color: '#444',
-        margin: '4px 0 0 0',
+        margin: '3px 0 0 0',
         fontWeight: '600',
     },
     orderInfo: {
         textAlign: 'right',
-        fontSize: '8pt',
+        fontSize: '8.5pt',
         color: '#444',
         lineHeight: 1.4,
     },
@@ -450,7 +472,7 @@ const S = {
     ticket: {
         maxWidth: '380px',
         margin: '0 auto',
-        padding: '10px 16px',
+        padding: '8px 14px',
         background: '#fff',
         border: '2px dashed #ffc107',
         borderRadius: '5px',
@@ -460,34 +482,34 @@ const S = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: '6px',
+        paddingBottom: '5px',
         borderBottom: '1.5px dashed #e0e0e0',
-        marginBottom: '8px',
+        marginBottom: '6px',
     },
     ticketLogoImg: {
-        height: '28px',
+        height: '26px',
         width: 'auto',
         objectFit: 'contain',
     },
     ticketLabel: {
-        fontSize: '0.7rem',
+        fontSize: '0.65rem',
         fontWeight: '800',
         color: '#b38600',
         textTransform: 'uppercase',
         background: '#fff8e1',
-        padding: '2px 8px',
+        padding: '2px 7px',
         borderRadius: '3px',
     },
     ticketBody: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '6px',
+        gap: '4px',
     },
     ticketField: {
         background: '#fafbfc',
         border: '1px solid #e8e8e8',
         borderRadius: '3px',
-        padding: '5px 7px',
+        padding: '4px 6px',
     },
     ticketLabel2: {
         fontSize: '7pt',
@@ -495,7 +517,7 @@ const S = {
         color: '#888',
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        marginBottom: '2px',
+        marginBottom: '1px',
     },
     ticketValue2: {
         fontSize: '9pt',
@@ -520,13 +542,13 @@ const S = {
     ticketSep: {
         height: 0,
         borderTop: '1.5px dashed #ccc',
-        margin: '4px 0',
+        margin: '3px 0',
     },
     ticketTotales: {
         background: '#fafbfc',
         border: '1px solid #e8e8e8',
         borderRadius: '3px',
-        padding: '6px 7px',
+        padding: '5px 6px',
     },
     ticketTotalRow: {
         display: 'flex',
@@ -550,9 +572,9 @@ const S = {
         display: 'flex',
         justifyContent: 'space-between',
         fontSize: '9.5pt',
-        padding: '4px 0 1px 0',
+        padding: '3px 0 1px 0',
         borderTop: '1px solid #ccc',
-        marginTop: '3px',
+        marginTop: '2px',
     },
     ticketTotalLabelFinal: {
         color: '#222',
@@ -566,8 +588,8 @@ const S = {
         textAlign: 'center',
         fontSize: '7pt',
         color: '#aaa',
-        marginTop: '6px',
-        paddingTop: '5px',
+        marginTop: '4px',
+        paddingTop: '4px',
         borderTop: '1px dashed #ccc',
     },
 };

@@ -1025,7 +1025,7 @@ function ServiciosAdmin() {
             </div>
 
             {serviceToPrint && isPrinting && (
-                <div ref={comprobanteRef} style={{ position: 'absolute', left: '-9999px', width: '210mm', minHeight: '297mm', padding: '10mm', backgroundColor: '#fff' }}>
+                <div ref={comprobanteRef} style={{ position: 'absolute', left: '-9999px', width: '210mm', minHeight: '297mm', padding: '0', backgroundColor: '#fff' }}>
                     <ComprobantePDF service={serviceToPrint} TIPO_SERVICIO_OPTIONS={TIPO_SERVICIO_OPTIONS} ESTADO_OPTIONS={ESTADO_OPTIONS} />
                 </div>
             )}
