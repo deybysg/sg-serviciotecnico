@@ -257,13 +257,22 @@ function ConsultaServicio() {
     const currentIcon = getStatusIcon(servicio?.estado);
     const isViewingResult = servicio && !loading && !error;
 
+    const isNotificacionEstado = servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion';
+
     const timelineSteps = [
         { key: 'P1_RECIBIDO', label: 'RECIBIDO', desc: 'Tu equipo ha sido recibido correctamente.', icon: <FiFileText size={22} />, color: 'blue' },
         { key: 'P3_DIAGNOSTICO', label: 'DIAGNÓSTICO', desc: 'Estamos evaluando la falla reportada.', icon: <FiSearch size={22} />, color: 'amber' },
-        { key: 'P2_5_SIN_SOLUCION', label: 'NOTIFICACIÓN', desc: 'Te notificaremos si equipo no tiene solucion', icon: <FiBell size={22} />, color: 'magenta' },
         { key: 'P4_REPARACION', label: 'REPARACIÓN', desc: 'Tu equipo está siendo reparado por nuestro equipo técnico.', icon: <FiTool size={22} />, color: 'purple' },
         { key: 'P5_TERMINADO', label: 'LISTO PARA RETIRAR', desc: 'Tu equipo está listo para ser retirado.', icon: <FiPackage size={22} />, color: 'green' },
     ];
+
+    const notificacionStep = { 
+        key: 'P2_5_SIN_SOLUCION', 
+        label: 'NOTIFICACIÓN', 
+        desc: servicio?.detalleCliente || 'El taller se pondrá en contacto contigo.', 
+        icon: <FiBell size={22} />, 
+        color: 'magenta' 
+    };
 
     return (
         <div className="consulta-servicio-full">
@@ -354,175 +363,243 @@ function ConsultaServicio() {
 
                 {isViewingResult && (
                     <>
-                        <div className="timeline-container">
-                            {timelineSteps.map((step, index) => {
-                                const isActive = isStepActive(step.key);
-                                const isCurrent = (servicio?.estado === PASOS[step.key]) 
-                                    || (step.key === 'P3_DIAGNOSTICO' && servicio?.estado === 'enRevision')
-                                    || (step.key === 'P4_REPARACION' && (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada'))
-                                    || (step.key === 'P5_TERMINADO' && servicio?.estado === 'terminado')
-                                    || (step.key === 'P2_5_SIN_SOLUCION' && (servicio?.estado === 'notificacion' || servicio?.estado === 'sinSolucion'));
-                                const isPast = isActive && !isCurrent;
-                                return (
-                                    <React.Fragment key={step.key}>
-                                        {index > 0 && (
-                                            <div className={`timeline-connector ${isActive ? 'active' : ''}`}>
-                                                <div className="timeline-line-track">
-                                                    <div className={`timeline-line-fill ${isActive ? 'filled' : ''}`}></div>
+                        {servicio?.estado === 'entregado' ? (
+                            <div className="gratitude-card">
+                                <div className="gratitude-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div className="gratitude-content">
+                                    <h2 className="gratitude-title">¡Servicio Completado!</h2>
+                                    <p className="gratitude-message">
+                                        Gracias por confiar en nosotros. Tu equipo ha sido entregado exitosamente.
+                                    </p>
+                                    <div className="gratitude-details">
+                                        <div className="gratitude-item">
+                                            <span className="gratitude-label">Cliente</span>
+                                            <span className="gratitude-value">{cliente?.nombreCompleto || servicio?.clienteNombre || servicio?.cliente_nombre || 'N/A'}</span>
+                                        </div>
+                                        <div className="gratitude-item">
+                                            <span className="gratitude-label">Equipo</span>
+                                            <span className="gratitude-value">{servicio.marcaProducto} {servicio.modeloProducto}</span>
+                                        </div>
+                                        <div className="gratitude-item">
+                                            <span className="gratitude-label">Fecha de Entrega</span>
+                                            <span className="gratitude-value">{servicio.fechaSalida ? new Date(servicio.fechaSalida).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="gratitude-confetti">
+                                    <span className="confetti"></span>
+                                    <span className="confetti"></span>
+                                    <span className="confetti"></span>
+                                    <span className="confetti"></span>
+                                    <span className="confetti"></span>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="cosmic-timeline">
+                                    <div className="timeline-track">
+                                        <div className="track-line"></div>
+                                        <div className="track-glow"></div>
+                                    </div>
+                                    {timelineSteps.map((step, index) => {
+                                        const isActive = isStepActive(step.key);
+                                        const isCurrent = (servicio?.estado === PASOS[step.key]) 
+                                            || (step.key === 'P3_DIAGNOSTICO' && servicio?.estado === 'enRevision')
+                                            || (step.key === 'P4_REPARACION' && (servicio?.estado === 'reparacion' || servicio?.estado === 'revisionTerminada'));
+                                        const isCompleted = (step.key === 'P5_TERMINADO' && (servicio?.estado === 'terminado' || servicio?.estado === 'entregado'));
+                                        return (
+                                            <div key={step.key} className={`cosmic-node ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${step.color}`}>
+                                                <div className="node-orb">
+                                                    <div className="orb-inner">
+                                                        <div className="orb-icon">{step.icon}</div>
+                                                    </div>
+                                                    <div className="orb-ring ring-1"></div>
+                                                    <div className="orb-ring ring-2"></div>
+                                                    <div className="orb-particles">
+                                                        <span className="particle"></span>
+                                                        <span className="particle"></span>
+                                                        <span className="particle"></span>
+                                                    </div>
+                                                </div>
+                                                <div className={`node-card ${step.color}`}>
+                                                    <div className="card-shine"></div>
+                                                    <div className="card-glow"></div>
+                                                    <div className="card-content">
+                                                        <div className="card-step">{index + 1}</div>
+                                                        <h4 className={`card-title ${step.color}`}>{step.label}</h4>
+                                                        <p className="card-desc">{step.desc}</p>
+                                                        {isCompleted && (
+                                                            <div className="card-complete">
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                                </svg>
+                                                                Completado
+                                                            </div>
+                                                        )}
+                                                        {isCurrent && !isCompleted && (
+                                                            <div className={`card-status ${step.color}`}>
+                                                                <span className="status-dot"></span>
+                                                                <span className="status-text">En Progreso</span>
+                                                            </div>
+                                                        )}
+                                                        {isActive && !isCurrent && !isCompleted && (
+                                                            <div className="card-complete">
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                                </svg>
+                                                                Completado
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className={`card-border ${step.color}`}></div>
                                                 </div>
                                             </div>
-                                        )}
-                                        <div className={`timeline-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''} ${step.color}`}>
-                                            <div className={`timeline-circle ${step.color}`}>
-                                                {step.icon}
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="client-card">
+                                    <div className="client-card-left">
+                                        <div className="client-avatar">
+                                            <FiUser size={28} />
+                                        </div>
+                                        <div className="client-info">
+                                            <span className="client-label">CLIENTE</span>
+                                            <span className="client-name">{cliente?.nombreCompleto || servicio?.clienteNombre || servicio?.cliente_nombre || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="client-card-right">
+                                        <div className="client-meta-item">
+                                            <FiHash size={16} />
+                                            <div>
+                                                <span className="client-meta-label">N° DE ORDEN</span>
+                                                <span className="client-meta-value">#{servicio.servicioNumero || 'N/A'}</span>
                                             </div>
-                                            <span className={`timeline-label ${step.color}`}>{step.label}</span>
-                                            <span className="timeline-time">
-                                                {isActive ? (servicio?.fechaEntrada ? new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '20/05 10:30') : '— —'}
+                                        </div>
+                                        <div className="client-meta-item">
+                                            <FiCalendar size={16} />
+                                            <div>
+                                                <span className="client-meta-label">FECHA DE INGRESO</span>
+                                                <span className="client-meta-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="details-box">
+                                    <h3 className="details-box-title">
+                                        <FiFileText size={18} /> Estado de tu Equipo
+                                    </h3>
+                                    <div className="detail-row">
+                                        <div className="detail-icon">
+                                            <FiCalendar size={18} />
+                                        </div>
+                                        <div className="detail-content">
+                                            <span className="detail-label">Fecha de Ingreso</span>
+                                            <span className="detail-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    </div>
+                                    <div className="detail-row">
+                                        <div className="detail-icon">
+                                            <FiTool size={18} />
+                                        </div>
+                                        <div className="detail-content">
+                                            <span className="detail-label">Equipo</span>
+                                            <span className="detail-value">{servicio.marcaProducto} {servicio.modeloProducto} ({servicio.tipoEquipo})</span>
+                                        </div>
+                                    </div>
+                                    <div className="detail-row">
+                                        <div className="detail-icon">
+                                            <FiActivity size={18} />
+                                        </div>
+                                        <div className="detail-content">
+                                            <span className="detail-label">Estado Actual</span>
+                                            <span className="detail-value">
+                                                <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span>
                                             </span>
                                         </div>
-                                    </React.Fragment>
-                                );
-                            })}
-                        </div>
+                                    </div>
+                                    <div className="detail-row">
+                                        <div className="detail-icon">
+                                            <FiHash size={18} />
+                                        </div>
+                                        <div className="detail-content">
+                                            <span className="detail-label">N° de Orden</span>
+                                            <span className="detail-value">#{servicio.servicioNumero || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="detail-row">
+                                        <div className="detail-icon">
+                                            <FiDollarSign size={18} />
+                                        </div>
+                                        <div className="detail-content">
+                                            <span className="detail-label">Presupuesto Total</span>
+                                            <span className="detail-value">${formatNumber(servicio.presupuesto?.total) || 'Pendiente'}</span>
+                                        </div>
+                                    </div>
+                                    {servicio.fallaReportada && (
+                                        <div className="detail-row">
+                                            <div className="detail-icon">
+                                                <FiAlertTriangle size={18} />
+                                            </div>
+                                            <div className="detail-content">
+                                                <span className="detail-label">Falla Reportada</span>
+                                                <span className="detail-value">{servicio.fallaReportada}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
-                        <div className="client-card">
-                            <div className="client-card-left">
-                                <div className="client-avatar">
-                                    <FiUser size={28} />
-                                </div>
-                                <div className="client-info">
-                                    <span className="client-label">CLIENTE</span>
-                                    <span className="client-name">{cliente?.nombreCompleto || servicio?.clienteNombre || servicio?.cliente_nombre || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div className="client-card-right">
-                                <div className="client-meta-item">
-                                    <FiHash size={16} />
-                                    <div>
-                                        <span className="client-meta-label">N° DE ORDEN</span>
-                                        <span className="client-meta-value">#{servicio.servicioNumero || 'N/A'}</span>
+                                {(servicio?.estado === 'notificacion' || servicio?.notificacion || servicio?.sinSolucion) && (
+                                    <div className="seguimiento-notificacion-box">
+                                        <div className="notif-icon">⚠️</div>
+                                        <div style={{ flex: 1 }}>
+                                            <h3>Notificación del Taller</h3>
+                                            {(() => {
+                                                const notiEntries = servicio.seguimiento ? servicio.seguimiento.filter(e => e.tipo === 'notificacion' || e.tipo === 'sinSolucion') : [];
+                                                const latest = notiEntries.length > 0 ? notiEntries.slice().reverse()[0] : null;
+                                                const mensaje = servicio.detalleCliente || latest?.mensaje || 'El equipo no tiene solución.';
+                                                return (
+                                                    <>
+                                                        <p className="seguimiento-mensaje">{mensaje}</p>
+                                                        {latest && (
+                                                            <div className="notif-meta">
+                                                                Enviado por {latest.autor || 'Taller'} • {new Date(latest.fecha).toLocaleString()}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="client-meta-item">
-                                    <FiCalendar size={16} />
-                                    <div>
-                                        <span className="client-meta-label">FECHA DE INGRESO</span>
-                                        <span className="client-meta-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                )}
 
-                        <div className="details-box">
-                            <h3 className="details-box-title">
-                                <FiFileText size={18} /> Estado de tu Equipo
-                            </h3>
-                            <div className="detail-row">
-                                <div className="detail-icon">
-                                    <FiCalendar size={18} />
+                                <div className="action-buttons">
+                                    {(servicio.presupuesto?.total > 0 || servicio.estado === 'presupuestoPendiente') && (
+                                        <button className="btn-primary-outline" onClick={() => setShowPresupuestoModal(true)}>
+                                            <FiFileText size={18} /> Ver Presupuesto
+                                        </button>
+                                    )}
+                                    <button className="btn-secondary" onClick={() => {
+                                        const tel = cliente?.telefono || cliente?.celular || '';
+                                        if (tel) {
+                                            const num = tel.replace(/\D/g, '');
+                                            window.open(`https://wa.me/${num}`, '_blank');
+                                        } else {
+                                            Swal.fire('Contacto', 'Datos de contacto no disponibles', 'info');
+                                        }
+                                    }}>
+                                        <FiUser size={18} /> Contactar Taller
+                                    </button>
                                 </div>
-                                <div className="detail-content">
-                                    <span className="detail-label">Fecha de Ingreso</span>
-                                    <span className="detail-value">{new Date(servicio.fechaEntrada).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                            </div>
-                            <div className="detail-row">
-                                <div className="detail-icon">
-                                    <FiTool size={18} />
-                                </div>
-                                <div className="detail-content">
-                                    <span className="detail-label">Equipo</span>
-                                    <span className="detail-value">{servicio.marcaProducto} {servicio.modeloProducto} ({servicio.tipoEquipo})</span>
-                                </div>
-                            </div>
-                            <div className="detail-row">
-                                <div className="detail-icon">
-                                    <FiActivity size={18} />
-                                </div>
-                                <div className="detail-content">
-                                    <span className="detail-label">Estado Actual</span>
-                                    <span className="detail-value">
-                                        <span className={`current-status-label ${servicio.estado}`}>{ESTADO_DISPLAY[servicio.estado] || servicio.estado}</span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="detail-row">
-                                <div className="detail-icon">
-                                    <FiHash size={18} />
-                                </div>
-                                <div className="detail-content">
-                                    <span className="detail-label">N° de Orden</span>
-                                    <span className="detail-value">#{servicio.servicioNumero || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div className="detail-row">
-                                <div className="detail-icon">
-                                    <FiDollarSign size={18} />
-                                </div>
-                                <div className="detail-content">
-                                    <span className="detail-label">Presupuesto Total</span>
-                                    <span className="detail-value">${formatNumber(servicio.presupuesto?.total) || 'Pendiente'}</span>
-                                </div>
-                            </div>
-                            {servicio.fallaReportada && (
-                                <div className="detail-row">
-                                    <div className="detail-icon">
-                                        <FiAlertTriangle size={18} />
-                                    </div>
-                                    <div className="detail-content">
-                                        <span className="detail-label">Falla Reportada</span>
-                                        <span className="detail-value">{servicio.fallaReportada}</span>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {(servicio?.estado === 'notificacion' || servicio?.notificacion || servicio?.sinSolucion) && (
-                            <div className="seguimiento-notificacion-box">
-                                <div className="notif-icon">⚠️</div>
-                                <div style={{ flex: 1 }}>
-                                    <h3>Notificación del Taller</h3>
-                                    {(() => {
-                                        const notiEntries = servicio.seguimiento ? servicio.seguimiento.filter(e => e.tipo === 'notificacion' || e.tipo === 'sinSolucion') : [];
-                                        const latest = notiEntries.length > 0 ? notiEntries.slice().reverse()[0] : null;
-                                        const mensaje = servicio.detalleCliente || latest?.mensaje || 'El equipo no tiene solución.';
-                                        return (
-                                            <>
-                                                <p className="seguimiento-mensaje">{mensaje}</p>
-                                                {latest && (
-                                                    <div className="notif-meta">
-                                                        Enviado por {latest.autor || 'Taller'} • {new Date(latest.fecha).toLocaleString()}
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    })()}
-                                </div>
-                            </div>
+                            </>
                         )}
-
-                        <div className="action-buttons">
-                            {(servicio.presupuesto?.total > 0 || servicio.estado === 'presupuestoPendiente') && (
-                                <button className="btn-primary-outline" onClick={() => setShowPresupuestoModal(true)}>
-                                    <FiFileText size={18} /> Ver Presupuesto
-                                </button>
-                            )}
-                            <button className="btn-secondary" onClick={() => {
-                                const tel = cliente?.telefono || cliente?.celular || '';
-                                if (tel) {
-                                    const num = tel.replace(/\D/g, '');
-                                    window.open(`https://wa.me/${num}`, '_blank');
-                                } else {
-                                    Swal.fire('Contacto', 'Datos de contacto no disponibles', 'info');
-                                }
-                            }}>
-                                <FiUser size={18} /> Contactar Taller
-                            </button>
-                        </div>
                     </>
                 )}
-            </div>
 
             {showPresupuestoModal && servicio && (
                 <div className="modal-overlay" onClick={() => setShowPresupuestoModal(false)}>
@@ -568,6 +645,7 @@ function ConsultaServicio() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }
