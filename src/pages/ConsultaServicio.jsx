@@ -364,6 +364,7 @@ function ConsultaServicio() {
                 {isViewingResult && (
                     <>
                         {servicio?.estado === 'entregado' ? (
+                            <>
                             <div className="gratitude-card">
                                 <div className="gratitude-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -398,7 +399,16 @@ function ConsultaServicio() {
                                     <span className="confetti"></span>
                                 </div>
                             </div>
+
+                            <div className="timeline-inicio-btn">
+                                <button className="btn-inicio" onClick={() => navigate('/')}>
+                                    <FiHome size={18} />
+                                    Volver al Inicio
+                                </button>
+                            </div>
+                            </>
                         ) : isNotificacionEstado ? (
+                            <>
                             <div className="notification-card">
                                 <div className="notification-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -450,6 +460,14 @@ function ConsultaServicio() {
                                     <span className="notif-particle"></span>
                                 </div>
                             </div>
+
+                            <div className="timeline-inicio-btn">
+                                <button className="btn-inicio" onClick={() => navigate('/')}>
+                                    <FiHome size={18} />
+                                    Volver al Inicio
+                                </button>
+                            </div>
+                            </>
                         ) : (
                             <>
                                 <div className="cosmic-timeline">
