@@ -183,6 +183,25 @@ const PanelTrabajo = () => {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const refreshDatos = useCallback(async () => {
+    try {
+      const [serviciosData, clientesData] = await Promise.all([
+        api.get('/servicios'),
+        api.get('/clientes'),
+      ]);
+      const serviciosNormalizados = Array.isArray(serviciosData)
+        ? serviciosData.map(normalizeServicio)
+        : [];
+      const clientesNormalizados = Array.isArray(clientesData)
+        ? clientesData.map(normalizeCliente)
+        : [];
+      setServicios(serviciosNormalizados);
+      setClientes(clientesNormalizados);
+    } catch (error) {
+      console.error("Error al refrescar datos:", error);
+    }
   }, []);  useEffect(() => {
     cargarDatos();
   }, [cargarDatos]);
@@ -301,7 +320,7 @@ const PanelTrabajo = () => {
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 2000,
+        timer: 1200,
         timerProgressBar: true,
       });
       Toast.fire({ icon: 'success', title: 'ID copiado al portapapeles' });
@@ -382,7 +401,7 @@ const PanelTrabajo = () => {
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 3000,
+        timer: 1200,
         timerProgressBar: true,
         didOpen: (toast) => {
           toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -395,7 +414,7 @@ const PanelTrabajo = () => {
         title: '✅ Servicio actualizado exitosamente'
       });
       
-      cargarDatos();
+      refreshDatos();
       setModalOpen(false);
     } catch (error) {
       console.error("Error al guardar edición:", error);
@@ -450,7 +469,7 @@ const PanelTrabajo = () => {
           title: 'Notificación enviada al cliente'
         });
 
-        cargarDatos();
+        refreshDatos();
       } catch (error) {
         console.error('Error al notificar:', error);
         Swal.fire({
@@ -519,7 +538,7 @@ const PanelTrabajo = () => {
         title: 'Estado actualizado'
       });
 
-      cargarDatos();
+      refreshDatos();
     } catch (error) {
       console.error('Error al cambiar estado:', error);
       Swal.fire({
@@ -564,7 +583,7 @@ const PanelTrabajo = () => {
 
       setShowResolverModal(false);
       setResolverData(null);
-      cargarDatos();
+      refreshDatos();
     } catch (error) {
       console.error('Error al resolver notificación:', error);
       Swal.fire({
@@ -641,7 +660,7 @@ const PanelTrabajo = () => {
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 3000,
+        timer: 1200,
         timerProgressBar: true,
         didOpen: (toast) => {
           toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -654,10 +673,7 @@ const PanelTrabajo = () => {
         title: '✅ ¡Servicio entregado exitosamente!'
       });
       
-      cargarDatos();
-      
-      // Redirigir al historial después del éxito (opcional)
-      // navigate('/admin/historial'); 
+      refreshDatos();
       
     } catch (error) {
       console.error("Error al completar la entrega:", error);
@@ -732,7 +748,7 @@ const PanelTrabajo = () => {
       });
 
       Toast.fire({ icon: 'success', title: 'Notificado al cliente y agregado a seguimiento' });
-      cargarDatos();
+      refreshDatos();
     } catch (error) {
       console.error('Error al notificar al cliente:', error);
       Swal.fire({
@@ -1420,7 +1436,7 @@ const PanelTrabajo = () => {
                       await api.put(`/servicios/${id}`, { anticipo: nuevoAnticipo });
                       const actualizado = { ...servicioSeleccionado, anticipo: nuevoAnticipo };
                       setServicioSeleccionado(actualizado);
-                      await cargarDatos();
+                      await refreshDatos();
                       Swal.fire({ icon: 'success', title: 'Seña agregada', timer: 1500, showConfirmButton: false });
                     } catch (err) {
                       Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'No se pudo agregar la seña.' });

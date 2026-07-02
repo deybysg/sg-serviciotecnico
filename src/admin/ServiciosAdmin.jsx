@@ -423,7 +423,7 @@ function ServiciosAdmin() {
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 1200,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer);
@@ -470,7 +470,7 @@ function ServiciosAdmin() {
             setServicios((prev) => prev.map(s => (s._id || s.id) === (updated._id || updated.id) ? updated : s));
             setEditId(null);
             setEditData(null);
-            Swal.fire({ icon: 'success', title: 'Servicio actualizado', timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'Servicio actualizado', timer: 1200, showConfirmButton: false });
         } catch (err) {
             Swal.fire({ icon: "error", title: "Error", text: err.message || "No se pudieron guardar los cambios." });
         }
@@ -492,7 +492,7 @@ function ServiciosAdmin() {
         try {
             await api.delete(`/servicios/${id}`);
             setServicios((prev) => prev.filter((s) => (s._id || s.id) !== id));
-            Swal.fire({ icon: 'success', title: 'Servicio eliminado', timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'Servicio eliminado', timer: 1200, showConfirmButton: false });
         } catch (err) {
             Swal.fire({ icon: "error", title: "Error", text: err.message || "No se pudo eliminar el servicio." });
         }
@@ -545,7 +545,7 @@ function ServiciosAdmin() {
             const updatedNormalized = normalizeServicio(updated);
             setServicios((prev) => prev.map(s => (s._id || s.id) === (updatedNormalized._id || updatedNormalized.id) ? updatedNormalized : s));
             closeModal();
-            Swal.fire({ icon: 'success', title: 'Servicio actualizado', timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'Servicio actualizado', timer: 1200, showConfirmButton: false });
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'No se pudo guardar.' });
         }

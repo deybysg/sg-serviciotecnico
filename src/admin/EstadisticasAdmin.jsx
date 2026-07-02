@@ -727,7 +727,7 @@ function EstadisticasAdmin() {
                 icon: 'error',
                 title: `Error al cargar ${dataType}`,
                 showConfirmButton: false,
-                timer: 3000
+                timer: 1200
             });
         } finally {
             loadingSetter(false);

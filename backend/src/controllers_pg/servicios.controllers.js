@@ -1,4 +1,5 @@
 import { getPool } from '../database/postgres.js';
+import { sendWhatsAppMessage, MENSAJES_ESTADO } from '../helpers/whatsappHelper.js';
 
 let nextServicioNumero = 100;
 
@@ -126,7 +127,7 @@ export const actualizarServicio = async (req, res) => {
       const clienteId = servicio.cliente_id;
       if (clienteId) {
         try {
-          const { rows: clienteRows } = await pool.query('SELECT servicios_realizados FROM clientes WHERE id = $1', [clienteId]);
+          const { rows: clienteRows } = await pool.query('SELECT servicios_realizados, celular FROM clientes WHERE id = $1', [clienteId]);
           if (clienteRows.length > 0) {
             let serviciosRealizados = clienteRows[0].servicios_realizados || [];
             if (typeof serviciosRealizados === 'string') serviciosRealizados = JSON.parse(serviciosRealizados);
@@ -157,9 +158,35 @@ export const actualizarServicio = async (req, res) => {
                 [JSON.stringify(serviciosRealizados), clienteId]
               );
             }
+
+            const celular = clienteRows[0].celular;
+            if (celular) {
+              const mensaje = `${MENSAJES_ESTADO.entregado}\n\n📱 Equipo: ${servicio.marca_producto} ${servicio.modelo_producto}\n🔧 Servicio: ${servicio.tipo_servicio}\n📋 Orden: #${servicio.servicio_numero}`;
+              sendWhatsAppMessage(celular, mensaje).catch(err => console.error('Error enviando WhatsApp:', err));
+            }
           }
         } catch (err) {
           console.error('Error al guardar servicio en cliente:', err);
+        }
+      }
+    }
+
+    if ((body.estado === 'terminado' || body.estado === 'notificacion') && rows.length > 0) {
+      const servicio = rows[0];
+      const clienteId = servicio.cliente_id;
+      if (clienteId) {
+        try {
+          const { rows: clienteRows } = await pool.query('SELECT celular FROM clientes WHERE id = $1', [clienteId]);
+          if (clienteRows.length > 0) {
+            const celular = clienteRows[0].celular;
+            if (celular) {
+              const estadoKey = body.estado === 'notificacion' ? 'notificacion' : 'terminado';
+              const mensaje = `${MENSAJES_ESTADO[estadoKey]}\n\n📱 Equipo: ${servicio.marca_producto} ${servicio.modelo_producto}\n🔧 Servicio: ${servicio.tipo_servicio}\n📋 Orden: #${servicio.servicio_numero}`;
+              sendWhatsAppMessage(celular, mensaje).catch(err => console.error('Error enviando WhatsApp:', err));
+            }
+          }
+        } catch (err) {
+          console.error('Error enviando WhatsApp:', err);
         }
       }
     }
@@ -186,7 +213,7 @@ export const marcarEntregado = async (req, res) => {
     const clienteId = servicio.cliente_id;
     if (clienteId) {
       try {
-        const { rows: clienteRows } = await pool.query('SELECT servicios_realizados FROM clientes WHERE id = $1', [clienteId]);
+        const { rows: clienteRows } = await pool.query('SELECT servicios_realizados, celular FROM clientes WHERE id = $1', [clienteId]);
         if (clienteRows.length > 0) {
           let serviciosRealizados = clienteRows[0].servicios_realizados || [];
           if (typeof serviciosRealizados === 'string') serviciosRealizados = JSON.parse(serviciosRealizados);
@@ -216,6 +243,12 @@ export const marcarEntregado = async (req, res) => {
               'UPDATE clientes SET servicios_realizados = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
               [JSON.stringify(serviciosRealizados), clienteId]
             );
+          }
+
+          const celular = clienteRows[0].celular;
+          if (celular) {
+            const mensaje = `${MENSAJES_ESTADO.entregado}\n\n📱 Equipo: ${servicio.marca_producto} ${servicio.modelo_producto}\n🔧 Servicio: ${servicio.tipo_servicio}\n📋 Orden: #${servicio.servicio_numero}`;
+            sendWhatsAppMessage(celular, mensaje).catch(err => console.error('Error enviando WhatsApp:', err));
           }
         }
       } catch (err) {

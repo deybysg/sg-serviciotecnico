@@ -163,7 +163,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                     icon: 'warning',
                     title: 'Imagen muy grande',
                     text: 'La imagen no debe superar los 2MB. Usá una URL de imagen o comprimí la imagen.',
-                    timer: 3000
+                    timer: 1200
                 });
                 setLocalFile(null);
                 setLocalFileBase64(null);
@@ -192,7 +192,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                 icon: 'warning',
                 title: 'Código requerido',
                 text: 'El código del producto es obligatorio',
-                timer: 2000
+                timer: 1200
             });
             return;
         }
@@ -214,7 +214,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                 icon: 'warning',
                 title: 'Nombre requerido',
                 text: 'El nombre del producto es obligatorio',
-                timer: 2000
+                timer: 1200
             });
             return;
         }
@@ -225,7 +225,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                 icon: 'warning',
                 title: 'Nombre muy corto',
                 text: 'El nombre debe tener al menos 2 caracteres',
-                timer: 2000
+                timer: 1200
             });
             return;
         }
@@ -253,7 +253,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                 icon: 'warning',
                 title: 'Stock inválido',
                 text: 'El stock no puede ser negativo',
-                timer: 2000
+                timer: 1200
             });
             return;
         }
@@ -280,7 +280,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                     icon: 'warning',
                     title: 'Imagen muy grande',
                     text: 'La imagen es muy grande. Usá una URL de imagen o una imagen más liviana.',
-                    timer: 3000
+                    timer: 1200
                 });
                 return;
             }
@@ -290,7 +290,7 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
                 icon: 'warning',
                 title: 'Archivo requerido',
                 text: 'Debe seleccionar un archivo si eligió la opción de archivo local',
-                timer: 2000
+                timer: 1200
             });
             return;
         }
@@ -554,6 +554,15 @@ function ProductosAdmin() {
         } finally {
             setLoading(false);
         }
+    }, []);
+
+    const refreshProductos = useCallback(async () => {
+        try {
+            const data = await api.get('/productos', false);
+            setProductos(Array.isArray(data) ? data : []); 
+        } catch (err) {
+            console.error('Error al refrescar productos:', err);
+        }
     }, []);    useEffect(() => {
         fetchProductos();
     }, [fetchProductos]); 
@@ -605,14 +614,14 @@ function ProductosAdmin() {
             }
             
             setShowModal(false); 
-            fetchProductos(); // Recargar la lista
+            refreshProductos();
             
             // Toast notification
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 1200,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -660,7 +669,7 @@ function ProductosAdmin() {
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 1200,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)

@@ -90,7 +90,7 @@ function Carrito({ isOpen, onClose }) {
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 3000
+                timer: 1200
             });
             return;
         }
@@ -171,7 +171,7 @@ function Carrito({ isOpen, onClose }) {
         if (useCartStore.getState().checkExpiration()) return;
 
         if (!user || user.role === 'Invitado') {
-            Swal.fire({ icon: 'info', title: 'Inicia Sesión', text: 'Debes iniciar sesión para realizar una compra.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'info', title: 'Inicia Sesión', text: 'Debes iniciar sesión para realizar una compra.', toast: true, position: 'top-end', showConfirmButton: false, timer: 1200 });
             return;
         }
 
@@ -229,7 +229,7 @@ function Carrito({ isOpen, onClose }) {
                 title: 'Inicia Sesión',
                 text: 'Debes iniciar sesión para comprar',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 1200,
                 timerProgressBar: true
              });
              return;
@@ -242,7 +242,7 @@ function Carrito({ isOpen, onClose }) {
                 icon: 'warning',
                 title: 'Carrito Vacío',
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 1200,
                 timerProgressBar: true
             });
             return;
@@ -292,7 +292,7 @@ function Carrito({ isOpen, onClose }) {
                         title: '¡Compra Exitosa!',
                         text: 'Pedido registrado correctamente',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 1200,
                         timerProgressBar: true
                     });
                     onClose(); 

@@ -84,7 +84,7 @@ function Login() {
           icon: 'error',
           title: 'Oops...',
           text: 'Las contraseñas no coinciden',
-          timer: 2000,
+          timer: 1200,
           showConfirmButton: false
         });
         return;
@@ -97,7 +97,7 @@ function Login() {
           icon: 'error',
           title: 'Error',
           text: result.message,
-          timer: 2000,
+          timer: 1200,
           showConfirmButton: false
         });
         return;
@@ -107,7 +107,7 @@ function Login() {
         icon: 'success',
         title: 'Registro exitoso',
         text: `Bienvenido ${username}!`,
-        timer: 2000,
+        timer: 1200,
         showConfirmButton: false,
         timerProgressBar: true
       });
@@ -125,7 +125,7 @@ function Login() {
           icon: 'error',
           title: 'Error',
           text: result.message,
-          timer: 2000,
+          timer: 1200,
           showConfirmButton: false
         });
         return;
@@ -145,7 +145,7 @@ function Login() {
       Swal.fire({
         icon: 'success',
         title: title,
-        timer: 2000,
+        timer: 1200,
         showConfirmButton: false,
         timerProgressBar: true
       });

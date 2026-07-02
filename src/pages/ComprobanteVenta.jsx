@@ -84,7 +84,7 @@ function ComprobanteVenta() {
         icon: 'success',
         title: '¡Descarga exitosa!',
         text: 'El comprobante PDF se ha descargado correctamente.',
-        timer: 2000,
+        timer: 1200,
         showConfirmButton: false
       });
     } catch (e) {

@@ -83,7 +83,7 @@ function NavHamburguesa() {
                     icon: 'success',
                     title: 'Sesión cerrada',
                     text: 'Has cerrado sesión correctamente.',
-                    timer: 2000,
+                    timer: 1200,
                     showConfirmButton: false,
                     timerProgressBar: true
                 });

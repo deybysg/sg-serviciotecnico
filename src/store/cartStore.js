@@ -163,7 +163,7 @@ const useCartStore = create((set, get) => ({
         icon: 'success',
         title: `¡${product.nombre} agregado!`,
         showConfirmButton: false,
-        timer: 2000,
+        timer: 1200,
         timerProgressBar: true
       });
     } else {
@@ -182,7 +182,7 @@ const useCartStore = create((set, get) => ({
           icon: 'success',
           title: `¡${product.nombre} agregado!`,
           showConfirmButton: false,
-          timer: 2000,
+          timer: 1200,
           timerProgressBar: true
         });
       }
@@ -244,7 +244,7 @@ const useCartStore = create((set, get) => ({
           icon: 'info',
           title: 'Producto eliminado',
           showConfirmButton: false,
-          timer: 2000,
+          timer: 1200,
           timerProgressBar: true
         });
 
@@ -286,7 +286,7 @@ const useCartStore = create((set, get) => ({
             icon: 'info',
             title: 'Carrito vaciado',
             showConfirmButton: false,
-            timer: 2000,
+            timer: 1200,
             timerProgressBar: true
           });
         } catch (err) {

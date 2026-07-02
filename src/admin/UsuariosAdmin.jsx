@@ -30,7 +30,6 @@ export default function UsuariosAdmin() {
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      // Backend real (JWT) -> /api/usuarios (requiere admin/superadmin)
       const data = await api.get('/usuarios');
       setUsuarios(data);
     } catch (e) {
@@ -38,6 +37,15 @@ export default function UsuariosAdmin() {
       toast('error', 'No se pudieron cargar los usuarios');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshUsuarios = async () => {
+    try {
+      const data = await api.get('/usuarios');
+      setUsuarios(data);
+    } catch (e) {
+      console.error('Error al refrescar usuarios:', e);
     }
   };
 
@@ -113,7 +121,7 @@ export default function UsuariosAdmin() {
       await api.post('/usuarios', payload);
       setForm({ username: '', password: '', email: '', role: 'user' });
       toast('success', 'Usuario creado');
-      fetchUsuarios();
+      refreshUsuarios();
     } catch (e) {
       setError('No se pudo crear el usuario');
       toast('error', e?.message || 'No se pudo crear el usuario');
@@ -185,11 +193,10 @@ export default function UsuariosAdmin() {
 
     try {
       setSaving(true);
-      // Backend usa PUT /usuarios/:id
       await api.put(`/usuarios/${id}`, payload);
       cancelEdit();
       toast('success', 'Usuario actualizado');
-      fetchUsuarios();
+      refreshUsuarios();
     } catch (e) {
       setError('No se pudo actualizar el usuario');
       toast('error',  'No se pudo actualizar usuario existente');
@@ -222,7 +229,7 @@ export default function UsuariosAdmin() {
       setSaving(true);
       await api.delete(`/usuarios/${id}`);
       toast('success', 'Usuario eliminado');
-      fetchUsuarios();
+      refreshUsuarios();
     } catch (e) {
       setError('No se pudo eliminar el usuario');
       toast('error', e?.message || 'No se pudo eliminar');
