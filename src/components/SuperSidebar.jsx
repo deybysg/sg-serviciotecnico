@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUsersCog, FaTools, FaUserFriends, FaBoxOpen, FaWrench, FaChartBar, FaHistory, FaFileInvoiceDollar, FaTrashAlt } from 'react-icons/fa';
+import { FaUsersCog, FaTools, FaUserFriends, FaBoxOpen, FaWrench, FaChartBar, FaHistory, FaFileInvoiceDollar, FaTrashAlt, FaCashRegister } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -70,6 +70,10 @@ export default function SuperSidebar({ onExpandChange }) {
         </div> 
       </div>
       <nav className="super-sidebar__nav">
+        <NavLink to="/admin/punto-de-venta" className="super-sidebar__item">
+          <span className="super-sidebar__icon"><FaCashRegister /></span>
+          <span className="super-sidebar__label">Punto de Venta</span>
+        </NavLink>
         <NavLink to="/admin/paneltrabajos" className="super-sidebar__item">
           <span className="super-sidebar__icon"><FaTools /></span>
           <span className="super-sidebar__label">Panel de Trabajo</span>

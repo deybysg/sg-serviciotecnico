@@ -25,3 +25,23 @@
   }
 }
 
+.app-content.with-super-sidebar {
+  margin-left: 70px;
+  transition: margin-left 0.3s ease;
+}
+
+.app-content.with-super-sidebar.sidebar-expanded {
+  margin-left: 240px;
+}
+
+@media (max-width: 900px) {
+  .page-container {
+    padding-inline: 12px;
+    padding-top: 84px;
+  }
+
+  .app-content.with-super-sidebar {
+    margin-left: 0 !important;
+  }
+}
+

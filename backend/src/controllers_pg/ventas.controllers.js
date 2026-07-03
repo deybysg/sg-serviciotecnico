@@ -70,6 +70,45 @@ export const crearVenta = async (req, res) => {
   }
 };
 
+export const devolverVenta = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = getPool();
+    // Obtener la venta
+    const { rows: ventaRows } = await pool.query('SELECT * FROM ventas WHERE id = $1', [id]);
+    if (ventaRows.length === 0) return res.status(404).json({ mensaje: "Venta no encontrada" });
+    const venta = ventaRows[0];
+    if (venta.estado === 'Devuelto') return res.status(400).json({ mensaje: "Esta venta ya fue devuelta" });
+
+    const productos = typeof venta.productos_comprados === 'string' ? JSON.parse(venta.productos_comprados) : venta.productos_comprados;
+
+    // Devolver stock
+    for (const p of (productos || [])) {
+      if (!p.nombre) continue;
+      const { rows: prodRows } = await pool.query('SELECT * FROM productos WHERE LOWER(nombre) = LOWER($1)', [p.nombre]);
+      if (prodRows.length > 0) {
+        const prod = prodRows[0];
+        await pool.query(
+          'UPDATE productos SET stock = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+          [(prod.stock || 0) + (p.cantidad || 0), prod.id]
+        );
+      }
+    }
+
+    // Actualizar estado de venta
+    const { rows } = await pool.query(
+      `UPDATE ventas SET estado = $1, total_venta = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
+      ['Devuelto', id]
+    );
+    const ventaDevuelta = rows[0];
+    ventaDevuelta.productosComprados = typeof ventaDevuelta.productos_comprados === 'string' ? JSON.parse(ventaDevuelta.productos_comprados) : ventaDevuelta.productos_comprados;
+    res.json(ventaDevuelta);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: error.message });
+  }
+};
+
 export const obtenerVentasPorUsuario = async (req, res) => {
   try {
     const { username } = req.params;

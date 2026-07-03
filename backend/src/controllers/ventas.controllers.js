@@ -1,4 +1,5 @@
 import VentasModel from "../models/ventasSchema.js";
+import ProductosModel from "../models/productosSchema.js";
 import PDFDocument from "pdfkit";
 
 // Obtener todas las ventas
@@ -78,6 +79,41 @@ export const crearVenta = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al crear la venta" });
+  }
+};
+
+// Devolver venta y reintegrar stock
+export const devolverVenta = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const venta = await VentasModel.findById(id);
+    if (!venta) {
+      return res.status(404).json({ mensaje: "Venta no encontrada" });
+    }
+    if (venta.estado === "Devuelto") {
+      return res.status(400).json({ mensaje: "Esta venta ya fue devuelta" });
+    }
+
+    const productos = venta.productosComprados || [];
+    for (const p of productos) {
+      if (!p.nombre) continue;
+      const prod = await ProductosModel.findOne({
+        nombre: { $regex: new RegExp(`^${p.nombre}$`, "i") }
+      });
+      if (prod) {
+        prod.stock = (prod.stock || 0) + (p.cantidad || 0);
+        await prod.save();
+      }
+    }
+
+    venta.estado = "Devuelto";
+    venta.totalVenta = 0;
+    await venta.save();
+
+    res.json(venta);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: error.message });
   }
 };
 

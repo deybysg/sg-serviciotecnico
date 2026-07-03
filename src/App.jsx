@@ -28,6 +28,7 @@ import EstadisticasAdmin from "./admin/EstadisticasAdmin";
 import HistorialAdmin from "./admin/HistorialAdmin";
 import Paneltrabajos from "./admin/Paneltrabajos";
 import HistorialDeVentas from "./admin/HistorialDeVentas";
+import PuntoDeVenta from "./admin/PuntoDeVenta";
 
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartProvider";
@@ -128,13 +129,23 @@ function AppBody() {
             }
           />
          <Route
-            path="/admin/historialventas"
-            element={
-              <PrivateRoute roles={["admin","superadmin"]}>
-                <HistorialDeVentas />
-              </PrivateRoute>
-            }
-          />
+            path="/admin/historialventas"
+            element={
+              <PrivateRoute roles={["admin","superadmin"]}>
+                <HistorialDeVentas />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Ruta Punto de Venta - Solo SuperAdmin */}
+          <Route
+            path="/admin/punto-de-venta"
+            element={
+              <PrivateRoute roles={["superadmin"]}>
+                <PuntoDeVenta />
+              </PrivateRoute>
+            }
+          />
 
                     {/* Solo SUPERADMIN */}
                     <Route

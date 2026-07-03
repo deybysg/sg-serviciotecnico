@@ -8,7 +8,7 @@ const ventasSchema = new Schema({
   estado: { 
     type: String, 
     required: true,
-    enum: ["Completado", "Cancelado"],
+    enum: ["Completado", "Cancelado", "Devuelto"],
     default: "Completado"
   },
   productosComprados: [{
