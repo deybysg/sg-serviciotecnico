@@ -30,7 +30,7 @@ const METODOS_PAGO = [
   { id: "qr", label: "QR / Yape", icon: FaQrcode, color: "#06b6d4" },
 ];
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 15;
 
 function PuntoDeVenta() {
   const { user } = useAuth();
@@ -111,7 +111,17 @@ function PuntoDeVenta() {
     setCurrentPage(1);
   }, [busqueda, categoriaActiva]);
 
-  // Focus automático en el buscador al cargar y al cambiar página/categoría
+  // Focus automático al entrar al punto de venta (primera vez)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (busquedaRef.current) {
+        busquedaRef.current.focus();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Focus automático al cambiar página/categoría
   useEffect(() => {
     if (busquedaRef.current) {
       busquedaRef.current.focus();
@@ -374,7 +384,7 @@ function PuntoDeVenta() {
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Lista de productos */}
         <div className="pv-products-grid">
           {productosPaginados.length === 0 ? (
             <div className="pv-no-products">
@@ -382,29 +392,66 @@ function PuntoDeVenta() {
               <p>No se encontraron productos</p>
             </div>
           ) : (
-            productosPaginados.map((producto) => (
-              <div key={producto._id || producto.id} className="pv-product-card">
-                <div className="pv-product-img">
-                  <img
-                    src={producto.imagen || "https://placehold.co/300x300/1a1a2e/64748b?text=Sin+Imagen"}
-                    alt={producto.nombre}
-                    onError={(e) => { e.target.src = "https://placehold.co/300x300/1a1a2e/64748b?text=Sin+Imagen"; }}
-                  />
-                </div>
-                <div className="pv-product-info">
-                  <div className="pv-product-name">{producto.nombre}</div>
-                  <div className="pv-product-price">${Number(producto.precio || 0).toFixed(2)}</div>
-                  <div className="pv-product-stock">Stock: {producto.stock}</div>
-                </div>
-                <button
-                  className="pv-product-add"
-                  onClick={() => agregarAlCarrito(producto)}
-                  disabled={producto.stock <= 0}
-                >
-                  <FiPlus size={16} />
-                </button>
+            <>
+              {/* Header */}
+              <div className="pv-producto-lista-header">
+                <span>Producto</span>
+                <span>Código</span>
+                <span>Categoría</span>
+                <span>Precio</span>
+                <span>Stock</span>
+                <span></span>
               </div>
-            ))
+              {productosPaginados.map((producto) => (
+                <div key={producto._id || producto.id} className="pv-product-card">
+                  {/* Producto - Imagen + Nombre */}
+                  <div className="pv-producto-col producto">
+                    <img
+                      src={producto.imagen || "https://placehold.co/300x300/1a1a2e/64748b?text=Sin+Imagen"}
+                      alt={producto.nombre}
+                      onError={(e) => { e.target.src = "https://placehold.co/300x300/1a1a2e/64748b?text=Sin+Imagen"; }}
+                    />
+                    <div className="pv-producto-nombre-wrap">
+                      <span className="pv-producto-nombre">{producto.nombre}</span>
+                    </div>
+                  </div>
+
+                  {/* Código */}
+                  <div className="pv-producto-col codigo">
+                    <span className="pv-badge-codigo">{producto.codigo || "S/C"}</span>
+                  </div>
+
+                  {/* Categoría */}
+                  <div className="pv-producto-col categoria">
+                    <span className="pv-badge-cat">{producto.categoria || "General"}</span>
+                  </div>
+
+                  {/* Precio */}
+                  <div className="pv-producto-col precio">
+                    <span className="pv-precio-valor">${Number(producto.precio || 0).toFixed(2)}</span>
+                  </div>
+
+                  {/* Stock */}
+                  <div className="pv-producto-col stock">
+                    <span className={`pv-badge-stock ${producto.stock <= 0 ? "stock-cero" : producto.stock <= 5 ? "stock-bajo" : "stock-ok"}`}>
+                      {producto.stock}
+                    </span>
+                  </div>
+
+                  {/* Botón */}
+                  <div className="pv-producto-col accion">
+                    <button
+                      className="pv-btn-agregar"
+                      onClick={() => agregarAlCarrito(producto)}
+                      disabled={producto.stock <= 0}
+                      title="Agregar al carrito"
+                    >
+                      <FiPlus size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </>
           )}
         </div>
 
