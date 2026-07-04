@@ -137,11 +137,11 @@ function AppBody() {
             }
           />
 
-          {/* Ruta Punto de Venta - Solo SuperAdmin */}
+          {/* Ruta Punto de Venta - Admin y SuperAdmin */}
           <Route
             path="/admin/punto-de-venta"
             element={
-              <PrivateRoute roles={["superadmin"]}>
+              <PrivateRoute roles={["admin", "superadmin"]}>
                 <PuntoDeVenta />
               </PrivateRoute>
             }

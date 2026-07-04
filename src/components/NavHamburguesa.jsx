@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
     FaBars, FaTimes, FaHome, FaServicestack, FaSignInAlt, 
-    FaShoppingCart, FaUsers, FaChartBar, FaHistory, FaTools, FaShoppingBag
+    FaShoppingCart, FaUsers, FaChartBar, FaHistory, FaTools, FaShoppingBag,
+    FaCashRegister
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
@@ -45,6 +46,7 @@ function NavHamburguesa() {
         ];
     } else if (user.role === 'admin') {
         menuItems = [
+            { nombre: 'Punto de Venta', to: '/admin/punto-de-venta', icon: <FaCashRegister /> },
             { nombre: 'Panel de Trabajo', to: '/admin/paneltrabajos', icon: <FaTools /> },
             { nombre: 'Clientes', to: '/admin/clientes', icon: <FaUsers /> },
             { nombre: 'Productos', to: '/admin/productosAdmin', icon: <FaShoppingCart /> },
@@ -55,6 +57,7 @@ function NavHamburguesa() {
         ];
     }else if (user.role === 'superadmin') {
         menuItems = [
+            { nombre: 'Punto de Venta', to: '/admin/punto-de-venta', icon: <FaCashRegister /> },
             { nombre: 'Panel de Trabajo', to: '/admin/paneltrabajos', icon: <FaTools /> },
             { nombre: 'Clientes', to: '/admin/clientes', icon: <FaUsers /> },
             { nombre: 'Productos', to: '/admin/productosAdmin', icon: <FaShoppingCart /> },

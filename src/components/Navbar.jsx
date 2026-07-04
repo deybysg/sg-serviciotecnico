@@ -171,6 +171,7 @@ function Navbar() {
           {user?.role === 'admin' && (
             <>
               <li><NavLink to="/admin/paneltrabajos"><FaTools style={{ marginRight: '8px' }} />Panel</NavLink></li>
+              <li><NavLink to="/admin/punto-de-venta"><FaShoppingCart style={{ marginRight: '8px' }} />Punto de Venta</NavLink></li>
               <li><NavLink to="/admin/clientes"><FiUser size={14} /> Clientes</NavLink></li>
               <li><NavLink to="/admin/productosAdmin"><FiBox size={14} /> Productos</NavLink></li>
               <li><NavLink to="/admin/servicios"><FiSearch size={14} /> Servicios</NavLink></li>

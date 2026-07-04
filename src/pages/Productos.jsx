@@ -32,6 +32,15 @@ import { useAuth } from "../context/AuthContext";
 import useCartStore from "../store/cartStore";
 import "./Productos.css";
 
+/* =====================================================
+   CONFIGURA TUS IMÁGENES AQUÍ
+   Cambiá las URLs de los slides que necesites
+   ===================================================== */
+const SLIDE_AURICULARES_IMAGEN = "https://ik.imagekit.io/2upopbnzjh/fondos%20para%20banner/ee266281-757c-43bb-8526-03f8aa747a34.png";
+const SLIDE_CAMARAS_IMAGEN = "https://ik.imagekit.io/2upopbnzjh/fondos%20para%20banner/9a82b5b2-698a-4fb4-9167-54693796525e.png";
+const SLIDE_LINTERNAS_IMAGEN = "https://ik.imagekit.io/2upopbnzjh/fondos%20para%20banner/979ce618-f495-42e6-ac20-339d1386fbe7.png";
+const SLIDE_PARLANTES_IMAGEN = "https://ik.imagekit.io/2upopbnzjh/fondos%20para%20banner/d4cffcc5-470d-4a5b-9d11-502cd73a9bdf.png";
+
 const DEFAULT_CATEGORIES = [
   "todos",
   "accesorio para auto",
@@ -96,28 +105,28 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const slides = [
     {
-      imagen: "/img/fondo2.png",
+      imagen: SLIDE_AURICULARES_IMAGEN,
       titulo: "Auriculares Inalámbricos",
       subtitulo: "Audio libre y sin cables para todo el día.",
       cta: "Explorar",
       categoria: "auriculares",
     },
     {
-      imagen: "/img/image.png",
+      imagen: SLIDE_CAMARAS_IMAGEN,
       titulo: "Cámaras de Seguridad",
       subtitulo: "Protegé tu hogar y negocio las 24 horas.",
       cta: "Ver cámaras",
       categoria: "camaras",
     },
     {
-      imagen: "/img/fondo1.jpg",
+      imagen: SLIDE_LINTERNAS_IMAGEN,
       titulo: "Linternas Tácticas",
       subtitulo: "Iluminación potente para cualquier aventura.",
       cta: "Descubrir",
       categoria: "linternas",
     },
     {
-      imagen: "/img/sonidos.png",
+      imagen: SLIDE_PARLANTES_IMAGEN,
       titulo: "Parlantes Potentes",
       subtitulo: "Sonido envolvente para cada momento.",
       cta: "Escuchar",

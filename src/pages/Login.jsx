@@ -23,10 +23,8 @@ function Login() {
   
   useEffect(() => {
     if (user) { 
-        if (user.role === "admin") {
-            navigate("/admin/clientes", { replace: true });
-        } else if (user.role === "superadmin") {
-            navigate("/admin/clientes", { replace: true });
+        if (user.role === "admin" || user.role === "superadmin") {
+            navigate("/admin/paneltrabajos", { replace: true });
         }
         else {
             navigate("/productos", { replace: true });
@@ -113,7 +111,7 @@ function Login() {
       });
 
       setTimeout(() => {
-        navigate(result.user?.role === "admin" || result.user?.role === "superadmin" ? "/admin/clientes" : "/productos");
+        navigate(result.user?.role === "admin" || result.user?.role === "superadmin" ? "/admin/paneltrabajos" : "/productos");
       }, 2000);
 
     // Login
@@ -131,7 +129,7 @@ function Login() {
         return;
       }
 
-      const redirectPath = result.user.role === "admin" || result.user.role === "superadmin" ? "/admin/clientes" : "/productos";
+      const redirectPath = result.user.role === "admin" || result.user.role === "superadmin" ? "/admin/paneltrabajos" : "/productos";
       
       let title;
       if (result.user.role === "superadmin") {
