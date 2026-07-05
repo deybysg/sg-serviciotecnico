@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
 import { FaBoxes, FaCalendarAlt, FaDollarSign, FaFilePdf, FaReceipt, FaMapMarkerAlt } from 'react-icons/fa';
-import './MisComprasModal.css';
+import '../styles/pages/MisComprasModal.css';
 
 // 🚨 Asegúrate de añadir el CSS único para este modal en tu archivo de estilos global o uno específico.
 // .compras-modal-overlay, .compras-modal-content, .compras-close-btn, etc.

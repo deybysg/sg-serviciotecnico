@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Swal from "sweetalert2";
-import './Login.css';
+import '../styles/pages/Login.css';
 import { FiEye, FiEyeOff, FiLock, FiUser, FiMail, FiLogIn, FiUserPlus, FiArrowRight } from "react-icons/fi"; 
 
 function Login() {

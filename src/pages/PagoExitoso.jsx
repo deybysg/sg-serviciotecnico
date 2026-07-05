@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useCartStore from '../store/cartStore';
-import './PagoResultado.css';
+import '../styles/pages/PagoResultado.css';
 
 function PagoExitoso() {
     const navigate = useNavigate();

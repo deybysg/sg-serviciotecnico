@@ -3,7 +3,7 @@ import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
-import '../pages/ComprobanteVenta.css';
+import '../styles/pages/ComprobanteVenta.css';
 
 function ComprobanteVenta() {
   const { id } = useParams();

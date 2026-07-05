@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import logoTech from '../assets/logo3.png';
-import './NavHamburguesa.css';
+import '../styles/components/NavHamburguesa.css';
 
 function NavHamburguesa() {
     const [open, setOpen] = useState(false);

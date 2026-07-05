@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import logoTech from '../assets/logo3.png';
-import './SuperSidebar.css';
+import '../styles/components/SuperSidebar.css';
 
 export default function SuperSidebar({ onExpandChange }) {
   const [isResetting, setIsResetting] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import './UsuariosAdmin.css';
+import '../styles/admin/UsuariosAdmin.css';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
 import {

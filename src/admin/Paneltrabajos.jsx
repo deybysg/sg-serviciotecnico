@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import ModalDetalles from "./ModalDetalles";
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import './Paneltrabajos.css';
+import '../styles/admin/Paneltrabajos.css';
 import { FiEye, FiClipboard, FiUser, FiPhone, FiTool, FiTruck, FiBell, FiClock, FiSearch, FiCheckCircle, FiSmartphone, FiTag, FiCalendar, FiHash, FiDollarSign } from 'react-icons/fi';
 import logoTech from '../assets/logo3.png';
 import { ESTADO_OPTIONS, getEstadoLabel, TIPO_SERVICIO_OPTIONS } from '../constants';

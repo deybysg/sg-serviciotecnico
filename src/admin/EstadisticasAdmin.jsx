@@ -6,7 +6,7 @@ import {
   FiClipboard, FiCopy, FiFilter, FiCalendar, FiPieChart,
   FiActivity, FiHash
 } from 'react-icons/fi';
-import './EstadisticasAdmin.css';
+import '../styles/admin/EstadisticasAdmin.css';
 import { api } from '../services/api';
 import { useRef } from 'react';
 import { shortId, toIdString } from '../utils/id';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import './ResetPassword.css';
+import '../styles/pages/ResetPassword.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 

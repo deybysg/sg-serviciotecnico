@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { FaPlus, FaMinus, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import '../pages/Carrito.css'; 
+import '../styles/pages/Carrito.css'; 
 
 /**
  * Función para registrar la compra en el backend y actualizar stock

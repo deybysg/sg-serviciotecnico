@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PagoResultado.css';
+import '../styles/pages/PagoResultado.css';
 
 function PagoFallido() {
     const navigate = useNavigate();

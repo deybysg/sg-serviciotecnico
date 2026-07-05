@@ -10,7 +10,7 @@ import { RiAdminFill } from "react-icons/ri";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
-import './Navbar.css';
+import '../styles/components/Navbar.css';
 
 function Navbar() {
   const { user, logout } = useAuth();

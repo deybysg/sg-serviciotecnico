@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Swal from "sweetalert2";
-import "./PuntoDeVenta.css";
+import "../styles/admin/PuntoDeVenta.css";
 import {
   FiSearch, FiShoppingCart, FiPlus, FiMinus, FiTrash2,
   FiPackage, FiChevronLeft, FiChevronRight, FiEdit2

@@ -30,7 +30,7 @@ import { BsPhone } from "react-icons/bs";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import useCartStore from "../store/cartStore";
-import "./Productos.css";
+import "../styles/pages/Productos.css";
 
 /* =====================================================
    CONFIGURA TUS IMÁGENES AQUÍ

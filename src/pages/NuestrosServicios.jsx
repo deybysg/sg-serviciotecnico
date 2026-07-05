@@ -22,7 +22,7 @@ import {
   FaArrowCircleRight,
   FaStar,
 } from "react-icons/fa";
-import "./NuestrosServicios.css";
+import "../styles/pages/NuestrosServicios.css";
 
 const servicios = [
   {

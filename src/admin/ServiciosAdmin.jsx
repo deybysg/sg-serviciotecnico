@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ComprobantePDF from "./ComprobantePDF";
 import ModalDetalles from "./ModalDetalles";
-import "./ServiciosAdmin.css";
+import "../styles/admin/ServiciosAdmin.css";
 import { toIdString } from "../utils/id";
 import {
   FiUser, FiPhone, FiMail, FiMapPin, FiHash, FiCheckSquare,

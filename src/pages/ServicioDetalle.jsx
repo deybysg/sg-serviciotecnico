@@ -12,7 +12,7 @@ import {
   FaWhatsapp,
   FaCheckCircle,
 } from "react-icons/fa";
-import "./ServicioDetalle.css";
+import "../styles/pages/ServicioDetalle.css";
 
 const serviciosData = [
   {

@@ -21,7 +21,7 @@ import {
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import useCartStore from "../store/cartStore";
-import "./Home.css";
+import "../styles/pages/Home.css";
 
 const heroSlides = [
   {

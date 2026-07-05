@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { api } from "../services/api";
 import { shortId } from "../utils/id";
 import Swal from "sweetalert2";
-import "./ProductosAdmin.css";
+import "../styles/admin/ProductosAdmin.css";
 import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit3, FiTrash2, FiSearch, FiAlertTriangle, FiPackage, FiX, FiSave, FiUpload, FiLink } from "react-icons/fi"; 
 
 const CATEGORIAS_VALIDAS = [

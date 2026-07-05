@@ -1,5 +1,5 @@
 import React from 'react';
-import './HistorialDeVentas.css';
+import '../styles/admin/HistorialDeVentas.css';
 import { shortId, toIdString } from "../utils/id";
 import { FiX, FiHash, FiUser, FiCalendar, FiCreditCard, FiCheckCircle, FiPackage, FiDollarSign } from "react-icons/fi";
 

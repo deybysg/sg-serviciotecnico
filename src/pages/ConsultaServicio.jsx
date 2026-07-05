@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { shortId, toIdString } from '../utils/id';
 import Swal from 'sweetalert2';
-import './ConsultaServicio.css';
+import '../styles/pages/ConsultaServicio.css';
 import { FiFileText, FiSearch, FiBell, FiTool, FiPackage, FiArrowRight, FiHome, FiUser, FiClock, FiCalendar, FiHash, FiActivity, FiAlertTriangle, FiDollarSign } from 'react-icons/fi';
 
 const formatNumber = (value) => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Swal from "sweetalert2";
 import HistorialDeVentasModal from "./HistorialDeVentasModal";
-import "./HistorialDeVentas.css";
+import "../styles/admin/HistorialDeVentas.css";
 import { api } from "../services/api";
 import { shortId, toIdString } from "../utils/id";
 import {

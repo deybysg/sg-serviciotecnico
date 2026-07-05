@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import SuperSidebar from "./components/SuperSidebar";
-import "./App.css";
+import "./styles/App.css";
 
 // Páginas públicas
 import Home from "./pages/Home";

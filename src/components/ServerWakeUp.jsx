@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './ServerWakeUp.css';
+import '../styles/components/ServerWakeUp.css';
 
 const TIPS = [
   {

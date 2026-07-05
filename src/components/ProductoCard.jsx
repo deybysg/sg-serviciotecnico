@@ -2,7 +2,7 @@
 import { useState } from "react";
 import useCartStore from "../store/cartStore"; 
 import Swal from "sweetalert2"; 
-import "./ProductoCard.css";
+import "../styles/components/ProductoCard.css";
 
 function ProductoCard({ producto, isLoggedIn = true }) {
   const [modalOpen, setModalOpen] = useState(false);

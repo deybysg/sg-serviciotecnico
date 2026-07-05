@@ -1,5 +1,5 @@
   
-import './CategoriaFiltro.css';
+import '../styles/components/CategoriaFiltro.css';
 
 function CategoriaFiltro() {
   // Aquí iría la lógica para filtrar por categoría
