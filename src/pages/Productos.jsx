@@ -102,6 +102,7 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const slides = [
     {
@@ -355,9 +356,20 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
         </div>
       </section>
 
-      <button className="mobile-filter-btn" onClick={() => setShowFiltroMovil(true)} aria-label="Abrir filtros">
-        <FaSlidersH /> Filtros
-      </button>
+      <div className="mobile-top-bar">
+        <button className="mobile-filter-btn" onClick={() => setShowFiltroMovil(true)} aria-label="Abrir filtros">
+          <FaSlidersH /> Filtros
+        </button>
+        <label className="mobile-search-bar">
+          <input
+            type="search"
+            placeholder="Buscar productos..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <FaSearch />
+        </label>
+      </div>
 
       {showFiltroMovil && (
         <div className="filter-overlay">
@@ -399,7 +411,7 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
                     <button className="favorite-btn" aria-label={`Guardar ${product.nombre}`}>
                       <FaHeart />
                     </button>
-                    <div className="tech-product-image">
+                    <div className="tech-product-image" onClick={() => setSelectedProduct(product)} style={{ cursor: 'zoom-in' }}>
                       <img src={product.imagen || "/img/image.png"} alt={product.nombre} />
                     </div>
                     <span className="tech-product-category">{categoryMeta[category]?.label || product.categoria || "Tecnología"}</span>
@@ -474,6 +486,41 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
           </div>
         </div>
       </section>
+
+      {selectedProduct && (
+        <div className="home-product-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="home-product-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="home-product-modal-close" onClick={() => setSelectedProduct(null)}>&times;</button>
+            <div className="home-product-modal-body">
+              <div className="home-product-modal-img">
+                <img src={selectedProduct.imagen || "/img/image.png"} alt={selectedProduct.nombre} />
+              </div>
+              <div className="home-product-modal-info">
+                <span className="home-product-modal-category">{selectedProduct.categoria || "Tecnología"}</span>
+                <h2>{selectedProduct.nombre}</h2>
+                <p className="home-product-modal-desc">{selectedProduct.descripcion || "Producto seleccionado con garantía."}</p>
+                <div className="home-product-modal-price">
+                  ${Number(selectedProduct.precio || 0).toLocaleString("es-AR")}
+                </div>
+                <span className={`home-product-modal-stock ${Number(selectedProduct.stock || 0) > 0 ? 'in-stock' : 'no-stock'}`}>
+                  {Number(selectedProduct.stock || 0) > 0 ? `Stock disponible: ${selectedProduct.stock}` : "Sin stock"}
+                </span>
+                <div className="home-product-modal-actions">
+                  {user ? (
+                    <button className="home-modal-add-btn" onClick={() => { handleAddToCart(selectedProduct); setSelectedProduct(null); }} disabled={Number(selectedProduct.stock || 0) === 0}>
+                      <FaShoppingCart /> {Number(selectedProduct.stock || 0) > 0 ? "Agregar al Carrito" : "Agotado"}
+                    </button>
+                  ) : (
+                    <button className="home-modal-add-btn" onClick={() => { setSelectedProduct(null); navigate('/login'); }}>
+                      Iniciá sesión para comprar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

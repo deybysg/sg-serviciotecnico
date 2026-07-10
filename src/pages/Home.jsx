@@ -163,6 +163,7 @@ function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [productIndex, setProductIndex] = useState(0);
   const [products, setProducts] = useState(fallbackProducts);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Generar orden aleatorio UNA SOLA VEZ (persistido en localStorage)
   const [catOrder, setCatOrder] = useState(() => {
@@ -399,7 +400,7 @@ function Home() {
         <div className="product-grid">
           {visibleProducts.map((product) => (
             <article className="home-product-card" key={product.id ?? product._id}>
-              <div className="product-image-wrap">
+              <div className="product-image-wrap" onClick={() => setSelectedProduct(product)} style={{ cursor: 'zoom-in' }}>
                 <img src={product.imagen || "/img/image.png"} alt={product.nombre} />
               </div>
               <span className="product-category">{product.categoria || "Tecnología"}</span>
@@ -460,6 +461,41 @@ function Home() {
       <footer className="tech-footer">
         <p>© 2026 DEYBY - Servicio técnico & ventas</p>
       </footer>
+
+      {selectedProduct && (
+        <div className="home-product-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="home-product-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="home-product-modal-close" onClick={() => setSelectedProduct(null)}>&times;</button>
+            <div className="home-product-modal-body">
+              <div className="home-product-modal-img">
+                <img src={selectedProduct.imagen || "/img/image.png"} alt={selectedProduct.nombre} />
+              </div>
+              <div className="home-product-modal-info">
+                <span className="home-product-modal-category">{selectedProduct.categoria || "Tecnología"}</span>
+                <h2>{selectedProduct.nombre}</h2>
+                <p className="home-product-modal-desc">{selectedProduct.descripcion || "Producto seleccionado con garantía."}</p>
+                <div className="home-product-modal-price">
+                  ${Number(selectedProduct.precio || 0).toLocaleString("es-AR")}
+                </div>
+                <span className={`home-product-modal-stock ${selectedProduct.stock > 0 ? 'in-stock' : 'no-stock'}`}>
+                  {selectedProduct.stock > 0 ? `Stock disponible: ${selectedProduct.stock}` : "Sin stock"}
+                </span>
+                <div className="home-product-modal-actions">
+                  {user ? (
+                    <button className="home-modal-add-btn" onClick={() => { handleAddProduct(selectedProduct); setSelectedProduct(null); }} disabled={selectedProduct.stock === 0}>
+                      <FaShoppingCart /> {selectedProduct.stock > 0 ? "Agregar al Carrito" : "Agotado"}
+                    </button>
+                  ) : (
+                    <button className="home-modal-add-btn" onClick={() => { setSelectedProduct(null); navigate('/login'); }}>
+                      Iniciá sesión para comprar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
