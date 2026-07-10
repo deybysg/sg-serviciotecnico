@@ -131,12 +131,19 @@
 .ventas-historial-encabezados p { margin: 0; text-align: center; }
 
 .ventas-historial-encabezados-modo-ventas,
-.venta-historial-row { grid-template-columns: 0.8fr 1.5fr 1.5fr 1fr 1fr 0.8fr; }
+.venta-historial-row { grid-template-columns: 50px 1.5fr 1fr 1fr 1fr 1fr; }
 
 .ventas-historial-encabezados-modo-usuarios,
-.usuario-historial-row { grid-template-columns: 1.5fr 1fr 1.2fr 1.5fr 1fr; }
+.usuario-historial-row { grid-template-columns: 1fr 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr; }
 
-/* 6. ROWS */
+.ventas-historial-encabezados-modo-productos,
+.producto-nuevo-row { grid-template-columns: 50px 1.5fr 1fr 1fr 0.8fr 1fr; }
+
+.ventas-historial-encabezados-modo-devoluciones,
+.venta-devuelta-row { grid-template-columns: 50px 1.5fr 1fr 1fr 1fr 1fr; }
+
+.ventas-historial-encabezados-modo-ajustes,
+.ajuste-row { grid-template-columns: 50px 1.5fr 1fr 1.2fr 1fr 1fr; }
 .venta-historial-row,
 .usuario-historial-row {
   display: grid;
@@ -186,7 +193,33 @@
   text-align: center;
 }
 
-.venta-historial-row .col-id,
+.venta-historial-row .col-foto-venta,
+.usuario-historial-row .col-usuario-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.venta-historial-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(94, 164, 255, 0.2);
+}
+
+.venta-historial-thumb-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(94, 164, 255, 0.15);
+  color: var(--text-muted);
+}
+
 .venta-historial-row .col-usuario,
 .usuario-historial-row .col-usuario-name {
   text-align: left;
@@ -207,6 +240,30 @@
 .venta-historial-row .col-total {
   font-weight: 700;
   color: var(--neon-green) !important;
+}
+
+.venta-historial-row .col-descripcion-venta {
+  font-size: 0.78rem;
+  color: var(--text-secondary) !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-historial-row .col-descripcion-usuario {
+  font-size: 0.78rem;
+  color: var(--text-secondary) !important;
+  text-align: left;
+}
+
+.venta-devuelta-row .col-descripcion-devolucion {
+  font-size: 0.78rem;
+  color: var(--text-secondary) !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .usuario-historial-row .col-total-acc {
@@ -522,15 +579,516 @@
   box-shadow: 0 0 25px rgba(0, 183, 255, 0.25), 0 0 28px rgba(191, 50, 255, 0.22);
 }
 
-/* 13. RESPONSIVE */
+/* 13. TABS */
+.ventas-historial-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 6px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--input-border);
+}
+
+.ventas-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.ventas-tab:hover {
+  color: var(--text-primary);
+  background: rgba(0, 183, 255, 0.08);
+  border-color: rgba(0, 183, 255, 0.2);
+}
+
+.ventas-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.2), rgba(191, 50, 255, 0.2));
+  border-color: rgba(0, 183, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.15);
+}
+
+/* 14. PRODUCTOS NUEVOS */
+.ventas-historial-encabezados-modo-productos,
+.producto-nuevo-row {
+  grid-template-columns: 0.8fr 1.5fr 1.5fr 1fr 0.8fr 1fr;
+}
+
+.producto-nuevo-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(94, 164, 255, 0.2);
+  background: var(--panel-card-bg);
+  box-shadow: inset 0 0 35px rgba(0, 183, 255, 0.04), 0 14px 32px rgba(0, 0, 0, 0.24);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.producto-nuevo-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+  opacity: 0.7;
+  transition: opacity 0.25s ease;
+}
+
+.producto-nuevo-row:hover {
+  transform: translateY(-4px);
+  border-color: rgba(35, 221, 95, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(35, 221, 95, 0.1);
+}
+
+.producto-nuevo-row:hover::before {
+  opacity: 1;
+}
+
+.producto-nuevo-row p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.producto-nuevo-row .col-foto-venta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  text-align: left;
+  font-weight: 800;
+  color: var(--neon-green) !important;
+  text-shadow: 0 0 10px rgba(35, 221, 95, 0.3);
+}
+
+.producto-nuevo-row .col-nombre {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary) !important;
+}
+
+.producto-nuevo-row .col-precio {
+  font-weight: 700;
+  color: var(--neon-green) !important;
+}
+
+.producto-nuevo-row .col-stock {
+  font-weight: 700;
+  color: var(--neon-blue) !important;
+}
+
+.producto-nuevo-row .col-stock.stock-bajo {
+  color: var(--neon-red) !important;
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+}
+
+.producto-nuevo-row .col-categoria {
+  font-size: 0.78rem;
+  color: var(--neon-purple) !important;
+}
+
+/* 15. DEVOLUCIONES */
+.ventas-historial-encabezados-modo-devoluciones,
+.venta-devuelta-row {
+  grid-template-columns: 0.8fr 1.5fr 1.5fr 1fr 1fr 0.8fr;
+}
+
+.venta-devuelta-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  background: var(--panel-card-bg);
+  box-shadow: inset 0 0 35px rgba(255, 77, 77, 0.04), 0 14px 32px rgba(0, 0, 0, 0.24);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.venta-devuelta-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-red), var(--neon-amber));
+  opacity: 0.7;
+  transition: opacity 0.25s ease;
+}
+
+.venta-devuelta-row:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 77, 77, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(255, 77, 77, 0.1);
+}
+
+.venta-devuelta-row:hover::before {
+  opacity: 1;
+}
+
+.venta-devuelta-row p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.venta-devuelta-row .col-foto-venta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.venta-devuelta-row .col-usuario {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary) !important;
+}
+
+.venta-devuelta-row .col-total-original {
+  font-weight: 700;
+  color: var(--text-muted) !important;
+  text-decoration: line-through;
+}
+
+.venta-devuelta-row .col-estado-devuelto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--neon-red);
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+/* 16. AJUSTES */
+.ventas-historial-encabezados-modo-ajustes,
+.ajuste-row {
+  grid-template-columns: 1.2fr 0.8fr 1.2fr 1fr 1.5fr 1fr;
+}
+
+.ajuste-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 196, 0, 0.2);
+  background: var(--panel-card-bg);
+  box-shadow: inset 0 0 35px rgba(255, 196, 0, 0.04), 0 14px 32px rgba(0, 0, 0, 0.24);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ajuste-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-amber), var(--neon-green));
+  opacity: 0.7;
+  transition: opacity 0.25s ease;
+}
+
+.ajuste-row:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 196, 0, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(255, 196, 0, 0.1);
+}
+
+.ajuste-row:hover::before {
+  opacity: 1;
+}
+
+.ajuste-row p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.ajuste-row .col-producto-nombre {
+  text-align: left;
+  font-weight: 800;
+  color: var(--neon-amber) !important;
+  text-shadow: 0 0 10px rgba(255, 196, 0, 0.3);
+}
+
+.ajuste-row .col-foto-venta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ajuste-row .col-tipo-ajuste {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ajuste-row .col-tipo-ajuste.tipo-modificacion {
+  color: var(--neon-blue);
+  background: rgba(0, 183, 255, 0.1);
+  border: 1px solid rgba(0, 183, 255, 0.3);
+}
+
+.ajuste-row .col-tipo-ajuste.tipo-ajuste_stock {
+  color: var(--neon-green);
+  background: rgba(35, 221, 95, 0.1);
+  border: 1px solid rgba(35, 221, 95, 0.3);
+}
+
+.ajuste-row .col-tipo-ajuste.tipo-ajuste_precio {
+  color: var(--neon-purple);
+  background: rgba(191, 50, 255, 0.1);
+  border: 1px solid rgba(191, 50, 255, 0.3);
+}
+
+.ajuste-row .col-tipo-ajuste.tipo-creacion {
+  color: var(--neon-amber);
+  background: rgba(255, 196, 0, 0.1);
+  border: 1px solid rgba(255, 196, 0, 0.3);
+}
+
+.ajuste-row .col-cambios {
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ajuste-row .cambio-item {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(94, 164, 255, 0.1);
+  white-space: nowrap;
+}
+
+.ajuste-row .col-usuario-ajuste {
+  font-size: 0.78rem;
+  color: var(--text-muted) !important;
+}
+
+/* 17. TODOS LOS MOVIMIENTOS */
+.ventas-historial-encabezados-modo-todos,
+.movimiento-combinado-row {
+  grid-template-columns: 1fr 1.5fr 1fr 1.2fr 0.8fr 1fr 0.5fr;
+}
+
+.movimiento-combinado-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(94, 164, 255, 0.2);
+  background: var(--panel-card-bg);
+  box-shadow: inset 0 0 35px rgba(0, 183, 255, 0.04), 0 14px 32px rgba(0, 0, 0, 0.24);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.movimiento-combinado-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.7;
+  transition: opacity 0.25s ease;
+}
+
+.movimiento-combinado-row.venta::before {
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+}
+
+.movimiento-combinado-row.devolucion::before {
+  background: linear-gradient(90deg, var(--neon-red), var(--neon-amber));
+}
+
+.movimiento-combinado-row.producto::before {
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+}
+
+.movimiento-combinado-row.ajuste::before {
+  background: linear-gradient(90deg, var(--neon-amber), var(--neon-green));
+}
+
+.movimiento-combinado-row:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 183, 255, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(0, 183, 255, 0.1);
+}
+
+.movimiento-combinado-row:hover::before {
+  opacity: 1;
+}
+
+.movimiento-combinado-row p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.movimiento-combinado-row .col-fecha-movimiento {
+  font-size: 0.78rem;
+  color: var(--text-muted) !important;
+}
+
+.movimiento-combinado-row .col-tipo-movimiento {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-venta {
+  color: var(--neon-blue);
+  background: rgba(0, 183, 255, 0.1);
+  border: 1px solid rgba(0, 183, 255, 0.3);
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-salida {
+  color: var(--neon-red);
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-entrada {
+  color: var(--neon-green);
+  background: rgba(35, 221, 95, 0.1);
+  border: 1px solid rgba(35, 221, 95, 0.3);
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-devolucion {
+  color: #ff8c00;
+  background: rgba(255, 140, 0, 0.1);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-producto {
+  color: var(--neon-green);
+  background: rgba(35, 221, 95, 0.1);
+  border: 1px solid rgba(35, 221, 95, 0.3);
+}
+
+.movimiento-combinado-row .col-tipo-movimiento.tipo-ajuste {
+  color: var(--neon-blue);
+  background: rgba(0, 183, 255, 0.1);
+  border: 1px solid rgba(0, 183, 255, 0.3);
+}
+
+.movimiento-combinado-row .col-descripcion-movimiento {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary) !important;
+}
+
+.movimiento-combinado-row .col-detalle-movimiento {
+  font-size: 0.78rem;
+  color: var(--text-muted) !important;
+  text-align: left;
+}
+
+.movimiento-combinado-row .col-total-movimiento {
+  font-weight: 700;
+  color: var(--neon-green) !important;
+}
+
+.movimiento-combinado-row .col-usuario-movimiento {
+  font-size: 0.78rem;
+  color: var(--text-muted) !important;
+}
+
+.movimiento-combinado-row .col-acciones-movimiento {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 18. RESPONSIVE */
 @media (max-width: 992px) {
   .ventas-historial-encabezados-modo-ventas,
   .venta-historial-row { grid-template-columns: 1fr 1fr 1fr 1fr; font-size: 0.85rem; }
-  .venta-historial-row .col-usuario,
-  .venta-historial-row .col-id { display: none; }
+  .venta-historial-row .col-foto-venta,
+  .venta-historial-row .col-descripcion-venta,
+  .venta-historial-row .col-usuario { display: none; }
 
   .ventas-historial-encabezados-modo-usuarios,
   .usuario-historial-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .usuario-historial-row .col-descripcion-usuario,
+  .usuario-historial-row .col-usuario { display: none; }
+
+  .ventas-historial-encabezados-modo-productos,
+  .producto-nuevo-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .producto-nuevo-row .col-foto-venta,
+  .producto-nuevo-row .col-categoria,
+  .producto-nuevo-row .col-categoria { display: none; }
+
+  .ventas-historial-encabezados-modo-devoluciones,
+  .venta-devuelta-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .venta-devuelta-row .col-foto-venta,
+  .venta-devuelta-row .col-descripcion-devolucion,
+  .venta-devuelta-row .col-usuario { display: none; }
+
+  .ventas-historial-encabezados-modo-ajustes,
+  .ajuste-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .ajuste-row .col-producto-codigo,
+  .ajuste-row .col-fecha-ajuste,
+  .ajuste-row .col-acciones { display: none; }
+
+  .ventas-historial-encabezados-modo-todos,
+  .movimiento-combinado-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .movimiento-combinado-row .col-fecha-movimiento,
+  .movimiento-combinado-row .col-usuario-movimiento { display: none; }
 }
 
 @media (max-width: 768px) {
@@ -542,15 +1100,43 @@
     padding: 20px 14px;
   }
 
+  .ventas-historial-tabs {
+    flex-direction: column;
+  }
+
+  .ventas-tab {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
   .ventas-historial-encabezados-modo-ventas,
   .venta-historial-row { grid-template-columns: 1fr 1fr; }
-  .ventas-historial-encabezados-modo-ventas p:nth-child(3),
   .venta-historial-row .col-fecha { display: none; }
 
   .ventas-historial-encabezados-modo-usuarios,
   .usuario-historial-row { grid-template-columns: 1fr 1fr; }
-  .ventas-historial-encabezados-modo-usuarios p:nth-child(4),
   .usuario-historial-row .col-ultima-compra { display: none; }
+
+  .ventas-historial-encabezados-modo-productos,
+  .producto-nuevo-row { grid-template-columns: 1fr 1fr; }
+  .producto-nuevo-row .col-precio,
+  .producto-nuevo-row .col-stock { display: none; }
+
+  .ventas-historial-encabezados-modo-devoluciones,
+  .venta-devuelta-row { grid-template-columns: 1fr 1fr; }
+  .venta-devuelta-row .col-total-original,
+  .venta-devuelta-row .col-estado-devuelto { display: none; }
+
+  .ventas-historial-encabezados-modo-ajustes,
+  .ajuste-row { grid-template-columns: 1fr 1fr; }
+  .ajuste-row .col-tipo-ajuste,
+  .ajuste-row .col-cambios { display: none; }
+
+  .ventas-historial-encabezados-modo-todos,
+  .movimiento-combinado-row { grid-template-columns: 1fr 1fr; }
+  .movimiento-combinado-row .col-detalle-movimiento,
+  .movimiento-combinado-row .col-total-movimiento,
+  .movimiento-combinado-row .col-acciones-movimiento { display: none; }
 
   .modal-content {
     width: 95%;
@@ -561,11 +1147,19 @@
 @media (max-width: 480px) {
   .ventas-historial-encabezados { display: none; }
   .venta-historial-row,
-  .usuario-historial-row {
+  .usuario-historial-row,
+  .producto-nuevo-row,
+  .venta-devuelta-row,
+  .ajuste-row,
+  .movimiento-combinado-row {
     grid-template-columns: 1fr;
     gap: 6px;
     padding: 12px;
   }
   .venta-historial-row::before,
-  .usuario-historial-row::before { display: none; }
+  .usuario-historial-row::before,
+  .producto-nuevo-row::before,
+  .venta-devuelta-row::before,
+  .ajuste-row::before,
+  .movimiento-combinado-row::before { display: none; }
 }

@@ -27,7 +27,7 @@ import ServiciosAdmin from "./admin/ServiciosAdmin";
 import EstadisticasAdmin from "./admin/EstadisticasAdmin";
 import HistorialAdmin from "./admin/HistorialAdmin";
 import Paneltrabajos from "./admin/Paneltrabajos";
-import HistorialDeVentas from "./admin/HistorialDeVentas";
+import HistorialDeMovimientos from "./admin/HistorialDeMovimientos";
 import PuntoDeVenta from "./admin/PuntoDeVenta";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -129,10 +129,10 @@ function AppBody() {
             }
           />
          <Route
-            path="/admin/historialventas"
+            path="/admin/historialmovimientos"
             element={
               <PrivateRoute roles={["admin","superadmin"]}>
-                <HistorialDeVentas />
+                <HistorialDeMovimientos />
               </PrivateRoute>
             }
           />

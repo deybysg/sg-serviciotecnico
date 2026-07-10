@@ -245,6 +245,7 @@ function PuntoDeVenta() {
               cantidad: item.cantidad,
               precioUnitario: item.precio,
               subtotal: item.precio * item.cantidad,
+              imagen: item.imagen || "",
             })),
           };
           await api.post("/ventas", ventaData);

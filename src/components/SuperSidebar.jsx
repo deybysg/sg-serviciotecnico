@@ -98,9 +98,9 @@ export default function SuperSidebar({ onExpandChange }) {
           <span className="super-sidebar__icon"><FaHistory /></span>
           <span className="super-sidebar__label">H. Servicios</span>
         </NavLink>
-        <NavLink to="/admin/historialventas" className="super-sidebar__item">
+        <NavLink to="/admin/historialmovimientos" className="super-sidebar__item">
           <span className="super-sidebar__icon"><FaFileInvoiceDollar /></span>
-          <span className="super-sidebar__label">H. Ventas</span>
+          <span className="super-sidebar__label">H. Movimientos</span>
         </NavLink>
         <div className="super-sidebar__divider" />
         <NavLink to="/admin/usuarios" className="super-sidebar__item">

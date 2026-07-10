@@ -1,4 +1,5 @@
-import ProductosModel from "../models/productosSchema";
+import ProductosModel from "../models/productosSchema.js";
+import AjustesModel from "../models/ajustesSchema.js";
 
 export const obtenerProductos = async(req, res) => {
 
@@ -48,9 +49,57 @@ export const actualizarProducto = async (req, res) => {
       }
     }
 
+    // Obtener el producto antes de actualizar para comparar cambios
+    const productoAntes = await ProductosModel.findById(id);
+    if (!productoAntes) return res.status(404).json({ message: "Producto no encontrado" });
+
     const producto = await ProductosModel.findByIdAndUpdate(id, req.body, { new: true });
     
-    if (!producto) return res.status(404).json({ message: "Producto no encontrado" });
+    // Detectar cambios y registrar ajuste
+    const cambios = {};
+    let hayCambios = false;
+    
+    const stockNuevo = req.body.stock !== undefined ? Number(req.body.stock) : undefined;
+    const precioNuevo = req.body.precio !== undefined ? Number(req.body.precio) : undefined;
+    
+    if (stockNuevo !== undefined && stockNuevo !== Number(productoAntes.stock)) {
+      cambios.stock = { anterior: Number(productoAntes.stock), nuevo: stockNuevo };
+      hayCambios = true;
+    }
+    if (precioNuevo !== undefined && precioNuevo !== Number(productoAntes.precio)) {
+      cambios.precio = { anterior: Number(productoAntes.precio), nuevo: precioNuevo };
+      hayCambios = true;
+    }
+    if (req.body.nombre && req.body.nombre !== productoAntes.nombre) {
+      cambios.nombre = { anterior: productoAntes.nombre, nuevo: req.body.nombre };
+      hayCambios = true;
+    }
+    if (req.body.categoria && req.body.categoria !== productoAntes.categoria) {
+      cambios.categoria = { anterior: productoAntes.categoria, nuevo: req.body.categoria };
+      hayCambios = true;
+    }
+
+    if (hayCambios) {
+      const usuario = req.user?.username || 'admin';
+      try {
+        await AjustesModel.create({
+          productoId: id,
+          productoNombre: producto.nombre,
+          productoCodigo: producto.codigo,
+          tipo: 'modificacion',
+          cambios,
+          stockAnterior: Number(productoAntes.stock),
+          stockNuevo: Number(producto.stock),
+          precioAnterior: Number(productoAntes.precio),
+          precioNuevo: Number(producto.precio),
+          motivo: req.body.motivo || '',
+          usuario
+        });
+      } catch (err) {
+        console.error('Error al crear ajuste:', err.message);
+      }
+    }
+    
     res.json(producto);
   } catch (error) {
     console.error(error);
@@ -79,6 +128,20 @@ export const obtenerProducto = async (req, res) => {
     const producto = await ProductosModel.findById(id);
     if (!producto) return res.status(404).json({ message: "Producto no encontrado" });
     res.json(producto);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const obtenerProductosNuevos = async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const productos = await ProductosModel.find({ 
+      createdAt: { $gte: sevenDaysAgo } 
+    }).sort({ createdAt: -1 });
+    res.json(productos);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

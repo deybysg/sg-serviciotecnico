@@ -117,6 +117,17 @@ export const devolverVenta = async (req, res) => {
   }
 };
 
+// Obtener ventas devueltas
+export const obtenerVentasDevueltas = async (req, res) => {
+  try {
+    const ventas = await VentasModel.find({ estado: "Devuelto" }).sort({ fechaCompra: -1 });
+    res.json(ventas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: error.message });
+  }
+};
+
 // Obtener ventas por usuario (mis compras)
 export const obtenerVentasPorUsuario = async (req, res) => {
   try {

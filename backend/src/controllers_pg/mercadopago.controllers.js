@@ -1,9 +1,9 @@
 // backend/src/controllers_pg/mercadopago.controllers.js
 
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import nodemailer from 'nodemailer';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import { sendEmail } from '../helpers/emailHelper.js';
 import { getPool } from '../database/postgres.js';
 
 // Configurar Mercado Pago con tu Access Token
@@ -174,7 +174,8 @@ export const webhook = async (req, res) => {
                     precioUnitario: item.precio,
                     categoria: item.categoria,
                     cantidad: item.cantidad,
-                    subtotal: item.precio * item.cantidad
+                    subtotal: item.precio * item.cantidad,
+                    imagen: item.imagen || ""
                 }));
 
                 const { rows } = await pool.query(
@@ -205,18 +206,9 @@ export const webhook = async (req, res) => {
 
 const enviarComprobante = async (email, venta, items) => {
     try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
-
         const pdfBuffer = await crearComprobantePDF(venta, items);
 
-        await transporter.sendMail({
-            from: `"${process.env.STORE_NAME || 'Tu Tienda'}" <${process.env.EMAIL_USER}>`,
+        await sendEmail({
             to: email,
             subject: `Comprobante de compra #${venta.id}`,
             html: `
@@ -250,7 +242,8 @@ const enviarComprobante = async (email, venta, items) => {
             attachments: [
                 {
                     filename: `comprobante-${venta.id}.pdf`,
-                    content: pdfBuffer
+                    content: pdfBuffer,
+                    type: 'application/pdf'
                 }
             ]
         });

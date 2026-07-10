@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { api } from "../services/api";
 import { shortId } from "../utils/id";
 import Swal from "sweetalert2";
+import { useAuth } from "../context/AuthContext";
 import "../styles/admin/ProductosAdmin.css";
 import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit3, FiTrash2, FiSearch, FiAlertTriangle, FiPackage, FiX, FiSave, FiUpload, FiLink } from "react-icons/fi"; 
 
@@ -501,14 +502,15 @@ function ProductoFormModal({ productoInicial, onClose, onGuardar, productosExist
 // 4. COMPONENTE PRINCIPAL: ProductosAdmin
 // =================================================================
 function ProductosAdmin() {
-    const [productos, setProductos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-    const [showStockModal, setShowStockModal] = useState(false);
-    // NUEVO ESTADO PARA EL BUSCADOR
-    const [searchTerm, setSearchTerm] = useState(''); 
+    const { user } = useAuth();
+    const [productos, setProductos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+    const [showStockModal, setShowStockModal] = useState(false);
+    // NUEVO ESTADO PARA EL BUSCADOR
+    const [searchTerm, setSearchTerm] = useState('');
     
     // Cálculo Dinámico de las Alertas (se actualiza automáticamente con 'productos')
     const productosAAlertar = productos.filter(p => p.stock <= UMBRAL_STOCK_BAJO);
@@ -606,6 +608,48 @@ function ProductosAdmin() {
                 // No enviar _id ni id en el body
                 const { _id, id: oldId, ...productoData } = producto;
                 resultado = await api.put(`/productos/${id}`, productoData);
+                
+                // Registrar en Historial de Movimientos (ajustes)
+                const oldProd = productoSeleccionado;
+                const cambios = {};
+                
+                if (oldProd.nombre !== productoData.nombre) cambios.nombre = { anterior: oldProd.nombre, nuevo: productoData.nombre };
+                if (oldProd.categoria !== productoData.categoria) cambios.categoria = { anterior: oldProd.categoria, nuevo: productoData.categoria };
+                if (oldProd.descripcion !== productoData.descripcion) cambios.descripcion = { anterior: oldProd.descripcion, nuevo: productoData.descripcion };
+                if (oldProd.imagen !== productoData.imagen) cambios.imagen = { anterior: oldProd.imagen, nuevo: productoData.imagen };
+                
+                const stockAnterior = Number(oldProd.stock || 0);
+                const stockNuevo = Number(productoData.stock || 0);
+                const precioAnterior = Number(oldProd.precio || 0);
+                const precioNuevo = Number(productoData.precio || 0);
+                
+                if (stockAnterior !== stockNuevo) cambios.stock = { anterior: stockAnterior, nuevo: stockNuevo };
+                if (precioAnterior !== precioNuevo) cambios.precio = { anterior: precioAnterior, nuevo: precioNuevo };
+                
+                    // Solo crear ajuste si hubo cambios
+                    if (Object.keys(cambios).length > 0) {
+                        try {
+                            console.log('[ProductosAdmin] Registrando ajuste para producto:', id, cambios);
+                            await api.post('/ajustes', {
+                                productoId: id,
+                                productoNombre: productoData.nombre,
+                                productoCodigo: productoData.codigo,
+                                tipo: 'modificacion',
+                                cambios,
+                                stockAnterior,
+                                stockNuevo,
+                                precioAnterior,
+                                precioNuevo,
+                                motivo: 'Edición de producto desde panel admin',
+                                usuario: user?.username || 'admin',
+                                imagen: productoData.imagen || ''
+                            });
+                            console.log('[ProductosAdmin] Ajuste registrado exitosamente');
+                        } catch (ajusteErr) {
+                            console.error('[ProductosAdmin] Error registrando ajuste:', ajusteErr);
+                            // No bloqueamos la operación principal si falla el ajuste
+                        }
+                    }
             } else {
                 // POST /productos (requiere auth)
                 // No necesitamos generar ID, MongoDB lo hace automáticamente
@@ -860,7 +904,7 @@ function ProductosAdmin() {
 
                 {/* --- Modal de Alertas de Stock --- */}
                 {showStockModal && (
-                    <AlertaStockModalo98
+                    <AlertaStockModal
                         productosAAlertar={productosAAlertar}
                         onClose={() => setShowStockModal(false)}
                     />

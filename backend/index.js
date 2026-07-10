@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import "dotenv/config";
 import { initDb } from './src/database/initDb.js';
 import productosRoutes from './src/routes/productos.routes.js';
@@ -15,6 +16,10 @@ import ventasRoutes from './src/routes/ventas.routes.js';
 import cartsRoutes from './src/routes/carts.routes.js';
 import estadisticasRoutes from './src/routes/estadisticas.routes.js';
 import mercadopagoRoutes from './src/routes/mercadopago.routes.js';
+import ajustesRoutes from './src/routes/ajustes.routes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 
@@ -41,7 +46,9 @@ if (process.env.FRONTEND_URL) {
   }
 }
 
-console.log('ALLOWED_ORIGINS:', ALLOWED_ORIGINS);
+if (process.env.NODE_ENV === 'development') {
+  console.log('ALLOWED_ORIGINS:', ALLOWED_ORIGINS);
+}
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -85,6 +92,7 @@ app.use('/api/ventas', ventasRoutes);
 app.use('/api/carts', cartsRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/mercadopago', mercadopagoRoutes);
+app.use('/api/ajustes', ajustesRoutes);
 
 // Endpoint simple para verificar que el servidor está corriendo (Uptime Robot)
 app.get('/api/health', (req, res) => {
@@ -114,11 +122,22 @@ app.get('/api/health/db', async (req, res) => {
 
 app.set('port', process.env.PORT || 4000);
 
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
 (async () => {
   try {
     await initDb();
-    app.listen(app.get('port'), () => {
+    const server = app.listen(app.get('port'), () => {
       console.log(`app running on port ${app.get('port')}`);
+    });
+    server.on('error', (err) => {
+      console.error('Server error:', err);
     });
   } catch (error) {
     console.error('Error al iniciar la aplicación:', error);

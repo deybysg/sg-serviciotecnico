@@ -12,6 +12,7 @@ const router = Router();
 
 // GET productos - público (todos pueden ver)
 router.get("/", ctrl.obtenerProductos);
+router.get("/nuevos", authenticate, authorize("admin", "superadmin"), ctrl.obtenerProductosNuevos);
 router.get("/:id", ctrl.obtenerProducto);
 
 // POST, PUT, DELETE - solo admin/superadmin

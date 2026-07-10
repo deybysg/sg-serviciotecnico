@@ -1,9 +1,9 @@
 // backend/src/controllers/mercadopago.controllers.js
 
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import nodemailer from 'nodemailer';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import { sendEmail } from '../helpers/emailHelper.js';
 import Venta from '../models/ventasSchema.js';
 import Producto from '../models/productosSchema.js';
 
@@ -199,7 +199,8 @@ export const webhook = async (req, res) => {
                         precioUnitario: item.precio,
                         categoria: item.categoria,
                         cantidad: item.cantidad,
-                        subtotal: item.precio * item.cantidad
+                        subtotal: item.precio * item.cantidad,
+                        imagen: item.imagen || ""
                     }))
                 });
 
@@ -230,21 +231,9 @@ export const webhook = async (req, res) => {
  */
 const enviarComprobante = async (email, venta, items) => {
     try {
-        // Configurar transporter de nodemailer (usa tus credenciales)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER, // tu-email@gmail.com
-                pass: process.env.EMAIL_PASSWORD // contraseña de aplicación
-            }
-        });
-
-        // Crear PDF del comprobante
         const pdfBuffer = await crearComprobantePDF(venta, items);
 
-        // Enviar email
-        await transporter.sendMail({
-            from: `"${process.env.STORE_NAME || 'Tu Tienda'}" <${process.env.EMAIL_USER}>`,
+        await sendEmail({
             to: email,
             subject: `Comprobante de compra #${venta._id}`,
             html: `
@@ -278,7 +267,8 @@ const enviarComprobante = async (email, venta, items) => {
             attachments: [
                 {
                     filename: `comprobante-${venta._id}.pdf`,
-                    content: pdfBuffer
+                    content: pdfBuffer,
+                    type: 'application/pdf'
                 }
             ]
         });

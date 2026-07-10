@@ -219,6 +219,37 @@ export async function initPostgres() {
       );
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ajustes (
+        id SERIAL PRIMARY KEY,
+        producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE,
+        producto_nombre VARCHAR(255) NOT NULL,
+        producto_codigo VARCHAR(50) NOT NULL,
+        tipo VARCHAR(50) NOT NULL DEFAULT 'modificacion',
+        cambios JSONB DEFAULT '{}',
+        stock_anterior INTEGER DEFAULT 0,
+        stock_nuevo INTEGER DEFAULT 0,
+        precio_anterior DECIMAL(10,2) DEFAULT 0,
+        precio_nuevo DECIMAL(10,2) DEFAULT 0,
+        motivo TEXT DEFAULT '',
+        usuario VARCHAR(255) NOT NULL,
+        imagen TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Migración: agregar columna imagen a ajustes si no existe
+    const colImagenAjustes = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'ajustes' AND column_name = 'imagen'
+      ) AS exists
+    `);
+    if (!colImagenAjustes.rows[0].exists) {
+      await client.query(`ALTER TABLE ajustes ADD COLUMN imagen TEXT DEFAULT ''`);
+      console.log('Columna imagen agregada a ajustes');
+    }
+
     // Asegurar superadmin por defecto
     const { rows } = await client.query(`SELECT * FROM usuarios WHERE username = 'admin' OR role = 'superadmin' LIMIT 1`);
     if (rows.length === 0) {

@@ -86,6 +86,11 @@ export const actualizarProducto = async (req, res) => {
     if (!nombre || nombre.trim() === '') {
       return res.status(400).json({ mensaje: "El nombre del producto es obligatorio" });
     }
+
+    // Obtener el producto antes de actualizar para comparar cambios
+    const { rows: productoAntesRows } = await pool.query('SELECT * FROM productos WHERE id = $1', [id]);
+    if (productoAntesRows.length === 0) return res.status(404).json({ message: "Producto no encontrado" });
+    const productoAntes = productoAntesRows[0];
     
     const descripcionFinal = descripcion || '';
     const imagenFinal = imagen || '/img/default-product.png';
@@ -99,7 +104,46 @@ export const actualizarProducto = async (req, res) => {
       [codigo.trim(), nombre, categoriaFinal, precioFinal, stockFinal, descripcionFinal, imagenFinal, id]
     );
     if (rows.length === 0) return res.status(404).json({ message: "Producto no encontrado" });
-    res.json(rows[0]);
+    const producto = rows[0];
+
+    // Detectar cambios y registrar ajuste
+    const cambios = {};
+    let hayCambios = false;
+    
+    const stockNuevo = stock !== undefined ? Number(stock) : undefined;
+    const precioNuevo = precio !== undefined ? Number(precio) : undefined;
+    
+    if (stockNuevo !== undefined && stockNuevo !== Number(productoAntes.stock)) {
+      cambios.stock = { anterior: Number(productoAntes.stock), nuevo: stockNuevo };
+      hayCambios = true;
+    }
+    if (precioNuevo !== undefined && precioNuevo !== Number(productoAntes.precio)) {
+      cambios.precio = { anterior: Number(productoAntes.precio), nuevo: precioNuevo };
+      hayCambios = true;
+    }
+    if (nombre && nombre !== productoAntes.nombre) {
+      cambios.nombre = { anterior: productoAntes.nombre, nuevo: nombre };
+      hayCambios = true;
+    }
+    if (categoria && categoria !== productoAntes.categoria) {
+      cambios.categoria = { anterior: productoAntes.categoria, nuevo: categoria };
+      hayCambios = true;
+    }
+
+    if (hayCambios) {
+      const usuario = req.user?.username || 'admin';
+      try {
+        await pool.query(
+          `INSERT INTO ajustes (producto_id, producto_nombre, producto_codigo, tipo, cambios, stock_anterior, stock_nuevo, precio_anterior, precio_nuevo, motivo, usuario)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [id, producto.nombre, producto.codigo, 'modificacion', JSON.stringify(cambios), Number(productoAntes.stock), Number(producto.stock), Number(productoAntes.precio), Number(producto.precio), req.body.motivo || '', usuario]
+        );
+      } catch (err) {
+        console.error('Error al crear ajuste:', err.message);
+      }
+    }
+    
+    res.json(producto);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -113,6 +157,19 @@ export const eliminarProducto = async (req, res) => {
     const { rows } = await pool.query('DELETE FROM productos WHERE id = $1 RETURNING *', [id]);
     if (rows.length === 0) return res.status(404).json({ message: "Producto no encontrado" });
     res.json({ message: "Producto eliminado" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const obtenerProductosNuevos = async (req, res) => {
+  try {
+    const pool = getPool();
+    const { rows } = await pool.query(
+      "SELECT * FROM productos WHERE created_at >= NOW() - INTERVAL '7 days' ORDER BY created_at DESC"
+    );
+    res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

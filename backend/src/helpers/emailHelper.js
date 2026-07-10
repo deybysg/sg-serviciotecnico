@@ -1,7 +1,35 @@
 import sgMail from '@sendgrid/mail';
 import 'dotenv/config';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+const DEFAULT_FROM = process.env.EMAIL_FROM || 'Sistema SG <no-reply@example.com>';
+
+export const sendEmail = async ({ to, subject, text, html, attachments = [] }) => {
+  const msg = {
+    from: DEFAULT_FROM,
+    to,
+    subject,
+    text,
+    html,
+    attachments: attachments.map(att => ({
+      content: att.content.toString('base64'),
+      filename: att.filename,
+      type: att.type || 'application/octet-stream',
+      disposition: 'attachment'
+    }))
+  };
+
+  try {
+    const info = await sgMail.send(msg);
+    return info;
+  } catch (error) {
+    console.error('SendGrid error:', error.response?.body || error.message);
+    throw error;
+  }
+};
 
 export const sendResetEmail = async (to, token, username) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -56,19 +84,5 @@ export const sendResetEmail = async (to, token, username) => {
     </body>
   </html>`;
 
-  const msg = {
-    from: process.env.SMTP_FROM || 'Sistema SG <no-reply@example.com>',
-    to,
-    subject: 'Solicitud de restablecimiento de contraseña',
-    text,
-    html
-  };
-
-  try {
-    const info = await sgMail.send(msg);
-    return info;
-  } catch (error) {
-    console.error('SendGrid error:', error.response?.body || error.message);
-    throw error;
-  }
+  return sendEmail({ to, subject: 'Solicitud de restablecimiento de contraseña', text, html });
 };

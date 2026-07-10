@@ -52,11 +52,8 @@ Agregá estas variables en Render Dashboard → **Environment** → **Add Enviro
 | `FRONTEND_URL` | `https://tu-frontend-url.vercel.app` | URL de tu frontend para CORS (¡cambiá esto!) |
 | `BACKEND_URL` | `https://sistema-sg-backend.onrender.com` | URL de este backend (Render te la da) |
 | `MERCADOPAGO_ACCESS_TOKEN` | `APP_USR-2588827446907989-112013-c858b942fa99bc8ebf1f05dc4c551501-3004659960` | Token de MercadoPago |
-| `EMAIL_USER` | `gastonituartedef@gmail.com` | Email para notificaciones |
-| `EMAIL_PASSWORD` | `xfwlymyfwquappkh` | Contraseña de aplicación de Gmail |
-| `SMTP_HOST` | `smtp.gmail.com` | Servidor SMTP |
-| `SMTP_PORT` | `587` | Puerto SMTP |
-| `SMTP_FROM` | `Sistema SG <gastonituartedef@gmail.com>` | Remitente de emails |
+| `SENDGRID_API_KEY` | `SG.xxxxxxxxxxxxxxxxxxxx` | API Key de SendGrid (envío de emails) |
+| `EMAIL_FROM` | `Sistema SG <serviciotecnico.deyby@gmail.com>` | Remitente verificado en SendGrid |
 | `STORE_NAME` | `Sistema SG` | Nombre de la tienda |
 
 #### 🟢 OPCIONALES (solo si usás MongoDB)

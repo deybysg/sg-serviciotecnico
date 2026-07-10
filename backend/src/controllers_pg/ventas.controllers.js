@@ -109,6 +109,17 @@ export const devolverVenta = async (req, res) => {
   }
 };
 
+export const obtenerVentasDevueltas = async (req, res) => {
+  try {
+    const pool = getPool();
+    const { rows } = await pool.query("SELECT * FROM ventas WHERE estado = 'Devuelto' ORDER BY fecha_compra DESC");
+    res.json(rows.map(r => ({ ...r, productosComprados: typeof r.productos_comprados === 'string' ? JSON.parse(r.productos_comprados) : r.productos_comprados })));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: error.message });
+  }
+};
+
 export const obtenerVentasPorUsuario = async (req, res) => {
   try {
     const { username } = req.params;
