@@ -2,12 +2,15 @@ import { Schema, model } from "mongoose";
 
 const CATEGORIAS_VALIDAS = [
   "accesorio para auto",
+  "articulo belleza",
   "auriculares",
   "cables usb",
   "camaras",
   "cargadores",
   "celulares",
+  "deporte",
   "hogar",
+  "juguetes",
   "linternas",
   "mouse",
   "otros",
