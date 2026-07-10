@@ -8,7 +8,7 @@ import { FiBox, FiTag, FiDollarSign, FiHash, FiImage, FiFileText, FiPlus, FiEdit
 
 const CATEGORIAS_VALIDAS = [
     "accesorio para auto",
-    "articulo belleza",
+    "articulos de belleza",
     "auriculares",
     "cables usb",
     "camaras",
