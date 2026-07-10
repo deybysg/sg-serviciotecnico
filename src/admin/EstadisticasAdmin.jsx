@@ -4,8 +4,19 @@ import {
   FiDollarSign, FiShoppingCart, FiBox, FiBarChart2,
   FiTool, FiCheckCircle, FiClock, FiTrendingUp, FiX,
   FiClipboard, FiCopy, FiFilter, FiCalendar, FiPieChart,
-  FiActivity, FiHash
+  FiActivity, FiHash, FiDownload, FiFileText, FiFile
 } from 'react-icons/fi';
+import {
+  generarPDF,
+  generarExcel,
+  calcularProductosMasVendidos,
+  calcularProductosMenosVendidos,
+  calcularProductosSinMovimiento,
+  calcularStockBajo,
+  calcularDistribucionCategoria,
+  calcularResumenMensualServicios,
+  calcularServiciosPorTipo
+} from '../utils/reportHelpers';
 import '../styles/admin/EstadisticasAdmin.css';
 import { api } from '../services/api';
 import { useRef } from 'react';
@@ -693,6 +704,7 @@ function EstadisticasAdmin() {
     // --- Estados para Ventas ---
     const [allSales, setAllSales] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [filterYearVentas, setFilterYearVentas] = useState('Todos');
     const [filterMonthVentas, setFilterMonthVentas] = useState('Todos');
     const [loadingSales, setLoadingSales] = useState(true);
@@ -737,6 +749,7 @@ function EstadisticasAdmin() {
     useEffect(() => {
         fetchAllData('/servicios', setAllServices, setErrorServices, setLoadingServices, 'servicios', normalizeServicio);
         fetchAllData('/ventas', setAllSales, setErrorSales, setLoadingSales, 'ventas', normalizeVenta);
+        fetchAllData('/productos', setAllProducts, () => {}, () => {}, 'productos');
         // Cargar usuarios para filtrar ventas huérfanas
         (async () => {
             try {
@@ -850,6 +863,12 @@ function EstadisticasAdmin() {
                     >
                         <FiTrendingUp size={16} /> Estadísticas de Ventas
                     </button>
+                    <button
+                        className={`estdash-tab-btn ${viewMode === 'reportes' ? 'is-active' : ''}`}
+                        onClick={() => setViewMode('reportes')}
+                    >
+                        <FiDownload size={16} /> Reportes
+                    </button>
                 </div>
             
             <div className="estdash-content">
@@ -880,6 +899,16 @@ function EstadisticasAdmin() {
                         availableMonths={availableMonthsVentas}
                         setSelectedMonthData={setSelectedMonthSalesData}
                         maxRevenue={maxRevenueVentas}
+                    />
+                )}
+
+                {viewMode === 'reportes' && (
+                    <ReportesView
+                        allProducts={allProducts}
+                        allSales={filteredAllSales}
+                        allServices={allServices}
+                        filterYear={viewMode === 'reportes' ? filterYearVentas : filterYearServicios}
+                        filterMonth={viewMode === 'reportes' ? filterMonthVentas : filterMonthServicios}
                     />
                 )}
             </div>
@@ -1013,6 +1042,389 @@ const MonthlySalesDetailModal = ({ data, onClose }) => {
                             </tbody>
                         </table>
                     )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// =================================================================
+// 9. COMPONENTE: Vista de Reportes (PDF y Excel)
+// =================================================================
+
+const ReportesView = ({ allProducts, allSales, allServices, filterYear, filterMonth }) => {
+    const [generando, setGenerando] = useState(null);
+
+    const handleGenerar = async (tipo) => {
+        setGenerando(tipo);
+        try {
+            await new Promise(r => setTimeout(r, 100)); // feedback visual
+
+            let ventasFiltradas = allSales;
+            if (filterYear && filterYear !== 'Todos') {
+                ventasFiltradas = ventasFiltradas.filter(v =>
+                    v.fechaCompra && new Date(v.fechaCompra).getFullYear().toString() === filterYear
+                );
+            }
+            if (filterMonth && filterMonth !== 'Todos') {
+                ventasFiltradas = ventasFiltradas.filter(v =>
+                    v.fechaCompra && (new Date(v.fechaCompra).getMonth() + 1).toString().padStart(2, '0') === filterMonth
+                );
+            }
+
+            let serviciosFiltrados = allServices;
+            if (filterYear && filterYear !== 'Todos') {
+                serviciosFiltrados = serviciosFiltrados.filter(s =>
+                    s.fechaSalida && new Date(s.fechaSalida).getFullYear().toString() === filterYear
+                );
+            }
+            if (filterMonth && filterMonth !== 'Todos') {
+                serviciosFiltrados = serviciosFiltrados.filter(s =>
+                    s.fechaSalida && (new Date(s.fechaSalida).getMonth() + 1).toString().padStart(2, '0') === filterMonth
+                );
+            }
+
+            const periodo = filterYear && filterYear !== 'Todos'
+                ? `${filterYear}${filterMonth && filterMonth !== 'Todos' ? '-' + filterMonth : ''}`
+                : 'todos';
+
+            switch (tipo) {
+                // === PRODUCTOS ===
+                case 'listado-productos': {
+                    const cols = [
+                        { key: 'codigo', label: 'Código', width: 25 },
+                        { key: 'nombre', label: 'Nombre', width: 50 },
+                        { key: 'categoria', label: 'Categoría', width: 35 },
+                        { key: 'precio', label: 'Precio', width: 25 },
+                        { key: 'stock', label: 'Stock', width: 15 }
+                    ];
+                    const rows = allProducts.map(p => ({
+                        codigo: p.codigo || '-',
+                        nombre: p.nombre || '-',
+                        categoria: p.categoria || '-',
+                        precio: formatCurrency(p.precio),
+                        stock: p.stock ?? 0
+                    }));
+                    generarPDF({ titulo: 'Listado de Productos', subtitulo: `Total: ${rows.length} productos`, columnas: cols, filas: rows, nombreArchivo: `reporte-productos-${periodo}` });
+                    generarExcel({ titulo: 'Listado de Productos', sheetName: 'Productos', columnas: cols, filas: rows, nombreArchivo: `reporte-productos-${periodo}` });
+                    break;
+                }
+                case 'stock-categoria': {
+                    const map = {};
+                    allProducts.forEach(p => {
+                        const cat = p.categoria || 'Sin categoría';
+                        if (!map[cat]) map[cat] = { categoria: cat, cantidadProductos: 0, stockTotal: 0, valorTotal: 0 };
+                        map[cat].cantidadProductos += 1;
+                        map[cat].stockTotal += p.stock ?? 0;
+                        map[cat].valorTotal += (p.precio ?? 0) * (p.stock ?? 0);
+                    });
+                    const cols = [
+                        { key: 'categoria', label: 'Categoría', width: 40 },
+                        { key: 'cantidadProductos', label: 'Cant. Productos', width: 25 },
+                        { key: 'stockTotal', label: 'Stock Total', width: 20 },
+                        { key: 'valorTotal', label: 'Valor Total', width: 30 }
+                    ];
+                    const rows = Object.values(map).sort((a, b) => b.valorTotal - a.valorTotal).map(r => ({
+                        ...r,
+                        valorTotal: formatCurrency(r.valorTotal)
+                    }));
+                    generarPDF({ titulo: 'Stock por Categoría', subtitulo: `Total: ${allProducts.length} productos`, columnas: cols, filas: rows, nombreArchivo: `reporte-stock-categoria-${periodo}` });
+                    generarExcel({ titulo: 'Stock por Categoría', sheetName: 'Stock por Categoría', columnas: cols, filas: rows, nombreArchivo: `reporte-stock-categoria-${periodo}` });
+                    break;
+                }
+                case 'stock-bajo': {
+                    const cols = [
+                        { key: 'codigo', label: 'Código', width: 25 },
+                        { key: 'nombre', label: 'Nombre', width: 50 },
+                        { key: 'categoria', label: 'Categoría', width: 35 },
+                        { key: 'stock', label: 'Stock', width: 15 },
+                        { key: 'precio', label: 'Precio', width: 25 }
+                    ];
+                    const rows = calcularStockBajo(allProducts).map(r => ({ ...r, precio: formatCurrency(r.precio) }));
+                    generarPDF({ titulo: 'Productos con Stock Bajo', subtitulo: `Stock ≤ 5 unidades - ${rows.length} productos`, columnas: cols, filas: rows, nombreArchivo: `reporte-stock-bajo-${periodo}` });
+                    generarExcel({ titulo: 'Productos con Stock Bajo', sheetName: 'Stock Bajo', columnas: cols, filas: rows, nombreArchivo: `reporte-stock-bajo-${periodo}` });
+                    break;
+                }
+
+                // === VENTAS ===
+                case 'historial-ventas': {
+                    const cols = [
+                        { key: 'id', label: 'ID', width: 20 },
+                        { key: 'fecha', label: 'Fecha', width: 25 },
+                        { key: 'usuario', label: 'Usuario', width: 25 },
+                        { key: 'productos', label: 'Productos', width: 55 },
+                        { key: 'total', label: 'Total', width: 25 },
+                        { key: 'estado', label: 'Estado', width: 20 }
+                    ];
+                    const rows = ventasFiltradas.map(v => ({
+                        id: String(v.id).substring(0, 8),
+                        fecha: formatDate(v.fechaCompra),
+                        usuario: v.username || '-',
+                        productos: (v.productosComprados || []).map(p => `${p.nombre}(${p.cantidad})`).join(', ') || '-',
+                        total: formatCurrency(v.totalVenta),
+                        estado: v.estado || '-'
+                    }));
+                    generarPDF({ titulo: 'Historial de Ventas', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-historial-ventas-${periodo}` });
+                    generarExcel({ titulo: 'Historial de Ventas', sheetName: 'Ventas', columnas: cols, filas: rows, nombreArchivo: `reporte-historial-ventas-${periodo}` });
+                    break;
+                }
+                case 'mas-vendidos': {
+                    const cols = [
+                        { key: 'pos', label: '#', width: 10 },
+                        { key: 'nombre', label: 'Producto', width: 50 },
+                        { key: 'cantidad', label: 'Unidades', width: 20 },
+                        { key: 'ingresos', label: 'Ingresos', width: 30 }
+                    ];
+                    const rows = calcularProductosMasVendidos(ventasFiltradas).map((r, i) => ({
+                        pos: i + 1,
+                        nombre: r.nombre,
+                        cantidad: r.cantidad,
+                        ingresos: formatCurrency(r.ingresos)
+                    }));
+                    generarPDF({ titulo: 'Productos Más Vendidos', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-mas-vendidos-${periodo}` });
+                    generarExcel({ titulo: 'Productos Más Vendidos', sheetName: 'Más Vendidos', columnas: cols, filas: rows, nombreArchivo: `reporte-mas-vendidos-${periodo}` });
+                    break;
+                }
+                case 'menos-vendidos': {
+                    const cols = [
+                        { key: 'pos', label: '#', width: 10 },
+                        { key: 'nombre', label: 'Producto', width: 50 },
+                        { key: 'cantidad', label: 'Unidades', width: 20 },
+                        { key: 'ingresos', label: 'Ingresos', width: 30 }
+                    ];
+                    const rows = calcularProductosMenosVendidos(ventasFiltradas).map((r, i) => ({
+                        pos: i + 1,
+                        nombre: r.nombre,
+                        cantidad: r.cantidad,
+                        ingresos: formatCurrency(r.ingresos)
+                    }));
+                    generarPDF({ titulo: 'Productos Menos Vendidos', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-menos-vendidos-${periodo}` });
+                    generarExcel({ titulo: 'Productos Menos Vendidos', sheetName: 'Menos Vendidos', columnas: cols, filas: rows, nombreArchivo: `reporte-menos-vendidos-${periodo}` });
+                    break;
+                }
+                case 'sin-movimiento': {
+                    const cols = [
+                        { key: 'nombre', label: 'Producto', width: 50 },
+                        { key: 'codigo', label: 'Código', width: 25 },
+                        { key: 'categoria', label: 'Categoría', width: 35 },
+                        { key: 'stock', label: 'Stock', width: 15 },
+                        { key: 'precio', label: 'Precio', width: 25 }
+                    ];
+                    const rows = calcularProductosSinMovimiento(allProducts, ventasFiltradas).map(r => ({ ...r, precio: formatCurrency(r.precio) }));
+                    generarPDF({ titulo: 'Productos sin Movimiento', subtitulo: `Productos que nunca se vendieron - ${rows.length} productos`, columnas: cols, filas: rows, nombreArchivo: `reporte-sin-movimiento-${periodo}` });
+                    generarExcel({ titulo: 'Productos sin Movimiento', sheetName: 'Sin Movimiento', columnas: cols, filas: rows, nombreArchivo: `reporte-sin-movimiento-${periodo}` });
+                    break;
+                }
+                case 'distribucion-categoria': {
+                    const cols = [
+                        { key: 'categoria', label: 'Categoría', width: 40 },
+                        { key: 'cantidad', label: 'Unidades Vendidas', width: 25 },
+                        { key: 'porcentaje', label: 'Porcentaje', width: 20 }
+                    ];
+                    const rows = calcularDistribucionCategoria(ventasFiltradas);
+                    generarPDF({ titulo: 'Distribución por Categoría', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-distribucion-categoria-${periodo}` });
+                    generarExcel({ titulo: 'Distribución por Categoría', sheetName: 'Distribución', columnas: cols, filas: rows, nombreArchivo: `reporte-distribucion-categoria-${periodo}` });
+                    break;
+                }
+
+                // === SERVICIOS ===
+                case 'ingresos-mensuales': {
+                    const cols = [
+                        { key: 'mes', label: 'Mes', width: 25 },
+                        { key: 'cantidad', label: 'Cant. Servicios', width: 25 },
+                        { key: 'ingresos', label: 'Ingresos', width: 30 }
+                    ];
+                    const rows = calcularResumenMensualServicios(serviciosFiltrados).map(r => ({ ...r, ingresos: formatCurrency(r.ingresos) }));
+                    generarPDF({ titulo: 'Ingresos Mensuales por Servicios', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-ingresos-servicios-${periodo}` });
+                    generarExcel({ titulo: 'Ingresos Mensuales por Servicios', sheetName: 'Ingresos Servicios', columnas: cols, filas: rows, nombreArchivo: `reporte-ingresos-servicios-${periodo}` });
+                    break;
+                }
+                case 'servicios-por-tipo': {
+                    const cols = [
+                        { key: 'tipo', label: 'Tipo de Servicio', width: 40 },
+                        { key: 'cantidad', label: 'Cantidad', width: 20 },
+                        { key: 'porcentaje', label: 'Porcentaje', width: 20 }
+                    ];
+                    const rows = calcularServiciosPorTipo(serviciosFiltrados);
+                    generarPDF({ titulo: 'Servicios por Tipo', subtitulo: `Periodo: ${filterYear || 'Todos'} - ${filterMonth || 'Todos'}`, columnas: cols, filas: rows, nombreArchivo: `reporte-servicios-por-tipo-${periodo}` });
+                    generarExcel({ titulo: 'Servicios por Tipo', sheetName: 'Servicios por Tipo', columnas: cols, filas: rows, nombreArchivo: `reporte-servicios-por-tipo-${periodo}` });
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Reporte descargado',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } catch (error) {
+            console.error('Error al generar reporte:', error);
+            Swal.fire('Error', 'No se pudo generar el reporte.', 'error');
+        } finally {
+            setGenerando(null);
+        }
+    };
+
+    return (
+        <div className="reportes-container">
+            <div className="reportes-header">
+                <h2><FiFileText size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} /> Centro de Reportes</h2>
+                <p>Descargá reportes en PDF y Excel de productos, ventas y servicios.</p>
+            </div>
+
+            {/* Sección: Productos */}
+            <div className="reportes-section">
+                <h3><FiBox size={18} /> Productos</h3>
+                <div className="reportes-grid">
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiFileText size={28} /></div>
+                        <h4>Listado Completo</h4>
+                        <p>Código, nombre, categoría, precio y stock de todos los productos.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('listado-productos')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('listado-productos')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiPieChart size={28} /></div>
+                        <h4>Stock por Categoría</h4>
+                        <p>Resumen agrupado: cantidad de productos y stock total por categoría.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('stock-categoria')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('stock-categoria')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon reporte-icon-warning"><FiActivity size={28} /></div>
+                        <h4>Stock Bajo</h4>
+                        <p>Productos con 5 unidades o menos en stock.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('stock-bajo')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('stock-bajo')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sección: Ventas */}
+            <div className="reportes-section">
+                <h3><FiShoppingCart size={18} /> Ventas</h3>
+                <div className="reportes-grid">
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiClipboard size={28} /></div>
+                        <h4>Historial de Ventas</h4>
+                        <p>ID, fecha, usuario, productos, total y estado de cada venta.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('historial-ventas')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('historial-ventas')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon reporte-icon-success"><FiTrendingUp size={28} /></div>
+                        <h4>Productos Más Vendidos</h4>
+                        <p>Ranking de productos por unidades vendidas e ingresos generados.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('mas-vendidos')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('mas-vendidos')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon reporte-icon-info"><FiTrendingUp size={28} style={{ transform: 'scaleY(-1)' }} /></div>
+                        <h4>Productos Menos Vendidos</h4>
+                        <p>Los productos con menor salida en ventas.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('menos-vendidos')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('menos-vendidos')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon reporte-icon-warning"><FiBox size={28} /></div>
+                        <h4>Sin Movimiento</h4>
+                        <p>Productos que nunca fueron vendidos.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('sin-movimiento')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('sin-movimiento')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiPieChart size={28} /></div>
+                        <h4>Distribución por Categoría</h4>
+                        <p>Unidades vendidas y porcentaje por categoría de producto.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('distribucion-categoria')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('distribucion-categoria')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sección: Servicios */}
+            <div className="reportes-section">
+                <h3><FiTool size={18} /> Servicios</h3>
+                <div className="reportes-grid">
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiBarChart2 size={28} /></div>
+                        <h4>Ingresos Mensuales</h4>
+                        <p>Resumen de servicios entregados por mes con ingresos totales.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('ingresos-mensuales')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('ingresos-mensuales')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="reporte-card">
+                        <div className="reporte-icon"><FiPieChart size={28} /></div>
+                        <h4>Servicios por Tipo</h4>
+                        <p>Cantidad y porcentaje de servicios según su tipo.</p>
+                        <div className="reporte-actions">
+                            <button className="btn-report-pdf" disabled={generando} onClick={() => handleGenerar('servicios-por-tipo')}>
+                                <FiFile size={14} /> PDF
+                            </button>
+                            <button className="btn-report-excel" disabled={generando} onClick={() => handleGenerar('servicios-por-tipo')}>
+                                <FiFile size={14} /> Excel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

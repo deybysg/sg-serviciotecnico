@@ -909,3 +909,179 @@
     height: 220px;
   }
 }
+
+/* ============================================
+   REPORTES - Centro de Reportes
+   ============================================ */
+
+.reportes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.reportes-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.reportes-header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.reportes-section h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--neon-blue);
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.reportes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.reporte-card {
+  background: var(--panel-card-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.reporte-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.reporte-card:hover {
+  border-color: rgba(0, 183, 255, 0.35);
+  box-shadow: 0 8px 30px rgba(0, 183, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.reporte-card:hover::before {
+  opacity: 1;
+}
+
+.reporte-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 183, 255, 0.1);
+  color: var(--neon-blue);
+}
+
+.reporte-icon-success {
+  background: rgba(35, 221, 95, 0.1);
+  color: var(--neon-green);
+}
+
+.reporte-icon-warning {
+  background: rgba(255, 196, 0, 0.1);
+  color: var(--neon-amber);
+}
+
+.reporte-icon-info {
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--neon-cyan);
+}
+
+.reporte-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 4px 0 0 0;
+}
+
+.reporte-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.reporte-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-report-pdf,
+.btn-report-excel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.btn-report-pdf {
+  background: rgba(255, 77, 77, 0.12);
+  color: #ff6b6b;
+  border-color: rgba(255, 77, 77, 0.25);
+}
+
+.btn-report-pdf:hover:not(:disabled) {
+  background: rgba(255, 77, 77, 0.22);
+  border-color: rgba(255, 77, 77, 0.45);
+  box-shadow: 0 0 12px rgba(255, 77, 77, 0.15);
+}
+
+.btn-report-excel {
+  background: rgba(35, 221, 95, 0.12);
+  color: var(--neon-green);
+  border-color: rgba(35, 221, 95, 0.25);
+}
+
+.btn-report-excel:hover:not(:disabled) {
+  background: rgba(35, 221, 95, 0.22);
+  border-color: rgba(35, 221, 95, 0.45);
+  box-shadow: 0 0 12px rgba(35, 221, 95, 0.15);
+}
+
+.btn-report-pdf:disabled,
+.btn-report-excel:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .reportes-grid {
+    grid-template-columns: 1fr;
+  }
+}

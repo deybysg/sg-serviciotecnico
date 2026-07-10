@@ -570,11 +570,11 @@ function ProductosAdmin() {
     }, [fetchProductos]); 
     
     // --- LÓGICA DE FILTRADO ---
-    const productosFiltrados = productos.filter(producto => {
-        const lowerCaseSearch = searchTerm.toLowerCase();
-        
-        // Si el término de búsqueda está vacío, muestra todos
-        if (!lowerCaseSearch) return true;
+    const productosFiltrados = productos.filter(producto => {
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        
+        // Si el término de búsqueda está vacío, muestra todos
+        if (!lowerCaseSearch) return true;
 
         // Filtra por nombre, categoría o código
         return (
@@ -582,7 +582,11 @@ function ProductosAdmin() {
             producto.categoria.toLowerCase().includes(lowerCaseSearch) ||
             producto.codigo?.toLowerCase().includes(lowerCaseSearch)
         );
-    });
+    }).sort((a, b) => {
+        const fechaA = new Date(a.created_at || a.createdAt || 0);
+        const fechaB = new Date(b.created_at || b.createdAt || 0);
+        return fechaB - fechaA;
+    });
 
 
     // --- Handlers CRUD (Crear, Editar, Guardar, Eliminar) ---
