@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import useCartStore from '../store/cartStore';
 import { useAuth } from '../context/AuthContext'; 
 import { api } from '../services/api';
-import { FaPlus, FaMinus, FaTrashAlt } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaTrashAlt, FaShoppingCart, FaCopy, FaLock } from 'react-icons/fa';
+import { FiTrash2 } from 'react-icons/fi';
+import { BsQrCode, BsCreditCard } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import '../styles/pages/Carrito.css'; 
 
@@ -331,14 +333,14 @@ function Carrito({ isOpen, onClose }) {
                         <button className="carrito-close-btn" onClick={onClose} aria-label="Cerrar carrito">&times;</button>
                     </div>
                     <div className="header-subtitle">
-                        <span className="cart-icon">🛒</span>
+                        <FaShoppingCart size={14} />
                         <span className="item-count">{totalItems} {totalItems === 1 ? 'artículo' : 'artículos'}</span>
                     </div>
                 </div>
                 
                 {cartItems.length === 0 ? (
                     <div className="carrito-empty">
-                        <div className="empty-icon">🛍️</div>
+                        <div className="empty-icon"><FaShoppingCart size={60} /></div>
                         <p className="empty-message">Tu carrito está vacío</p>
                         <p className="empty-subtitle">¡Añade productos para comenzar!</p>
                     </div>
@@ -353,7 +355,7 @@ function Carrito({ isOpen, onClose }) {
                                     className="btn-clear-top" 
                                     disabled={totalItems === 0}
                                 >
-                                    🗑️ Vaciar carrito
+                                    <FiTrash2 size={12} /> Vaciar carrito
                                 </button>
                             </div>
                             <div className="carrito-items-list">
@@ -363,7 +365,7 @@ function Carrito({ isOpen, onClose }) {
                                             {item.imagen ? (
                                                 <img src={item.imagen} alt={item.nombre} className="product-image" />
                                             ) : (
-                                                <div className="placeholder-image">📦</div>
+                                                <div className="placeholder-image"><FaShoppingCart size={20} /></div>
                                             )}
                                         </div>
                                         <div className="item-details">
@@ -407,7 +409,7 @@ function Carrito({ isOpen, onClose }) {
                             {/* Opciones adicionales */}
                             <div className="cart-options">
                                 <button className="btn-add-note">
-                                    📝 Ingresar código promocional
+                                    <FaCopy size={12} /> Ingresar código promocional
                                 </button>
                             </div>
                         </div>
@@ -437,7 +439,7 @@ function Carrito({ isOpen, onClose }) {
                                         className="mp-toggle"
                                         onClick={() => setShowMPInfo(!showMPInfo)}
                                     >
-                                        <span>💳 Datos de Mercado Pago</span>
+                                        <span><BsCreditCard size={14} /> Datos de Mercado Pago</span>
                                         <span className="mp-arrow">{showMPInfo ? '▲' : '▼'}</span>
                                     </button>
                                     {showMPInfo && (
@@ -460,7 +462,7 @@ function Carrito({ isOpen, onClose }) {
                                                         });
                                                     }}
                                                 >
-                                                    📋
+                                                    <FaCopy size={12} />
                                                 </button>
                                             </div>
                                             <div className="mp-row">
@@ -481,7 +483,7 @@ function Carrito({ isOpen, onClose }) {
                                                         });
                                                     }}
                                                 >
-                                                    📋
+                                                    <FaCopy size={12} />
                                                 </button>
                                             </div>
                                         </div>
@@ -497,7 +499,7 @@ function Carrito({ isOpen, onClose }) {
                                     className="btn-checkout btn-primary" 
                                     disabled={totalItems === 0}
                                 >
-                                    💳 Pagar con Mercado Pago
+                                    <BsCreditCard size={16} /> Pagar con Mercado Pago
                                 </button>
                                 
                                 <div className="payment-divider">
@@ -510,7 +512,7 @@ function Carrito({ isOpen, onClose }) {
                                     className="btn-checkout btn-qr" 
                                     disabled={totalItems === 0 || qrLoading}
                                 >
-                                    📱 Pagar con QR
+                                    <BsQrCode size={16} /> Pagar con QR
                                 </button>
                                 
                                 <div className="payment-divider">
@@ -523,11 +525,11 @@ function Carrito({ isOpen, onClose }) {
                                     className="btn-checkout btn-simulate" 
                                     disabled={totalItems === 0}
                                 >
-                                    🧪 Simular Compra (Test)
+                                    Simular Compra (Test)
                                 </button>
                                 
                                 <div className="payment-info">
-                                    <p className="secure-payment">🔒 Pago seguro</p>
+                                    <p className="secure-payment"><FaLock size={12} /> Pago seguro</p>
                                 </div>
 
                             </div>

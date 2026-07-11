@@ -290,19 +290,6 @@ function Home() {
   }, [featuredProducts, productIndex]);
 
   const handleAddProduct = (product) => {
-    if (!user) {
-      Swal.fire({
-        icon: "info",
-        title: "Iniciá sesión",
-        text: "Para agregar productos al carrito primero tenés que iniciar sesión.",
-        confirmButtonText: "Ir al login",
-        confirmButtonColor: "#00b7ff",
-      }).then((result) => {
-        if (result.isConfirmed) navigate("/login");
-      });
-      return;
-    }
-
     if (product.stock <= 0) {
       Swal.fire("Sin stock", `${product.nombre} está agotado.`, "warning");
       return;

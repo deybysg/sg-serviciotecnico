@@ -18,6 +18,7 @@ const useCartStore = create((set, get) => ({
   isLoading: false,
   currentUser: null,
   currentToken: null,
+  showMiniCart: false,
 
   // Utilidades
   /**
@@ -83,8 +84,52 @@ const useCartStore = create((set, get) => ({
       }
 
       const items = serverCart?.items || [];
-      console.log('✅ [CartStore INIT] Items cargados:', items.length);
-      set({ cartItems: items, isLoading: false });
+      
+      // Verificar si hay carrito guardado del invitado en localStorage
+      const guestCartRaw = localStorage.getItem('guestCart');
+      let finalItems = items;
+      
+      if (guestCartRaw) {
+        try {
+          const guestCart = JSON.parse(guestCartRaw);
+          console.log('🛒 [CartStore INIT] Carrito del invitado encontrado:', guestCart.length, 'items');
+          
+          if (guestCart.length > 0) {
+            // Merge: si el item ya existe en el server, sumar cantidades; si no, agregarlo
+            const merged = [...items];
+            for (const guestItem of guestCart) {
+              const pid = toIdString(guestItem.id ?? guestItem._id);
+              const existingIndex = merged.findIndex(item => toIdString(item.id ?? item._id) === pid);
+              
+              if (existingIndex >= 0) {
+                // Ya existe: sumar cantidades (respetando stock)
+                const maxStock = merged[existingIndex].stock || 99;
+                merged[existingIndex] = {
+                  ...merged[existingIndex],
+                  cantidad: Math.min(merged[existingIndex].cantidad + guestItem.cantidad, maxStock)
+                };
+              } else {
+                // Nuevo item: agregarlo
+                merged.push(guestItem);
+              }
+            }
+            finalItems = merged;
+            
+            // Persistir el carrito mergeado en el servidor
+            await upsertCartByUsername(username, finalItems, { token });
+            console.log('✅ [CartStore INIT] Carrito mergeado y persistido');
+          }
+          
+          // Limpiar el carrito del invitado del localStorage
+          localStorage.removeItem('guestCart');
+        } catch (e) {
+          console.error('Error parseando guestCart:', e);
+          localStorage.removeItem('guestCart');
+        }
+      }
+      
+      console.log('✅ [CartStore INIT] Items cargados:', finalItems.length);
+      set({ cartItems: finalItems, isLoading: false });
       
       // Si hay items, asegurarse de que hay timestamp de expiración
       if (items.length > 0) {
@@ -190,6 +235,11 @@ const useCartStore = create((set, get) => ({
 
     // Persistir después de agregar
     get().persistCart();
+
+    // Mostrar mini-cart para invitados
+    if (!get().currentUser) {
+      set({ showMiniCart: true });
+    }
   },
 
   /**
@@ -344,6 +394,8 @@ const useCartStore = create((set, get) => ({
     const { cartItems } = get();
     return cartItems.reduce((acc, item) => acc + item.cantidad, 0);
   },
+
+  setShowMiniCart: (value) => set({ showMiniCart: value }),
 }));
 
 export default useCartStore;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FaUsersCog, FaTools, FaUserFriends, FaBoxOpen, FaWrench, FaChartBar, FaHistory, FaFileInvoiceDollar, FaTrashAlt, FaCashRegister } from 'react-icons/fa';
+import { FiLogOut, FiUser, FiSettings, FiChevronUp } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +10,9 @@ import '../styles/components/SuperSidebar.css';
 
 export default function SuperSidebar({ onExpandChange }) {
   const [isResetting, setIsResetting] = useState(false);
-  const { user } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleMouseEnter = () => {
     if (onExpandChange) onExpandChange(true);
@@ -53,6 +56,23 @@ export default function SuperSidebar({ onExpandChange }) {
     } finally {
       setIsResetting(false);
     }
+  };
+
+  const handleLogout = async () => {
+    setShowProfileMenu(false);
+    const result = await Swal.fire({
+      title: '¿Cerrar sesión?',
+      text: 'Volverás a la pantalla de inicio.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
+    logout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -108,12 +128,36 @@ export default function SuperSidebar({ onExpandChange }) {
           <span className="super-sidebar__label">Usuarios</span>
         </NavLink>
       </nav>
-      <div className="super-sidebar__profile">
-        <span>{(user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
-        <div>
-          <strong>{user?.username || 'Admin'}</strong>
-          <small>{user?.role === 'superadmin' ? 'Super Admin' : 'Administrador'}</small>
-        </div>
+      <div className="super-sidebar__profile-wrapper">
+        <button
+          className="super-sidebar__profile"
+          onClick={() => setShowProfileMenu(!showProfileMenu)}
+          aria-label="Menú de perfil"
+        >
+          <span className="super-sidebar__avatar">{(user?.username || 'AD').slice(0, 2).toUpperCase()}</span>
+          <div className="super-sidebar__profile-info">
+            <strong>{user?.username || 'Admin'}</strong>
+            <small className={`super-sidebar__role-badge role-${user?.role}`}>
+              {user?.role === 'superadmin' ? 'Super Admin' : 'Administrador'}
+            </small>
+          </div>
+          <FiChevronUp className={`super-sidebar__chevron ${showProfileMenu ? 'open' : ''}`} />
+        </button>
+
+        {showProfileMenu && (
+          <div className="super-sidebar__dropdown">
+            <button className="super-sidebar__dropdown-item" onClick={() => { setShowProfileMenu(false); navigate('/admin/usuarios'); }}>
+              <FiUser size={16} /> Mi perfil
+            </button>
+            <button className="super-sidebar__dropdown-item" onClick={() => { setShowProfileMenu(false); }}>
+              <FiSettings size={16} /> Configuración
+            </button>
+            <div className="super-sidebar__dropdown-divider" />
+            <button className="super-sidebar__dropdown-item super-sidebar__dropdown-item--danger" onClick={handleLogout}>
+              <FiLogOut size={16} /> Cerrar sesión
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );

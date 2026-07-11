@@ -1,15 +1,17 @@
 import { NavLink } from 'react-router-dom';
 import NavHamburguesa from './NavHamburguesa';
+import MiniCart from './MiniCart';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { FaTools, FaShoppingCart } from 'react-icons/fa';
+import { FaTools, FaShoppingCart, FaUserCog } from 'react-icons/fa';
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser, FiBriefcase } from "react-icons/fi";
 import { RiAdminFill } from "react-icons/ri";
 import { useState, useEffect } from 'react'; 
 import useCartStore from '../store/cartStore'; 
 import Carrito from '../pages/Carrito'; 
+import { FiChevronDown, FiSettings } from 'react-icons/fi';
 import '../styles/components/Navbar.css';
 
 function Navbar() {
@@ -18,6 +20,7 @@ function Navbar() {
   const totalItems = useCartStore(state => state.getTotalItems()); 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     document.body.dataset.role = user?.role || 'guest';
@@ -103,21 +106,6 @@ function Navbar() {
                 Servicio Técnico Deyby
               </span>
             )}
-            
-            {/* Usuario logueado: perfil en vez de título */}
-            {user && (
-              <div className="navbar-admin-profile">
-                <div className={`navbar-user-avatar ${user?.role === 'superadmin' ? 'superadmin' : user?.role === 'user' ? 'user' : ''}`}>
-                  {user?.role === 'user' ? <FiUser size={16} /> : <RiAdminFill size={16} />}
-                </div>
-                <div className="navbar-user-info">
-                  <span className="navbar-user-name">{user?.username}</span>
-                  <span className={`navbar-user-role ${user?.role === 'superadmin' ? 'superadmin' : user?.role === 'user' ? 'user' : ''}`}>
-                    {user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'user' ? 'Usuario' : 'Administrador'}
-                  </span>
-                </div>
-              </div>
-            )}
           </h1>
         </div>
 
@@ -137,8 +125,7 @@ function Navbar() {
               <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
               <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
               <li><NavLink to="/nuestros-servicios"><FiBriefcase size={14} /> Servicios</NavLink></li>
-              <li><NavLink to="/login"><FiLogIn size={14} /> Login</NavLink></li>
-              <li><NavLink to="/servicios"><BsInfoCircleFill size={14} /> Info</NavLink></li>
+              <li><NavLink to="/login"><FiLogIn size={14} /> Mi Cuenta</NavLink></li>
             </>
           )}
 
@@ -148,23 +135,6 @@ function Navbar() {
               <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
               <li><NavLink to="/nuestros-servicios"><FiBriefcase size={14} /> Servicios</NavLink></li>
               <li><NavLink to="/miscomprasmodal"><FiShoppingBag size={14} /> Mis compras</NavLink></li>
-
-              {/* === CARRITO EN PC === */}
-              <li>
-                <button 
-                  className="cart-btn" 
-                  onClick={() => setIsCartOpen(true)}
-                >
-                  <FaShoppingCart size={22} />
-                  {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
-                </button>
-              </li>
-
-              <li>
-                <button onClick={handleLogout} className="logout-btn">
-                  <FiLogOut size={14} /> Salir
-                </button>
-              </li>
             </>
           )}
 
@@ -175,32 +145,75 @@ function Navbar() {
               <li><NavLink to="/admin/clientes"><FiUser size={14} /> Clientes</NavLink></li>
               <li><NavLink to="/admin/productosAdmin"><FiBox size={14} /> Productos</NavLink></li>
               <li><NavLink to="/admin/servicios"><FiSearch size={14} /> Servicios</NavLink></li>
-              <li>
-                <button onClick={handleLogout} className="logout-btn">
-                  <FiLogOut size={14} /> Salir
-                </button>
-              </li>
-            </>
-          )}
-
-          {user?.role === 'superadmin' && (
-            <>
-              <li>
-                <button onClick={handleLogout} className="logout-btn">
-                  <FiLogOut size={14} /> Salir
-                </button>
-              </li>
             </>
           )}
         </ul>
 
-        {/* === BOTÓN CARRITO SOLO EN MÓVIL === */}
-        {user?.role === 'user' && (
+        {/* === CARRITO EN PC (solo user y invitados) === */}
+        {(!user || user?.role === 'user') && (
+          <button 
+            className="cart-btn" 
+            onClick={() => user ? setIsCartOpen(true) : useCartStore.getState().setShowMiniCart(true)}
+          >
+            <FaShoppingCart size={14} /> Carrito
+            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+          </button>
+        )}
+
+        {/* === INFO (solo invitados, después del carrito) === */}
+        {!user && (
+          <NavLink to="/servicios" className="nav-info-link">
+            <BsInfoCircleFill size={14} /> Info
+          </NavLink>
+        )}
+
+        {/* 4. PERFIL DROPDOWN (todos los roles) */}
+        {user && (
+          <div className="navbar-profile-dropdown-wrapper">
+            <button className="navbar-profile-trigger" onClick={() => setShowProfileMenu(!showProfileMenu)}>
+              <div className="navbar-user-avatar">
+                {user?.role === 'admin' ? <RiAdminFill size={16} /> : user?.role === 'superadmin' ? <FaUserCog size={16} /> : <FiUser size={16} />}
+              </div>
+              <div className="navbar-trigger-info">
+                <strong>{user?.username}</strong>
+                <small>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Usuario'}</small>
+              </div>
+              <FiChevronDown className={`navbar-profile-chevron ${showProfileMenu ? 'open' : ''}`} />
+            </button>
+            {showProfileMenu && (
+              <div className="navbar-profile-dropdown">
+                <div className="navbar-dropdown-header">
+                  <div className="navbar-user-avatar">
+                    {user?.role === 'admin' ? <RiAdminFill size={16} /> : user?.role === 'superadmin' ? <FaUserCog size={16} /> : <FiUser size={16} />}
+                  </div>
+                  <div>
+                    <strong>{user?.username}</strong>
+                    <small>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Administrador' : 'Usuario'}</small>
+                  </div>
+                </div>
+                <div className="navbar-dropdown-divider" />
+                <button className="navbar-dropdown-item" onClick={() => { setShowProfileMenu(false); navigate(user?.role === 'admin' ? '/admin/usuarios' : '/'); }}>
+                  <FiUser size={15} /> Mi perfil
+                </button>
+                <button className="navbar-dropdown-item" onClick={() => setShowProfileMenu(false)}>
+                  <FiSettings size={15} /> Configuración
+                </button>
+                <div className="navbar-dropdown-divider" />
+                <button className="navbar-dropdown-item navbar-dropdown-item--danger" onClick={() => { setShowProfileMenu(false); handleLogout(); }}>
+                  <FiLogOut size={15} /> Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* === BOTÓN CARRITO SOLO EN MÓVIL (solo user y invitados) === */}
+        {(!user || user?.role === 'user') && (
           <button 
             className="mobile-cart-btn"
-            onClick={() => setIsCartOpen(true)}
+            onClick={() => user ? setIsCartOpen(true) : useCartStore.getState().setShowMiniCart(true)}
           >
-            <FaShoppingCart size={22} />
+            <FaShoppingCart size={14} /> Carrito
             {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
           </button>
         )}
@@ -208,6 +221,9 @@ function Navbar() {
 
       {/* MODAL DEL CARRITO */}
       {isCartOpen && <Carrito isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />}
+
+      {/* MINI CARRITO PARA INVITADOS */}
+      <MiniCart />
     </>
   );
 }
