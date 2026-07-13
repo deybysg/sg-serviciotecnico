@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import BottomTabBar from "./components/BottomTabBar";
+import MiniCart from "./components/MiniCart";
 import SuperSidebar from "./components/SuperSidebar";
 import "./styles/App.css";
 
@@ -203,6 +204,7 @@ function App() {
           <ServerWakeUp />
           <Navbar />
           <BottomTabBar />
+          <MiniCart />
                     <AppBody />
                 </Router>
       </CartProvider>

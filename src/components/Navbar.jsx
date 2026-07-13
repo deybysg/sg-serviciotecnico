@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom';
 import NavHamburguesa from './NavHamburguesa';
-import MiniCart from './MiniCart';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import Swal from 'sweetalert2';
@@ -321,9 +320,6 @@ function Navbar() {
 
       {/* MODAL DEL CARRITO */}
       {isCartOpen && <Carrito isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />}
-
-      {/* MINI CARRITO PARA INVITADOS */}
-      <MiniCart />
     </>
   );
 }
