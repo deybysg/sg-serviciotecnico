@@ -468,15 +468,9 @@ function Home() {
                   {selectedProduct.stock > 0 ? `Stock disponible: ${selectedProduct.stock}` : "Sin stock"}
                 </span>
                 <div className="home-product-modal-actions">
-                  {user ? (
                     <button className="home-modal-add-btn" onClick={() => { handleAddProduct(selectedProduct); setSelectedProduct(null); }} disabled={selectedProduct.stock === 0}>
                       <FaShoppingCart /> {selectedProduct.stock > 0 ? "Agregar al Carrito" : "Agotado"}
                     </button>
-                  ) : (
-                    <button className="home-modal-add-btn" onClick={() => { setSelectedProduct(null); navigate('/login'); }}>
-                      Iniciá sesión para comprar
-                    </button>
-                  )}
                 </div>
               </div>
             </div>

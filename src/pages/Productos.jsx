@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
   FaChevronDown,
+  FaChevronUp,
   FaChevronLeft,
   FaChevronRight,
   FaCreditCard,
@@ -95,10 +96,15 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
   const [productos, setProductos] = useState([]);
   const [categoria, setCategoria] = useState(categoriasDisponibles[0] || "todos");
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [showFiltroMovil, setShowFiltroMovil] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [page, setPage] = useState(1);
   const [quantities, setQuantities] = useState({});
+  const [filterSections, setFilterSections] = useState({ categorias: true, busqueda: true });
+  const [showCount, setShowCount] = useState({});
+  const [expandedCategory, setExpandedCategory] = useState(null);
+  const PRODUCTS_PER_CATEGORY = 4;
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -182,6 +188,7 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   useEffect(() => {
     setPage(1);
+    setExpandedCategory(null);
   }, [categoria, search]);
 
   const categories = useMemo(() => {
@@ -206,7 +213,7 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
 
   const productosFiltrados = useMemo(() => {
     const query = normalize(search);
-    return productos.filter((product) => {
+    let filtered = productos.filter((product) => {
       const productCategory = normalize(product.categoria);
       const matchesCategory = normalize(categoria) === "todos" || productCategory === normalize(categoria);
       const matchesSearch = !query || [product.nombre, product.descripcion, product.categoria]
@@ -214,7 +221,14 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
         .some((value) => value.includes(query));
       return matchesCategory && matchesSearch;
     });
-  }, [categoria, productos, search]);
+
+    if (sortBy === "price-asc") filtered.sort((a, b) => (a.precio || 0) - (b.precio || 0));
+    else if (sortBy === "price-desc") filtered.sort((a, b) => (b.precio || 0) - (a.precio || 0));
+    else if (sortBy === "name") filtered.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || "", "es"));
+    else if (sortBy === "stock") filtered.sort((a, b) => (b.stock || 0) - (a.stock || 0));
+
+    return filtered;
+  }, [categoria, productos, search, sortBy]);
 
   const perPage = viewMode === "grid" ? 8 : 6;
   const totalPages = Math.max(1, Math.ceil(productosFiltrados.length / perPage));
@@ -242,7 +256,48 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
   const clearFilters = () => {
     setCategoria("todos");
     setSearch("");
+    setSortBy("default");
     setShowFiltroMovil(false);
+  };
+
+  const hasActiveFilters = normalize(categoria) !== "todos" || search.trim() !== "" || sortBy !== "default";
+
+  const groupedProducts = useMemo(() => {
+    const groups = {};
+    productosFiltrados.forEach((product) => {
+      const cat = normalize(product.categoria) || "varios";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(product);
+    });
+    return groups;
+  }, [productosFiltrados]);
+
+  const visibleCategoryKeys = useMemo(() => {
+    const allKeys = Object.keys(groupedProducts).sort((a, b) => {
+      if (normalize(categoria) !== "todos") return 0;
+      if (a === normalize(categoria)) return -1;
+      if (b === normalize(categoria)) return 1;
+      return a.localeCompare(b);
+    });
+    if (expandedCategory && groupedProducts[expandedCategory]) {
+      return [expandedCategory];
+    }
+    return allKeys;
+  }, [groupedProducts, categoria, expandedCategory]);
+
+  const showMore = (cat) => {
+    const total = groupedProducts[cat]?.length || 0;
+    setShowCount((prev) => ({ ...prev, [cat]: total }));
+    setExpandedCategory(cat);
+  };
+
+  const showLess = (cat) => {
+    setShowCount((prev) => ({ ...prev, [cat]: PRODUCTS_PER_CATEGORY }));
+    setExpandedCategory(null);
+  };
+
+  const toggleFilterSection = (section) => {
+    setFilterSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const renderFilters = (mobile = false) => (
@@ -262,31 +317,39 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
         <FaSearch />
       </label>
 
-      <div className="filter-section-title">
+      <button className="filter-section-header" onClick={() => toggleFilterSection('categorias')}>
         <span>Categorías</span>
-        <FaChevronDown />
-      </div>
+        <FaChevronDown className={filterSections.categorias ? 'rotated' : ''} />
+      </button>
 
-      <div className="category-list">
-        {categories.map((cat) => {
-          const key = normalize(cat);
-          const meta = categoryMeta[key] || { label: cat, icon: <FaFilter /> };
-          return (
-            <button
-              key={cat}
-              className={normalize(categoria) === key ? "active" : ""}
-              onClick={() => {
-                setCategoria(cat);
-                if (mobile) setShowFiltroMovil(false);
-              }}
-            >
-              <span className="category-icon">{meta.icon}</span>
-              <span>{meta.label}</span>
-              <strong>{countByCategory[key] || 0}</strong>
-            </button>
-          );
-        })}
-      </div>
+      {filterSections.categorias && (
+        <div className="category-list">
+          {categories.map((cat) => {
+            const key = normalize(cat);
+            const meta = categoryMeta[key] || { label: cat, icon: <FaFilter /> };
+            return (
+              <button
+                key={cat}
+                className={normalize(categoria) === key ? "active" : ""}
+                onClick={() => {
+                  setCategoria(cat);
+                  if (mobile) setShowFiltroMovil(false);
+                }}
+              >
+                <span className="category-icon">{meta.icon}</span>
+                <span>{meta.label}</span>
+                <strong>{countByCategory[key] || 0}</strong>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {mobile && hasActiveFilters && (
+        <button className="filter-apply-btn" onClick={() => setShowFiltroMovil(false)}>
+          Aplicar filtros
+        </button>
+      )}
 
       <button className="clear-filters" onClick={clearFilters}>
         <FaTimes /> Limpiar filtros
@@ -373,82 +436,121 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
         <div className="products-content-panel">
           <div className="products-toolbar">
             <p>
-              Mostrando {visibleProducts.length ? (page - 1) * perPage + 1 : 0} - {Math.min(page * perPage, productosFiltrados.length)} de {productosFiltrados.length} productos
+              {productosFiltrados.length} productos en {visibleCategoryKeys.length} {visibleCategoryKeys.length === 1 ? 'categoría' : 'categorías'}
             </p>
-            <div className="view-actions">
-              <button className={viewMode === "grid" ? "active" : ""} onClick={() => setViewMode("grid")} aria-label="Vista grilla">
-                <FaThLarge />
-              </button>
-              <button className={viewMode === "list" ? "active" : ""} onClick={() => setViewMode("list")} aria-label="Vista lista">
-                <FaList />
-              </button>
+            <div className="toolbar-right">
+              <select className="sort-select" value={sortBy} onChange={(e) => { setSortBy(e.target.value); setPage(1); }}>
+                <option value="default">Ordenar por</option>
+                <option value="price-asc">Menor precio</option>
+                <option value="price-desc">Mayor precio</option>
+                <option value="name">Nombre A-Z</option>
+                <option value="stock">Mayor stock</option>
+              </select>
+              <div className="view-actions">
+                <button className={viewMode === "grid" ? "active" : ""} onClick={() => setViewMode("grid")} aria-label="Vista grilla">
+                  <FaThLarge />
+                </button>
+                <button className={viewMode === "list" ? "active" : ""} onClick={() => setViewMode("list")} aria-label="Vista lista">
+                  <FaList />
+                </button>
+              </div>
             </div>
           </div>
 
-          <section className={`products-grid ${viewMode === "list" ? "list-mode" : ""}`}>
-            {visibleProducts.length === 0 ? (
-              <p className="empty-products">No hay productos para mostrar.</p>
-            ) : (
-              visibleProducts.map((product, index) => {
-                const quantity = quantities[productKey(product)] || 1;
-                const category = normalize(product.categoria);
-                return (
-                  <article className="tech-product-card" key={productKey(product)}>
-                    {index === 0 && page === 1 && <span className="product-badge">Nuevo</span>}
-                    <button className="favorite-btn" aria-label={`Guardar ${product.nombre}`}>
-                      <FaHeart />
-                    </button>
-                    <div className="tech-product-image" onClick={() => setSelectedProduct(product)} style={{ cursor: 'zoom-in' }}>
-                      <img src={product.imagen || "/img/image.png"} alt={product.nombre} />
-                    </div>
-                    <span className="tech-product-category">{categoryMeta[category]?.label || product.categoria || "Tecnología"}</span>
-                    <h3>{product.nombre}</h3>
-                    <p className="product-description">{product.descripcion || "Producto seleccionado con garantía."}</p>
-                    <div className="product-rating" aria-label="Calificación 4.8 de 5">
-                      <span>★★★★★</span>
-                      <small>4.8 ({Math.max(12, Number(product.stock || 1) * 8)})</small>
-                    </div>
-                    <div className="product-price-row">
-                      <strong>${Number(product.precio || 0).toLocaleString("es-AR")}</strong>
-                    </div>
-                    <span className={Number(product.stock || 0) > 0 ? "stock-pill in-stock" : "stock-pill no-stock"}>
-                      {Number(product.stock || 0) > 0 ? "En stock" : "Sin stock"}
-                    </span>
-                    <div className="product-actions-row">
-                      <div className="quantity-control">
-                        <button onClick={() => setQuantity(product, -1)} aria-label="Restar cantidad">-</button>
-                        <span>{quantity}</span>
-                        <button onClick={() => setQuantity(product, 1)} aria-label="Sumar cantidad">+</button>
-                      </div>
-                      <button className="add-cart-btn" onClick={() => handleAddToCart(product)} aria-label={`Agregar ${product.nombre} al carrito`}>
-                        <FaShoppingCart />
-                      </button>
-                    </div>
-                  </article>
-                );
-              })
-            )}
-          </section>
+          {hasActiveFilters && (
+            <div className="active-filters-bar">
+              {normalize(categoria) !== "todos" && (
+                <span className="filter-chip">
+                  {categoryMeta[normalize(categoria)]?.label || categoria}
+                  <button onClick={() => setCategoria("todos")}><FaTimes size={10} /></button>
+                </span>
+              )}
+              {search.trim() && (
+                <span className="filter-chip">
+                  "{search}"
+                  <button onClick={() => setSearch("")}><FaTimes size={10} /></button>
+                </span>
+              )}
+              {sortBy !== "default" && (
+                <span className="filter-chip">
+                  {sortBy === 'price-asc' ? 'Menor precio' : sortBy === 'price-desc' ? 'Mayor precio' : sortBy === 'name' ? 'Nombre A-Z' : 'Mayor stock'}
+                  <button onClick={() => setSortBy("default")}><FaTimes size={10} /></button>
+                </span>
+              )}
+              <button className="filter-chip clear-all" onClick={clearFilters}>Limpiar todo</button>
+            </div>
+          )}
 
-          <div className="products-pagination">
-            <button onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>
-              <FaChevronLeft />
-            </button>
-            {Array.from({ length: Math.min(totalPages, 4) }, (_, index) => index + 1).map((item) => (
-              <button key={item} className={page === item ? "active" : ""} onClick={() => setPage(item)}>
-                {item}
-              </button>
-            ))}
-            {totalPages > 4 && <span>...</span>}
-            {totalPages > 4 && (
-              <button className={page === totalPages ? "active" : ""} onClick={() => setPage(totalPages)}>
-                {totalPages}
-              </button>
-            )}
-            <button onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page === totalPages}>
-              <FaChevronRight />
-            </button>
-          </div>
+          {visibleCategoryKeys.length === 0 ? (
+            <p className="empty-products">No hay productos para mostrar.</p>
+          ) : (
+            visibleCategoryKeys.map((catKey) => {
+              const items = groupedProducts[catKey];
+              const limit = showCount[catKey] || PRODUCTS_PER_CATEGORY;
+              const visibleItems = items.slice(0, limit);
+              const showVerMas = items.length > 1;
+              const meta = categoryMeta[catKey] || { label: catKey, icon: <FaFilter /> };
+
+              return (
+                <div className={`category-group ${expandedCategory === catKey ? 'category-expanded' : ''}`} key={catKey} data-total={items.length}>
+                  <div className="category-group-header">
+                    <span className="category-group-icon">{meta.icon}</span>
+                    <h3>{meta.label}</h3>
+                    <span className="category-group-count">{items.length} productos</span>
+                    {showVerMas && !expandedCategory && (
+                      <button className="category-ver-mas" onClick={() => showMore(catKey)}>
+                        Ver más <FaChevronDown />
+                      </button>
+                    )}
+                    {expandedCategory === catKey && (
+                      <button className="category-ver-mas category-ver-menos" onClick={() => showLess(catKey)}>
+                        Ver menos <FaChevronUp />
+                      </button>
+                    )}
+                  </div>
+                  <section className={`products-grid ${viewMode === "list" ? "list-mode" : ""}`}>
+                    {visibleItems.map((product) => {
+                      const quantity = quantities[productKey(product)] || 1;
+                      const category = normalize(product.categoria);
+                      return (
+                        <article className="tech-product-card" key={productKey(product)}>
+                          <button className="favorite-btn" aria-label={`Guardar ${product.nombre}`}>
+                            <FaHeart />
+                          </button>
+                          <div className="tech-product-image" onClick={() => setSelectedProduct(product)} style={{ cursor: 'zoom-in' }}>
+                            <img src={product.imagen || "/img/image.png"} alt={product.nombre} />
+                          </div>
+                          <span className="tech-product-category">{categoryMeta[category]?.label || product.categoria || "Tecnología"}</span>
+                          <h3>{product.nombre}</h3>
+                          <p className="product-description">{product.descripcion || "Producto seleccionado con garantía."}</p>
+                          <div className="product-rating" aria-label="Calificación 4.8 de 5">
+                            <span>★★★★★</span>
+                            <small>4.8 ({Math.max(12, Number(product.stock || 1) * 8)})</small>
+                          </div>
+                          <div className="product-price-row">
+                            <strong>${Number(product.precio || 0).toLocaleString("es-AR")}</strong>
+                          </div>
+                          <span className={Number(product.stock || 0) > 0 ? "stock-pill in-stock" : "stock-pill no-stock"}>
+                            {Number(product.stock || 0) > 0 ? "En stock" : "Sin stock"}
+                          </span>
+                          <div className="product-actions-row">
+                            <div className="quantity-control">
+                              <button onClick={() => setQuantity(product, -1)} aria-label="Restar cantidad">-</button>
+                              <span>{quantity}</span>
+                              <button onClick={() => setQuantity(product, 1)} aria-label="Sumar cantidad">+</button>
+                            </div>
+                            <button className="add-cart-btn" onClick={() => handleAddToCart(product)} aria-label={`Agregar ${product.nombre} al carrito`}>
+                              <FaShoppingCart />
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </section>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 
@@ -493,15 +595,9 @@ function Productos({ categoriasDisponibles = DEFAULT_CATEGORIES }) {
                   {Number(selectedProduct.stock || 0) > 0 ? `Stock disponible: ${selectedProduct.stock}` : "Sin stock"}
                 </span>
                 <div className="home-product-modal-actions">
-                  {user ? (
                     <button className="home-modal-add-btn" onClick={() => { handleAddToCart(selectedProduct); setSelectedProduct(null); }} disabled={Number(selectedProduct.stock || 0) === 0}>
                       <FaShoppingCart /> {Number(selectedProduct.stock || 0) > 0 ? "Agregar al Carrito" : "Agotado"}
                     </button>
-                  ) : (
-                    <button className="home-modal-add-btn" onClick={() => { setSelectedProduct(null); navigate('/login'); }}>
-                      Iniciá sesión para comprar
-                    </button>
-                  )}
                 </div>
               </div>
             </div>

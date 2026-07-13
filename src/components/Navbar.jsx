@@ -5,7 +5,6 @@ import { api } from '../services/api';
 import Swal from 'sweetalert2';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaTools, FaShoppingCart, FaUserCog, FaClock } from 'react-icons/fa';
-import { BsInfoCircleFill } from "react-icons/bs";
 import { FiHome, FiBox, FiLogIn, FiLogOut, FiShoppingBag, FiSearch, FiMapPin, FiShield, FiUser, FiBriefcase } from "react-icons/fi";
 import { RiAdminFill } from "react-icons/ri";
 import { useState, useEffect } from 'react'; 
@@ -220,7 +219,6 @@ function Navbar() {
               <li><NavLink to="/" end><FiHome size={14} /> Inicio</NavLink></li>
               <li><NavLink to="/productos"><FiBox size={14} /> Productos</NavLink></li>
               <li><NavLink to="/nuestros-servicios"><FiBriefcase size={14} /> Servicios</NavLink></li>
-              <li><NavLink to="/login"><FiLogIn size={14} /> Mi Cuenta</NavLink></li>
             </>
           )}
 
@@ -256,10 +254,10 @@ function Navbar() {
           </button>
         )}
 
-        {/* === INFO (solo invitados, después del carrito) === */}
+        {/* === MI CUENTA (solo invitados, después del carrito) === */}
         {!user && (
-          <NavLink to="/servicios" className="nav-info-link">
-            <BsInfoCircleFill size={14} /> Info
+          <NavLink to="/login" className="nav-info-link">
+            <FiLogIn size={14} /> Mi Cuenta
           </NavLink>
         )}
 
