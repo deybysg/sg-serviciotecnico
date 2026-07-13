@@ -76,7 +76,6 @@ function MiniCart() {
               </div>
             </div>
           ))}
-          )}
         </div>
 
         <div className="minicart-footer">

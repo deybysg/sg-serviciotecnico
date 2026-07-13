@@ -72,7 +72,7 @@ export default function SuperSidebar({ onExpandChange }) {
     });
     if (!result.isConfirmed) return;
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (

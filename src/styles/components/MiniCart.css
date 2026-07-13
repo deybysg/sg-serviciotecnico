@@ -5,7 +5,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 999;
+  z-index: 1001;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
@@ -267,11 +267,20 @@
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+  .minicart-panel {
+    top: 76px;
+    right: 12px;
+    width: 320px;
+  }
+}
+
 @media (max-width: 480px) {
   .minicart-panel {
-    right: 10px;
-    left: 10px;
+    right: 8px;
+    left: 8px;
     width: auto;
-    top: 70px;
+    top: 72px;
+    max-height: 65vh;
   }
 }

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "./components/Navbar";
+import BottomTabBar from "./components/BottomTabBar";
 import SuperSidebar from "./components/SuperSidebar";
 import "./styles/App.css";
 
@@ -29,6 +30,8 @@ import HistorialAdmin from "./admin/HistorialAdmin";
 import Paneltrabajos from "./admin/Paneltrabajos";
 import HistorialDeMovimientos from "./admin/HistorialDeMovimientos";
 import PuntoDeVenta from "./admin/PuntoDeVenta";
+import PagosPendientes from "./admin/PagosPendientes";
+import MisPagos from "./pages/MisPagos";
 
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartProvider";
@@ -76,8 +79,15 @@ function AppBody() {
                 <MisComprasModal />
               </PrivateRoute>
             }
-          /> 
-            
+          />
+          <Route
+            path="/mis-pagos"
+            element={
+              <PrivateRoute roles={["user","admin","superadmin"]}>
+                <MisComprasModal />
+              </PrivateRoute>
+            }
+          />
 
           {/* Rutas privadas para ADMIN (MANTENIDAS) */}
             <Route
@@ -147,6 +157,16 @@ function AppBody() {
             }
           />
 
+          {/* Ruta Pagos Pendientes - Admin y SuperAdmin */}
+          <Route
+            path="/admin/pagos-pendientes"
+            element={
+              <PrivateRoute roles={["admin", "superadmin"]}>
+                <PagosPendientes />
+              </PrivateRoute>
+            }
+          />
+
                     {/* Solo SUPERADMIN */}
                     <Route
                         path="/admin/usuarios"
@@ -182,6 +202,7 @@ function App() {
         <Router>
           <ServerWakeUp />
           <Navbar />
+          <BottomTabBar />
                     <AppBody />
                 </Router>
       </CartProvider>

@@ -6,6 +6,7 @@ import {
     FaCashRegister
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import useCartStore from '../store/cartStore';
 import Swal from 'sweetalert2';
 import logoTech from '../assets/logo3.png';
 import '../styles/components/NavHamburguesa.css';
@@ -14,6 +15,7 @@ function NavHamburguesa() {
     const [open, setOpen] = useState(false);
     const menuRef = useRef(null);
     const { user, logout } = useAuth();
+    const totalItems = useCartStore(state => state.getTotalItems());
 
     useEffect(() => {
         if (menuRef.current) {
@@ -33,6 +35,7 @@ function NavHamburguesa() {
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
             { nombre: 'Servicios', to: '/nuestros-servicios', icon: <FaServicestack /> },
+            { nombre: 'Mi Carrito', to: '#', icon: <FaShoppingCart />, isCart: true, badge: totalItems },
             { nombre: 'Ayuda', to: '/servicios', icon: <FaServicestack /> },
             { nombre: 'Login', to: '/login', icon: <FaSignInAlt /> },
         ];
@@ -42,6 +45,7 @@ function NavHamburguesa() {
             { nombre: 'Inicio', to: '/', icon: <FaHome /> },
             { nombre: 'Productos', to: '/productos', icon: <FaShoppingCart /> },
             { nombre: 'Servicios', to: '/nuestros-servicios', icon: <FaServicestack /> },
+            { nombre: 'Mi Carrito', to: '#', icon: <FaShoppingCart />, isCart: true, badge: totalItems },
             { nombre: 'Mis compras', to: '/miscomprasmodal', icon: <FaShoppingBag /> },
         ];
     } else if (user.role === 'admin') {
@@ -145,32 +149,52 @@ function NavHamburguesa() {
                 <ul className="nav-hamburguesa-list">
                     {menuItems.map(item => (
                         <li 
-                            key={item.to}
+                            key={item.nombre}
                             className={item.isCta ? 'nav-hamburguesa-tracking-item' : ''}
                         >
-                            <NavLink 
-                                to={item.to} 
-                                className={({ isActive }) => `${item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'}${isActive ? ' active' : ''}`}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpen(false);
-                                }}
-                            >
-                                {item.isCta ? (
-                                    <>
-                                        <span className="tracking-icon">{item.icon}</span>
-                                        <div className="tracking-text-group">
-                                            <span className="tracking-title">{item.nombre}</span>
-                                            <span className="tracking-subtitle">¡Ver estado de tu orden!</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="nav-hamburguesa-icon">{item.icon}</span>
-                                        {item.nombre}
-                                    </>
-                                )}
-                            </NavLink>
+                            {item.isCart ? (
+                                <button 
+                                    type="button"
+                                    className="nav-hamburguesa-link"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpen(false);
+                                        if (user) {
+                                            useCartStore.getState().setShowCartModal(true);
+                                        } else {
+                                            useCartStore.getState().setShowMiniCart(true);
+                                        }
+                                    }}
+                                >
+                                    <span className="nav-hamburguesa-icon">{item.icon}</span>
+                                    {item.nombre}
+                                    {item.badge > 0 && <span className="nav-hamburguesa-cart-badge">{item.badge}</span>}
+                                </button>
+                            ) : (
+                                <NavLink 
+                                    to={item.to} 
+                                    className={({ isActive }) => `${item.isCta ? 'nav-hamburguesa-tracking-cta' : 'nav-hamburguesa-link'}${isActive ? ' active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpen(false);
+                                    }}
+                                >
+                                    {item.isCta ? (
+                                        <>
+                                            <span className="tracking-icon">{item.icon}</span>
+                                            <div className="tracking-text-group">
+                                                <span className="tracking-title">{item.nombre}</span>
+                                                <span className="tracking-subtitle">¡Ver estado de tu orden!</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="nav-hamburguesa-icon">{item.icon}</span>
+                                            {item.nombre}
+                                        </>
+                                    )}
+                                </NavLink>
+                            )}
                         </li>
                     ))}
 

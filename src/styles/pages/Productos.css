@@ -11,7 +11,7 @@
 
 .products-page {
   min-height: 100vh;
-  padding: 102px clamp(14px, 2vw, 24px) 30px;
+  padding: 102px clamp(12px, 1.5vw, 18px) 30px;
   color: var(--products-text);
   background:
     radial-gradient(circle at 18% 10%, rgba(0, 200, 255, 0.14), transparent 28%),
@@ -23,7 +23,7 @@
 .products-hero,
 .products-shell,
 .products-help-panel {
-  max-width: 1240px;
+  max-width: 95%;
   margin: 0 auto;
 }
 

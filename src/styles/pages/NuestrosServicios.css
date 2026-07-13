@@ -443,7 +443,7 @@
    ========================================================= */
 .servicios-grid-section {
   padding: 4rem 2rem;
-  max-width: 1200px;
+  max-width: 95%;
   margin: 0 auto;
   position: relative;
   z-index: 1;
@@ -623,7 +623,7 @@
    ========================================================= */
 .beneficios-bar-section {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 95%;
   margin: 0 auto 2rem;
   position: relative;
   z-index: 1;

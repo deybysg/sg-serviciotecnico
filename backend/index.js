@@ -17,6 +17,7 @@ import cartsRoutes from './src/routes/carts.routes.js';
 import estadisticasRoutes from './src/routes/estadisticas.routes.js';
 import mercadopagoRoutes from './src/routes/mercadopago.routes.js';
 import ajustesRoutes from './src/routes/ajustes.routes.js';
+import pagosPendientesRoutes from './src/routes/pagosPendientes.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,6 +94,7 @@ app.use('/api/carts', cartsRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/mercadopago', mercadopagoRoutes);
 app.use('/api/ajustes', ajustesRoutes);
+app.use('/api/pagos-pendientes', pagosPendientesRoutes);
 
 // Endpoint simple para verificar que el servidor está corriendo (Uptime Robot)
 app.get('/api/health', (req, res) => {

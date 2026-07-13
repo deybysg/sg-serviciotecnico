@@ -1,0 +1,707 @@
+/* ========== PAGOS PENDIENTES - ADMIN ========== */
+
+.pagos-pendientes-container {
+  padding: 100px 32px 28px;
+  min-height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Dashboard Métricas */
+.metricas-dashboard {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.metrica-card {
+  background: linear-gradient(160deg, #111827, #0f172a);
+  border: 1px solid rgba(0, 183, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.metrica-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 183, 255, 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.metrica-card:hover {
+  border-color: rgba(0, 183, 255, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 183, 255, 0.08);
+}
+
+.metrica-card:hover::before { opacity: 1; }
+
+.metrica-card svg { 
+  color: rgba(0, 183, 255, 0.5); 
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.metrica-info { display: flex; flex-direction: column; gap: 3px; }
+
+.metrica-numero {
+  font-size: 1.4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.metrica-pendientes svg { color: rgba(255, 196, 0, 0.6); }
+.metrica-pendientes .metrica-numero { background: linear-gradient(135deg, #ffc400, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.metrica-monto-pendiente svg { color: rgba(255, 196, 0, 0.6); }
+.metrica-monto-pendiente .metrica-numero { background: linear-gradient(135deg, #ffc400, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.metrica-aceptados svg { color: rgba(35, 221, 95, 0.6); }
+.metrica-aceptados .metrica-numero { background: linear-gradient(135deg, #23dd5f, #00b894); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.metrica-rechazados svg { color: rgba(255, 77, 77, 0.6); }
+.metrica-rechazados .metrica-numero { background: linear-gradient(135deg, #ff4d4d, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.metrica-label {
+  font-size: 0.68rem;
+  color: rgba(148, 163, 184, 0.6);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Header */
+.pagos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 14px; }
+.header-right { display: flex; flex-direction: column; gap: 14px; align-items: flex-end; }
+
+.pagos-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+/* Búsqueda */
+.busqueda-wrapper {
+  position: relative;
+  width: 320px;
+}
+
+.busqueda-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 183, 255, 0.4);
+  font-size: 0.9rem;
+}
+
+.busqueda-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 183, 255, 0.15);
+  background: rgba(15, 23, 42, 0.7);
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  transition: all 0.25s;
+  outline: none;
+}
+
+.busqueda-input:focus {
+  border-color: rgba(0, 183, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.1);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.busqueda-input::placeholder { color: rgba(148, 163, 184, 0.4); }
+
+/* Filtros */
+.pagos-filtros { display: flex; gap: 10px; }
+
+.filtro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 1px solid rgba(0, 183, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.6);
+  color: rgba(226, 232, 240, 0.7);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.filtro-btn:hover { 
+  background: rgba(0, 183, 255, 0.08); 
+  border-color: rgba(0, 183, 255, 0.35);
+  color: #e2e8f0;
+}
+
+.filtro-btn.active {
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.15), rgba(191, 50, 255, 0.12));
+  border-color: rgba(0, 183, 255, 0.5);
+  color: #00b7ff;
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.12);
+}
+
+/* Header actions */
+.header-actions { display: flex; gap: 10px; }
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0, 183, 255, 0.18);
+  background: rgba(15, 23, 42, 0.6);
+  color: #00b7ff;
+  transition: all 0.25s;
+}
+
+.btn-action:hover:not(:disabled) { 
+  background: rgba(0, 183, 255, 0.1); 
+  border-color: rgba(0, 183, 255, 0.4); 
+}
+
+.btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Dropdown Limpiar */
+.limpiar-dropdown {
+  position: relative;
+}
+
+.btn-limpiar {
+  background: rgba(255, 77, 77, 0.1) !important;
+  color: #ff4d4d !important;
+  border: 1px solid rgba(255, 77, 77, 0.25) !important;
+}
+
+.btn-limpiar:hover {
+  background: rgba(255, 77, 77, 0.2) !important;
+  border-color: rgba(255, 77, 77, 0.5) !important;
+}
+
+.limpiar-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: linear-gradient(160deg, #111827, #0f172a);
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 220px;
+  z-index: 100;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.limpiar-dropdown:hover .limpiar-dropdown-menu {
+  display: block;
+}
+
+.limpiar-dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.8);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.limpiar-dropdown-menu button:hover {
+  background: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+}
+
+/* Acciones log */
+.acciones-log {
+  background: linear-gradient(160deg, #111827, #0f172a);
+  border: 1px solid rgba(0, 183, 255, 0.12);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.acciones-log h3 {
+  margin: 0 0 18px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #00b7ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acciones-lista { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+  max-height: 300px; 
+  overflow-y: auto; 
+}
+
+.acciones-lista::-webkit-scrollbar { width: 4px; }
+.acciones-lista::-webkit-scrollbar-track { background: transparent; }
+.acciones-lista::-webkit-scrollbar-thumb { background: rgba(0, 183, 255, 0.2); border-radius: 4px; }
+
+.accion-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 183, 255, 0.06);
+  font-size: 0.8rem;
+}
+
+.accion-fecha { color: rgba(148, 163, 184, 0.7); font-weight: 500; }
+.accion-user { color: #e2e8f0; display: flex; align-items: center; gap: 5px; font-weight: 600; }
+.accion-tipo { font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.72rem; }
+.accion-tipo.aceptado { color: #23dd5f; }
+.accion-tipo.rechazado { color: #ff4d4d; }
+.accion-monto { color: #00b7ff; font-weight: 800; }
+.accion-admin { color: rgba(148, 163, 184, 0.5); }
+.acciones-empty { color: rgba(148, 163, 184, 0.4); text-align: center; padding: 24px; }
+
+/* Batch actions */
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.08), rgba(191, 50, 255, 0.05));
+  border: 1px solid rgba(0, 183, 255, 0.2);
+  border-radius: 14px;
+  margin-bottom: 22px;
+}
+
+.batch-count { font-weight: 800; color: #00b7ff; font-size: 0.95rem; }
+
+.batch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s;
+}
+
+.batch-aceptar { background: rgba(35, 221, 95, 0.15); color: #23dd5f; border: 1px solid rgba(35, 221, 95, 0.3); }
+.batch-aceptar:hover { background: rgba(35, 221, 95, 0.25); box-shadow: 0 0 15px rgba(35, 221, 95, 0.15); }
+
+.batch-rechazar { background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+.batch-rechazar:hover { background: rgba(255, 77, 77, 0.25); box-shadow: 0 0 15px rgba(255, 77, 77, 0.15); }
+
+.batch-cancelar { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.3); }
+.batch-cancelar:hover { background: rgba(100, 116, 139, 0.25); }
+
+/* Select all */
+.select-all-row {
+  padding: 12px 18px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 183, 255, 0.1);
+  margin-bottom: 4px;
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.select-all-label input { accent-color: #00b7ff; width: 18px; height: 18px; }
+
+/* Loading / Empty */
+.pagos-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: rgba(0, 183, 255, 0.6);
+  font-size: 1rem;
+}
+
+.pagos-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: rgba(148, 163, 184, 0.3);
+  gap: 18px;
+}
+
+.pagos-empty p { margin: 0; font-size: 1rem; color: rgba(148, 163, 184, 0.5); }
+
+/* ===========================
+   TARJETAS DE PAGO - PRINCIPAL MEJORA
+   =========================== */
+.pagos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pago-card {
+  background: linear-gradient(160deg, #111827 0%, #0f172a 100%);
+  border: 1px solid rgba(0, 183, 255, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Glow sutil en hover */
+.pago-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.06), rgba(191, 50, 255, 0.04));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.pago-card:hover {
+  border-color: rgba(0, 183, 255, 0.25);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(0, 183, 255, 0.06);
+  transform: translateY(-3px);
+}
+
+.pago-card:hover::after { opacity: 1; }
+
+.pago-card.seleccionado {
+  border-color: rgba(0, 183, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 183, 255, 0.1);
+}
+
+/* Borde lateral de estado - MÁS VISIBLE */
+.pago-Pendiente { 
+  border-left: 5px solid #ffc400;
+  box-shadow: 0 4px 20px rgba(255, 196, 0, 0.08);
+}
+
+.pago-Pendiente:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 196, 0, 0.1);
+}
+
+.pago-Aceptado { 
+  border-left: 5px solid #23dd5f;
+  box-shadow: 0 4px 20px rgba(35, 221, 95, 0.06);
+}
+
+.pago-Aceptado:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(35, 221, 95, 0.1);
+}
+
+.pago-Rechazado { 
+  border-left: 5px solid #ff4d4d;
+  box-shadow: 0 4px 20px rgba(255, 77, 77, 0.06);
+}
+
+.pago-Rechazado:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 77, 77, 0.1);
+}
+
+.pago-checkbox {
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(0, 183, 255, 0.06);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pago-checkbox input { accent-color: #00b7ff; width: 18px; height: 18px; cursor: pointer; }
+
+.pago-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0, 183, 255, 0.08);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.pago-username { 
+  font-weight: 800; 
+  color: #e2e8f0; 
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.pago-estado {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.estado-Pendiente { 
+  background: rgba(255, 196, 0, 0.12); 
+  color: #ffc400; 
+  border: 1px solid rgba(255, 196, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255, 196, 0, 0.2);
+}
+
+.estado-Aceptado { 
+  background: rgba(35, 221, 95, 0.12); 
+  color: #23dd5f; 
+  border: 1px solid rgba(35, 221, 95, 0.3);
+  text-shadow: 0 0 10px rgba(35, 221, 95, 0.2);
+}
+
+.estado-Rechazado { 
+  background: rgba(255, 77, 77, 0.12); 
+  color: #ff4d4d; 
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
+}
+
+.pago-card-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pago-info { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+}
+
+.pago-label { 
+  font-size: 0.82rem; 
+  color: rgba(148, 163, 184, 0.6); 
+  font-weight: 600;
+}
+
+.pago-value { 
+  font-size: 0.9rem; 
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.pago-total {
+  font-size: 1.15rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pago-notas { 
+  font-size: 0.82rem; 
+  color: rgba(255, 196, 0, 0.85); 
+  font-style: italic;
+}
+
+/* Productos preview */
+.pago-productos-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 183, 255, 0.06);
+  border-radius: 10px;
+  margin-top: 6px;
+}
+
+.producto-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.8);
+  font-weight: 500;
+}
+
+.producto-preview-item svg { 
+  color: rgba(0, 183, 255, 0.35); 
+  font-size: 0.85rem;
+}
+
+.producto-mas {
+  font-size: 0.75rem;
+  color: rgba(0, 183, 255, 0.45);
+  font-style: italic;
+  padding-left: 22px;
+}
+
+/* Acciones */
+.pago-card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(0, 183, 255, 0.08);
+  flex-wrap: wrap;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pago-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s;
+  flex: 1;
+  justify-content: center;
+  letter-spacing: 0.01em;
+}
+
+.pago-ver { 
+  background: rgba(0, 183, 255, 0.1); 
+  color: #00b7ff; 
+  border: 1px solid rgba(0, 183, 255, 0.25); 
+}
+
+.pago-ver:hover { 
+  background: rgba(0, 183, 255, 0.18); 
+  border-color: rgba(0, 183, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 183, 255, 0.1);
+}
+
+.pago-detalle { 
+  background: rgba(191, 50, 255, 0.1); 
+  color: #bf32ff; 
+  border: 1px solid rgba(191, 50, 255, 0.25); 
+}
+
+.pago-detalle:hover { 
+  background: rgba(191, 50, 255, 0.18); 
+  border-color: rgba(191, 50, 255, 0.5);
+  box-shadow: 0 0 15px rgba(191, 50, 255, 0.1);
+}
+
+.pago-aceptar { 
+  background: rgba(35, 221, 95, 0.12); 
+  color: #23dd5f; 
+  border: 1px solid rgba(35, 221, 95, 0.3); 
+}
+
+.pago-aceptar:hover { 
+  background: rgba(35, 221, 95, 0.22); 
+  border-color: rgba(35, 221, 95, 0.6);
+  box-shadow: 0 0 15px rgba(35, 221, 95, 0.15);
+}
+
+.pago-rechazar { 
+  background: rgba(255, 77, 77, 0.12); 
+  color: #ff4d4d; 
+  border: 1px solid rgba(255, 77, 77, 0.3); 
+}
+
+.pago-rechazar:hover { 
+  background: rgba(255, 77, 77, 0.22); 
+  border-color: rgba(255, 77, 77, 0.6);
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.15);
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 1024px) {
+  .metricas-dashboard { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .pagos-pendientes-container { padding: 90px 16px 20px; }
+  .pagos-header { flex-direction: column; align-items: stretch; }
+  .header-left, .header-right { align-items: stretch; }
+  .busqueda-wrapper { width: 100%; }
+  .pagos-filtros { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .pagos-filtros::-webkit-scrollbar { display: none; }
+  .header-actions { flex-wrap: wrap; }
+  .metricas-dashboard { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .accion-item { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .batch-actions { flex-wrap: wrap; }
+  
+  .pagos-grid { gap: 14px; }
+  .pago-card-header { padding: 14px 16px; }
+  .pago-card-body { padding: 14px 16px; }
+  .pago-card-actions { padding: 12px 16px; }
+}
+
+@media (max-width: 480px) {
+  .pagos-pendientes-container { padding: 85px 12px 16px; }
+  .metricas-dashboard { grid-template-columns: 1fr; }
+  .pago-card-actions { flex-direction: column; }
+  .pago-action-btn { flex: none; }
+  .pago-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+}

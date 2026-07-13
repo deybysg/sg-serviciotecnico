@@ -1,293 +1,537 @@
-/* === Estilos para MisComprasModal.jsx (Optimización Estructural) === */
+/* ========== MIS COMPRAS - TIMELINE NEON ========== */
 
-/* --- Overlay del Modal --- */
+.compras-page-container {
+  padding: 100px 40px 32px;
+  min-height: 100vh;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: radial-gradient(ellipse at 20% 0%, rgba(0, 183, 255, 0.03) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 100%, rgba(191, 50, 255, 0.03) 0%, transparent 50%);
+}
+
 .compras-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1001;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  padding: 24px;
+  overflow-y: auto;
 }
 
-/* --- Contenido del Modal --- */
 .compras-modal-content {
-    background: #fff;
-    padding: 25px; /* Padding de PC */
-    border-radius: 10px;
-    width: 92%;
-    max-width: 600px; 
-    max-height: 85vh; 
-    overflow-y: auto; 
-    position: relative; 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
-}
-
-/* --- Header y Botón de Cierre (Diseño de PC) --- */
-.compras-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.compras-title {
-    color: #0b2545;
-    border-bottom: 2px solid #0b2545;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    margin-top: 0;
-}
-
-.compras-modal-content > .compras-title {
-    padding-right: 30px; 
+  background: linear-gradient(160deg, #0b1120 0%, #111827 50%, #0f172a 100%);
+  border: 1px solid rgba(0, 183, 255, 0.12);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(0, 183, 255, 0.05), 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 183, 255, 0.08);
 }
 
 .compras-close-btn {
-    position: fixed;
-    top: 8px;
-    right: 347px; 
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #dc3545;
-    z-index: 10;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.25);
+  color: #ff4d4d;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: all 0.2s;
+  z-index: 10;
 }
 
-.compras-empty-message {
-    text-align: center;
-    color: #6c757d;
-    padding: 30px 0;
+.compras-close-btn:hover {
+  background: rgba(255, 77, 77, 0.2);
+  border-color: #ff4d4d;
+  transform: rotate(90deg);
 }
 
-/* Estilos de la lista de compras */
-.compra-item {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px; /* Padding de PC */
-    margin-bottom: 15px;
-    background-color: #f8f9fa;
+/* Header */
+.miscompras-page-header {
+  padding: 36px 32px 28px;
+  border-bottom: 1px solid rgba(0, 183, 255, 0.08);
 }
 
-.compra-id-wrap {
-    display: flex;
-    flex-direction: column;
-    /* CRÍTICO: Asegura que el texto largo se rompa si es necesario */
-    max-width: 100%;
-    word-wrap: break-word; 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.compra-id {
-    font-size: 1rem;
-    color: #0b2545;
-    margin: 0;
+.compras-title {
+  margin: 0 0 6px;
+  font-size: 2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
-.compra-small-id {
-    font-size: 0.8rem;
-    color: #6c757d;
+.miscompras-intro {
+  margin: 0;
+  color: rgba(148, 163, 184, 0.7);
+  font-size: 0.9rem;
 }
 
-.compra-estado-wrap {
-    display: flex;
-    align-items: center;
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
 
-.compra-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    /* CRÍTICO: Permite que los elementos se encojan si es necesario */
-    flex-wrap: nowrap;
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0, 183, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: #00b7ff;
+  transition: all 0.25s;
 }
 
-.compra-estado {
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    flex-shrink: 0; 
+.btn-export:hover:not(:disabled) {
+  background: rgba(0, 183, 255, 0.1);
+  border-color: rgba(0, 183, 255, 0.4);
 }
 
-/* Colores de estado (ejemplos) */
-.estado-completado {
-    background-color: #28a745;
-    color: white;
-}
-.estado-pendiente {
-    background-color: #ffc107;
-    color: #333;
+.btn-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* --- Tabla de productos: CLAVE PARA EL DESBORDAMIENTO --- */
-.productos-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    /* ELIMINADO: display: block; overflow-x: auto; */
-    /* Esto es lo que causaba el scroll horizontal. En su lugar, hacemos la tabla compacta. */
+.btn-clear-history {
+  background: rgba(255, 77, 77, 0.1) !important;
+  color: #ff4d4d !important;
+  border: 1px solid rgba(255, 77, 77, 0.25) !important;
 }
 
-.productos-table th, .productos-table td {
-    border: 1px solid #e9ecef;
-    padding: 8px 10px;
-    text-align: left;
-    font-size: 0.95rem;
-    white-space: normal;
+.btn-clear-history:hover {
+  background: rgba(255, 77, 77, 0.2) !important;
+  border-color: rgba(255, 77, 77, 0.5) !important;
 }
 
-
-.compra-actions {
-    margin-top: 12px;
-    display: flex;
-    justify-content: flex-end;
+.spin {
+  animation: spin 1s linear infinite;
 }
 
-.btn-comprobante {
-    /* Manteniendo estilos y colores */
-    background: linear-gradient(90deg, #0b2545, #1f6f9f);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: opacity 0.2s ease;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.btn-comprobante:hover:not(:disabled) {
-    opacity: 0.9;
+/* Resumen Cards */
+.resumen-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.btn-comprobante:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.resumen-card {
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(0, 183, 255, 0.1);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+  transition: all 0.3s;
 }
 
-/* Spinner de carga para el botón PDF */
-.spinner-border {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    vertical-align: text-bottom;
-    border: 0.15em solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: spinner-border 0.75s linear infinite;
+.resumen-card:hover {
+  border-color: rgba(0, 183, 255, 0.25);
+  transform: translateY(-2px);
 }
 
-.spinner-border-sm {
-    width: 0.8rem;
-    height: 0.8rem;
-    border-width: 0.12em;
+.resumen-card-wide {
+  grid-column: span 2;
 }
 
-.me-2 {
-    margin-right: 0.5rem;
+.resumen-numero {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  line-height: 1.1;
 }
 
-@keyframes spinner-border {
-    to {
-        transform: rotate(360deg);
-    }
+.resumen-pendientes { background: linear-gradient(135deg, #ffc400, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.resumen-completadas { background: linear-gradient(135deg, #23dd5f, #00b894); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.resumen-rechazados { background: linear-gradient(135deg, #ff4d4d, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.resumen-label {
+  font-size: 0.68rem;
+  color: rgba(148, 163, 184, 0.6);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.compra-details.grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: center;
+/* Filtros Pills */
+.filtros-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-/* --- Botón abrir historial y Modal historial (manteniendo) --- */
-.btn-open-historial {
-    background: linear-gradient(90deg,#0b2545,#1f6f9f);
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-}
-.historial-modal { max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; }
-.historial-title { margin-top: 0; color: #0b2545; border-bottom: 1px solid #e9eef5; padding-bottom: 8px; }
-.historial-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
-
-
-/* ########################################## */
-/* ### ADAPTACIÓN PARA MÓVILES (Compacto) ### */
-/* ########################################## */
-
-/* Adaptación para pantallas medianas (Tablet/General) */
-@media (max-width: 700px) {
-    
-    /* Adaptación del modal historial */
-    .historial-modal { width: 100%; padding: 0; } 
-    .historial-modal .compras-modal-content {
-        max-width: none;
-        width: 100%;
-        padding: 15px;
-        border-radius: 0;
-    }
-    
-    /* Encabezado de la compra (Apilado) */
-    .compra-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .compra-details.grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
+.filtro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 183, 255, 0.15);
+  background: rgba(15, 23, 42, 0.5);
+  color: rgba(226, 232, 240, 0.7);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.25s;
 }
 
+.filtro-pill:hover { border-color: rgba(0, 183, 255, 0.35); background: rgba(0, 183, 255, 0.06); color: #e2e8f0; }
 
-/* Adaptación para pantallas pequeñas (Celulares) */
-@media (max-width: 600px) {
-    .compras-modal-content {
-        padding: 10px; /* **MÁS COMPACTO:** Reduce el padding de 25px a 10px */
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        border-radius: 0; 
-        max-height: 100vh;
-    }
-    
-    .compras-close-btn {
-        position: fixed;
-        top: 13rem;
-        right: -0.5rem; /* Ajusta la posición del botón de cierre */
-        font-size: 1.3rem; /* Ligeramente más pequeño para ahorrar espacio */
-    }
+.filtro-pill.active {
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.12), rgba(191, 50, 255, 0.12));
+  border-color: rgba(0, 183, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 183, 255, 0.12);
+  color: #fff;
+}
 
-    .compras-title {
-        font-size: 1.4rem; /* Título un poco más pequeño */
-        padding-right: 30px; /* Asegura espacio para el botón de cierre */
-        padding-bottom: 8px;
-        margin-bottom: 15px; /* Más compacto */
-    }
-    
-    .compra-item {
-        padding: 10px; /* **MÁS COMPACTO:** Reduce el padding de la tarjeta interna */
-        margin-bottom: 10px; /* Margen más pequeño */
-    }
-    
-    /* Tabla: Hacemos los ítems muy compactos */
-    .productos-table th, .productos-table td { 
-        font-size: 0.8rem; /* **MÁS COMPACTO:** Fuente más pequeña */
-        padding: 4px 6px; /* **MÁS COMPACTO:** Padding más reducido */
-    }
-    
-    .compra-actions {
-        justify-content: center;
-    }
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: linear-gradient(135deg, #ffc400, #ff8c00);
+  color: #000;
+  font-size: 0.62rem;
+  font-weight: 900;
+  border-radius: 999px;
+}
+
+.pill-badge-red {
+  background: linear-gradient(135deg, #ff4d4d, #ff8c00);
+}
+
+/* Timeline */
+.timeline-container { padding: 28px 32px 36px; position: relative; }
+
+.timeline-item { position: relative; padding-left: 56px; margin-bottom: 28px; }
+.timeline-item:last-child { margin-bottom: 0; }
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 52px;
+  bottom: -28px;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(0, 183, 255, 0.2), transparent);
+}
+
+.timeline-item:last-child::before { display: none; }
+
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: linear-gradient(160deg, #0b1120, #111827);
+  border: 2px solid;
+  z-index: 2;
+}
+
+.timeline-item.pendiente .timeline-dot { border-color: #ffc400; color: #ffc400; box-shadow: 0 0 20px rgba(255, 196, 0, 0.25); }
+.timeline-item.completado .timeline-dot { border-color: #23dd5f; color: #23dd5f; box-shadow: 0 0 20px rgba(35, 221, 95, 0.25); }
+.timeline-item.rechazado .timeline-dot { border-color: #ff4d4d; color: #ff4d4d; box-shadow: 0 0 20px rgba(255, 77, 77, 0.25); }
+.timeline-item.cancelado .timeline-dot { border-color: #64748b; color: #64748b; box-shadow: 0 0 15px rgba(100, 116, 139, 0.2); }
+
+/* Tarjeta */
+.timeline-card {
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.7));
+  border: 1px solid rgba(0, 183, 255, 0.1);
+  border-radius: 16px;
+  padding: 22px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-card:hover {
+  border-color: rgba(0, 183, 255, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 183, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.timeline-item.pendiente .timeline-card { border-left: 4px solid #ffc400; }
+.timeline-item.completado .timeline-card { border-left: 4px solid #23dd5f; }
+.timeline-item.rechazado .timeline-card { border-left: 4px solid #ff4d4d; }
+.timeline-item.cancelado .timeline-card { border-left: 4px solid #64748b; }
+
+/* Header de tarjeta */
+.timeline-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeline-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-fecha {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.8);
+  font-weight: 600;
+}
+
+.expiracion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255, 196, 0, 0.1);
+  color: #ffc400;
+  border: 1px solid rgba(255, 196, 0, 0.2);
+}
+
+.expiracion-badge.expirado {
+  background: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+  border-color: rgba(255, 77, 77, 0.3);
+}
+
+.estado-badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.estado-badge.pendiente { background: rgba(255, 196, 0, 0.1); color: #ffc400; border: 1px solid rgba(255, 196, 0, 0.25); }
+.estado-badge.completado { background: rgba(35, 221, 95, 0.1); color: #23dd5f; border: 1px solid rgba(35, 221, 95, 0.25); }
+.estado-badge.rechazado { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.25); }
+.estado-badge.cancelado { background: rgba(100, 116, 139, 0.1); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25); }
+
+/* Nota de rechazo */
+.nota-rechazo {
+  padding: 10px 14px;
+  background: rgba(255, 77, 77, 0.06);
+  border: 1px solid rgba(255, 77, 77, 0.18);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 77, 77, 0.9);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* Productos */
+.timeline-productos { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+
+.producto-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 183, 255, 0.06);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.producto-mini:hover { background: rgba(0, 183, 255, 0.04); border-color: rgba(0, 183, 255, 0.12); }
+
+.producto-mini-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(0, 183, 255, 0.06);
+  border: 1px solid rgba(0, 183, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.producto-mini-img img { width: 100%; height: 100%; object-fit: cover; }
+.producto-mini-img svg { color: rgba(0, 183, 255, 0.25); font-size: 1.2rem; }
+
+.producto-mini-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.producto-nombre { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.producto-qty { font-size: 0.72rem; color: rgba(0, 183, 255, 0.5); font-weight: 700; text-transform: uppercase; }
+.producto-precio { font-size: 0.85rem; font-weight: 800; color: #00b7ff; white-space: nowrap; }
+
+.btn-expandir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px dashed rgba(0, 183, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(148, 163, 184, 0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-expandir:hover { background: rgba(0, 183, 255, 0.06); color: #00b7ff; border-color: rgba(0, 183, 255, 0.3); }
+
+/* Footer */
+.timeline-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 183, 255, 0.06);
+}
+
+.timeline-total {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(226, 232, 240, 0.8);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.timeline-total strong {
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00b7ff, #bf32ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.timeline-acciones { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s;
+}
+
+.btn-primary { background: linear-gradient(135deg, #00b7ff, #7c3aed); color: white; box-shadow: 0 4px 16px rgba(0, 183, 255, 0.25); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0, 183, 255, 0.4); }
+
+.btn-secondary { background: rgba(0, 0, 0, 0.2); color: #00b7ff; border: 1px solid rgba(0, 183, 255, 0.2); }
+.btn-secondary:hover { background: rgba(0, 183, 255, 0.08); border-color: rgba(0, 183, 255, 0.4); }
+
+.btn-danger { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.25); }
+.btn-danger:hover { background: rgba(255, 77, 77, 0.2); border-color: rgba(255, 77, 77, 0.5); }
+
+.btn-warning { background: rgba(255, 196, 0, 0.1); color: #ffc400; border: 1px solid rgba(255, 196, 0, 0.25); }
+.btn-warning:hover { background: rgba(255, 196, 0, 0.2); border-color: rgba(255, 196, 0, 0.5); }
+
+/* Empty / Skeleton */
+.timeline-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 72px 24px; color: rgba(148, 163, 184, 0.3); gap: 16px; }
+.timeline-empty h3 { margin: 0; font-size: 1.2rem; font-weight: 700; color: rgba(148, 163, 184, 0.5); }
+.timeline-empty p { margin: 0; font-size: 0.88rem; color: rgba(148, 163, 184, 0.4); }
+
+.timeline-skeleton { padding: 28px 32px 36px; }
+.skeleton-card { padding-left: 56px; margin-bottom: 28px; position: relative; }
+.skeleton-card::before { content: ''; position: absolute; left: 18px; top: 0; width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 183, 255, 0.08); animation: shimmer 1.5s infinite; }
+.skeleton-content { height: 140px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 183, 255, 0.06); border-radius: 16px; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { opacity: 0.2; } 50% { opacity: 0.5; } 100% { opacity: 0.2; } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .compras-page-container { padding: 90px 16px 20px; }
+  .miscompras-page-header { padding: 24px 20px 20px; }
+  .header-top { flex-direction: column; }
+  .compras-title { font-size: 1.6rem; }
+  .resumen-cards { grid-template-columns: repeat(2, 1fr); }
+  .resumen-card-wide { grid-column: span 2; }
+  .resumen-numero { font-size: 1.3rem; }
+  .filtros-pills { gap: 6px; }
+  .filtro-pill { padding: 8px 14px; font-size: 0.78rem; }
+  .timeline-container { padding: 20px; }
+  .timeline-item { padding-left: 48px; margin-bottom: 24px; }
+  .timeline-dot { width: 34px; height: 34px; font-size: 0.85rem; left: 0; top: 14px; }
+  .timeline-item::before { left: 16px; top: 48px; bottom: -24px; }
+  .timeline-card { padding: 18px; border-radius: 14px; }
+  .timeline-card-footer { flex-direction: column; align-items: flex-start; }
+  .timeline-acciones { width: 100%; }
+  .btn-accion { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .compras-page-container { padding: 85px 12px 16px; }
+  .compras-title { font-size: 1.4rem; }
+  .resumen-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .resumen-card { padding: 14px 10px; }
+  .resumen-numero { font-size: 1.2rem; }
+  .resumen-label { font-size: 0.62rem; }
+  .filtros-pills { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .filtros-pills::-webkit-scrollbar { display: none; }
+  .filtro-pill { white-space: nowrap; flex-shrink: 0; }
+  .timeline-item { padding-left: 42px; margin-bottom: 20px; }
+  .timeline-dot { width: 30px; height: 30px; font-size: 0.75rem; left: 0; top: 10px; }
+  .timeline-item::before { left: 14px; top: 42px; bottom: -20px; }
+  .timeline-card { padding: 14px; border-radius: 12px; border-left-width: 3px; }
+  .timeline-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .timeline-header-right { flex-wrap: wrap; }
+  .producto-mini { padding: 8px 10px; }
+  .producto-mini-img { width: 38px; height: 38px; }
+  .timeline-total { font-size: 0.85rem; }
+  .timeline-total strong { font-size: 1rem; }
 }

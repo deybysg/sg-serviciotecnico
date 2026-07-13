@@ -17,7 +17,7 @@ export function getPool() {
       pool = new Pool({
         host: process.env.PGHOST || 'localhost',
         port: process.env.PGPORT || 5432,
-        database: process.env.PGDATABASE || 'ServicioTecnico',
+        database: process.env.PGDATABASE || 'servicio_tecnico',
         user: process.env.PGUSER || 'postgres',
         password: process.env.PGPASSWORD || 'postgres',
         ssl: { rejectUnauthorized: false }
@@ -237,6 +237,41 @@ export async function initPostgres() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Tabla pagos pendientes (comprobantes de transferencia)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pagos_pendientes (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) NOT NULL,
+        fecha_compra TIMESTAMP NOT NULL,
+        total_venta DECIMAL(10,2) NOT NULL,
+        comprobante TEXT NOT NULL,
+        productos_comprados JSONB DEFAULT '[]',
+        estado VARCHAR(50) NOT NULL DEFAULT 'Pendiente',
+        notas_admin TEXT DEFAULT '',
+        revisado_por VARCHAR(255) DEFAULT '',
+        fecha_revision TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Tabla de historial de acciones admin
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS admin_actions_log (
+        id SERIAL PRIMARY KEY,
+        pago_id INTEGER NOT NULL,
+        username VARCHAR(255) NOT NULL,
+        accion VARCHAR(100) NOT NULL,
+        notas TEXT DEFAULT '',
+        admin_user VARCHAR(255) NOT NULL,
+        monto DECIMAL(10,2) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Migración: agregar columna 'Cancelado' al CHECK de pagos_pendientes si existe restricción
+    // (PostgreSQL no tiene CHECK por defecto, así que esto es informativo)
 
     // Migración: agregar columna imagen a ajustes si no existe
     const colImagenAjustes = await client.query(`

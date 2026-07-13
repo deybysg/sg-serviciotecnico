@@ -4,42 +4,14 @@ import React, { useState } from 'react';
 import useCartStore from '../store/cartStore';
 import { useAuth } from '../context/AuthContext'; 
 import { api } from '../services/api';
+import { clearCartExpiration } from '../utils/cartExpiration';
 import { FaPlus, FaMinus, FaTrashAlt, FaShoppingCart, FaCopy, FaLock } from 'react-icons/fa';
-import { FiTrash2 } from 'react-icons/fi';
+import { FiTrash2, FiCreditCard } from 'react-icons/fi';
 import { BsQrCode, BsCreditCard } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import '../styles/pages/Carrito.css'; 
 
-/**
- * Función para registrar la compra en el backend y actualizar stock
- */
-const simulatePurchaseAndSave = async (userId, username, items, total, updateStock) => {
-    // 1. Preparar datos de la venta
-    const nuevaVenta = {
-        usuario: userId,
-        username: username,
-        fechaCompra: new Date().toISOString(),
-        totalVenta: total,
-        metodoPago: 'Efectivo',
-        estado: 'Completado',
-        productosComprados: items.map(item => ({
-            producto: item._id || item.id,
-            nombre: item.nombre,
-            precioUnitario: item.precio,
-            categoria: item.categoria,
-            cantidad: item.cantidad,
-            subtotal: item.precio * item.cantidad,
-        }))
-    };
-    
-    // 2. Registrar la venta en el backend
-    const ventaCreada = await api.post('/ventas', nuevaVenta);
-
-    // 3. Actualizar el stock de productos
-    await updateStock();
-
-    return ventaCreada;
-};
+// Función de compra simulada eliminada - solo se usa transferencia y MercadoPago
 
 /**
  * Componente Modal del Carrito
@@ -58,11 +30,8 @@ function Carrito({ isOpen, onClose }) {
     const clearCart = useCartStore(state => state.clearCart);
     const updateStockOnPurchase = useCartStore(state => state.updateStockOnPurchase);
 
-    // Estado para acordeón de Mercado Pago
-    const [showMPInfo, setShowMPInfo] = useState(false);
-    const [showQR, setShowQR] = useState(false);
-    const [qrImage, setQrImage] = useState(null);
-    const [qrLoading, setQrLoading] = useState(false);
+    // Estado para modal de medios de pago
+    const [showPaymentMethods, setShowPaymentMethods] = useState(false);
 
     // 💡 Obtiene el username o 'Invitado' si no hay usuario logueado
     const displayUsername = user?.username || 'Invitado';
@@ -75,6 +44,195 @@ function Carrito({ isOpen, onClose }) {
     if (!isOpen) {
         return null;
     }
+
+    // 🏦 FUNCIÓN TRANSFERENCIA
+    const handleTransferencia = async () => {
+        // Verificar expiración del carrito
+        if (useCartStore.getState().checkExpiration()) {
+            return;
+        }
+
+        if (!user || user.role === 'Invitado') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Inicia Sesión',
+                text: 'Debes iniciar sesión para realizar una compra.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1200
+            });
+            return;
+        }
+
+        if (cartItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Carrito Vacío',
+                text: 'No puedes comprar sin productos.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2500
+            });
+            return;
+        }
+
+        // Paso 1: Mostrar datos de transferencia
+        const result = await Swal.fire({
+            title: 'Datos de transferencia',
+            html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="margin: 8px 0; color: #0c4a6e;"><strong>Banco:</strong> Nación</p>
+                    <p style="margin: 8px 0; color: #0c4a6e;"><strong>Titular:</strong> Zenteno Deyby Brayan</p>
+                    <p style="margin: 8px 0; color: #0c4a6e;"><strong>CBU:</strong> 0000003100055094459294</p>
+                    <p style="margin: 8px 0; color: #0c4a6e;"><strong>Alias:</strong> sg.tecnico</p>
+                    <p style="margin: 12px 0 0; color: #0284c7; font-size: 0.85rem;">
+                        <strong>Total a transferir: $${formatNumber(totalAmount)}</strong>
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Ya transferí, enviar comprobante',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!result.isConfirmed) return;
+
+        // Paso 2: Seleccionar comprobante
+        const { value: file } = await Swal.fire({
+            title: 'Enviar comprobante',
+            html: `
+                <p style="margin: 0 0 12px; color: #64748b; font-size: 0.85rem;">
+                    Subí una foto o captura del comprobante de transferencia
+                </p>
+                <input type="file" id="swal-comprobante" accept="image/*" 
+                    style="width: 100%; padding: 10px; border: 1px solid #bae6fd; border-radius: 8px; background: white;">
+            `,
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Enviar comprobante',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const input = document.getElementById('swal-comprobante');
+                if (!input.files || !input.files[0]) {
+                    Swal.showValidationMessage('Seleccioná un comprobante');
+                    return false;
+                }
+                const file = input.files[0];
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.showValidationMessage('Solo se permiten imágenes (JPG, PNG, WEBP, GIF)');
+                    return false;
+                }
+                // Validar tamaño (máx 5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    Swal.showValidationMessage('La imagen no debe superar los 5MB');
+                    return false;
+                }
+                return file;
+            }
+        });
+
+        if (!file) return;
+
+        // Paso 3: Subir comprobante y registrar pago
+        try {
+            Swal.fire({
+                title: 'Enviando comprobante...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Convertir archivo a base64 comprimido
+            const compressImage = (file) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxSize = 800;
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > maxSize || height > maxSize) {
+                                if (width > height) {
+                                    height = (height / width) * maxSize;
+                                    width = maxSize;
+                                } else {
+                                    width = (width / height) * maxSize;
+                                    height = maxSize;
+                                }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.6));
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+            const base64 = await compressImage(file);
+
+            // Enviar al backend
+            await api.post('/pagos-pendientes', {
+                username: user.username,
+                fechaCompra: new Date().toISOString(),
+                totalVenta: totalAmount,
+                comprobante: base64,
+                productosComprados: cartItems.map(item => ({
+                    productId: item._id || item.id,
+                    nombre: item.nombre,
+                    categoria: item.categoria,
+                    precioUnitario: item.precio,
+                    cantidad: item.cantidad,
+                    subtotal: item.precio * item.cantidad
+                }))
+            });
+
+            // Vaciar carrito y persistir en servidor (el stock se actualiza cuando el admin acepta)
+            useCartStore.setState({ cartItems: [], showMiniCart: false });
+            useCartStore.getState().persistCart();
+            clearCartExpiration();
+
+            window.dispatchEvent(new Event('purchaseCompleted'));
+
+            Swal.fire({
+                icon: 'info',
+                title: '⏳ Esperando confirmación',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <p style="margin: 8px 0; color: #0c4a6e;"><strong>Estado:</strong> <span style="color: #ffc400;">Pendiente de aprobación</span></p>
+                        <p style="margin: 8px 0; color: #0c4a6e;"><strong>Total:</strong> $${formatNumber(totalAmount)}</p>
+                        <p style="margin: 8px 0; color: #0284c7; font-size: 0.85rem;">Un administrador revisará tu comprobante y confirmará la compra.</p>
+                        <p style="margin: 8px 0; color: #64748b; font-size: 0.8rem;">Recibirás una notificación cuando sea aprobado.</p>
+                    </div>
+                `,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#00b7ff'
+            });
+            onClose();
+
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error al enviar comprobante',
+                showConfirmButton: false,
+                timer: 4000
+            });
+        }
+    };
 
     // 💳 FUNCIÓN MERCADO PAGO - API de pago real
     const handleMercadoPago = async () => {
@@ -220,104 +378,8 @@ function Carrito({ isOpen, onClose }) {
         }
     };
 
-    // 🚨 FUNCIÓN handleCheckout MODIFICADA PARA SIMULAR COMPRA 🚨
-    const handleCheckout = async () => {
-        // 1. Verificación de sesión
-        if (!user || user.role === 'Invitado') {
-             Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'info',
-                title: 'Inicia Sesión',
-                text: 'Debes iniciar sesión para comprar',
-                showConfirmButton: false,
-                timer: 1200,
-                timerProgressBar: true
-             });
-             return;
-        }
-
-        if (cartItems.length === 0) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'warning',
-                title: 'Carrito Vacío',
-                showConfirmButton: false,
-                timer: 1200,
-                timerProgressBar: true
-            });
-            return;
-        }
-
-        // 2. Confirmación de compra (Simulación)
-        Swal.fire({
-            title: 'Confirmar Compra (Simulada)',
-            text: `El total a pagar es $${totalAmount.toFixed(2)}. ¿Deseas SIMULAR la compra?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745', // Verde para confirmar
-            cancelButtonColor: '#dc3545',
-            confirmButtonText: 'Sí, Comprar',
-            cancelButtonText: 'Cancelar'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    Swal.fire({
-                        title: 'Simulando Pago...',
-                        text: 'Procesando tu pedido y actualizando el historial...',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // 3. 🚨 LLAMADA A LA FUNCIÓN DE SIMULACIÓN Y REGISTRO 🚨
-                    await simulatePurchaseAndSave(
-                        user._id || user.id, 
-                        user.username, 
-                        cartItems, 
-                        totalAmount, 
-                        updateStockOnPurchase
-                    );
-                    
-                    // 4. Vaciar el carrito después de la simulación y registro exitoso
-                    // (updateStockOnPurchase ya lo vacía)
-                    
-                    // Disparar evento para que Productos recargue
-                    window.dispatchEvent(new Event('purchaseCompleted'));
-                    
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: '¡Compra Exitosa!',
-                        text: 'Pedido registrado correctamente',
-                        showConfirmButton: false,
-                        timer: 1200,
-                        timerProgressBar: true
-                    });
-                    onClose(); 
-                    
-                } catch (error) {
-                    console.error('Error en simulación:', error);
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'error',
-                        title: 'Error de Simulación',
-                        text: error.message || 'Error al procesar la compra',
-                        showConfirmButton: false,
-                        timer: 4000,
-                        timerProgressBar: true
-                    });
-                }
-            }
-        });
-    };
-
     return (
-        // 💡 CAMBIO 2: Se añade el ID único al overlay para control de estilos
+        <>
         <div id="shopping-cart-modal-unique" className="carrito-modal-overlay" onClick={onClose}>
             <div 
                 className="carrito-modal-content" 
@@ -432,100 +494,17 @@ function Carrito({ isOpen, onClose }) {
                                     <span className="summary-label">Total</span>
                                     <span className="summary-value">${formatNumber(totalAmount)}</span>
                                 </div>
-
-                                {/* Acordeón de Mercado Pago */}
-                                <div className="mp-accordion">
-                                    <button 
-                                        className="mp-toggle"
-                                        onClick={() => setShowMPInfo(!showMPInfo)}
-                                    >
-                                        <span><BsCreditCard size={14} /> Datos de Mercado Pago</span>
-                                        <span className="mp-arrow">{showMPInfo ? '▲' : '▼'}</span>
-                                    </button>
-                                    {showMPInfo && (
-                                        <div className="mp-content">
-                                            <div className="mp-row">
-                                                <span className="mp-label">CVU:</span>
-                                                <span className="mp-value">0000003100012345678901</span>
-                                                <button 
-                                                    className="mp-copy"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText('0000003100012345678901');
-                                                        Swal.fire({
-                                                            toast: true,
-                                                            position: 'top-end',
-                                                            icon: 'success',
-                                                            title: 'CVU copiado',
-                                                            showConfirmButton: false,
-                                                            timer: 1500,
-                                                            timerProgressBar: true
-                                                        });
-                                                    }}
-                                                >
-                                                    <FaCopy size={12} />
-                                                </button>
-                                            </div>
-                                            <div className="mp-row">
-                                                <span className="mp-label">Alias:</span>
-                                                <span className="mp-value">TU.ALIAS.MP</span>
-                                                <button 
-                                                    className="mp-copy"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText('TU.ALIAS.MP');
-                                                        Swal.fire({
-                                                            toast: true,
-                                                            position: 'top-end',
-                                                            icon: 'success',
-                                                            title: 'Alias copiado',
-                                                            showConfirmButton: false,
-                                                            timer: 1500,
-                                                            timerProgressBar: true
-                                                        });
-                                                    }}
-                                                >
-                                                    <FaCopy size={12} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
                             </div>
                             
-                            {/* ========== BLOQUE DE PAGO: INICIO ========== */}
+                            {/* ========== BLOQUE DE PAGO ========== */}
                             <div className="payment-actions">
-                                {/* Botón de Mercado Pago - Principal */}
+                                {/* Botón Medios de Pago */}
                                 <button 
-                                    onClick={handleMercadoPago} 
+                                    onClick={() => setShowPaymentMethods(true)} 
                                     className="btn-checkout btn-primary" 
                                     disabled={totalItems === 0}
                                 >
-                                    <BsCreditCard size={16} /> Pagar con Mercado Pago
-                                </button>
-                                
-                                <div className="payment-divider">
-                                    <span>o</span>
-                                </div>
-
-                                {/* Botón QR */}
-                                <button 
-                                    onClick={handleQR} 
-                                    className="btn-checkout btn-qr" 
-                                    disabled={totalItems === 0 || qrLoading}
-                                >
-                                    <BsQrCode size={16} /> Pagar con QR
-                                </button>
-                                
-                                <div className="payment-divider">
-                                    <span>o</span>
-                                </div>
-                                
-                                {/* Botón de Simulación */}
-                                <button 
-                                    onClick={handleCheckout} 
-                                    className="btn-checkout btn-simulate" 
-                                    disabled={totalItems === 0}
-                                >
-                                    Simular Compra (Test)
+                                    <FiCreditCard size={16} /> Medios de pago
                                 </button>
                                 
                                 <div className="payment-info">
@@ -533,30 +512,47 @@ function Carrito({ isOpen, onClose }) {
                                 </div>
 
                             </div>
-                            {/* ========== BLOQUE DE PAGO: FINAL ========== */}
                         </div>
                     </div>
                 )}
             </div>
+        </div>
 
-            {/* Modal QR */}
-            {showQR && (
-                <div className="qr-modal-overlay" onClick={() => { setShowQR(false); setQrImage(null); }}>
-                    <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Escaneá el código QR</h3>
-                        <p>Abre la app de Mercado Pago y escaneá para pagar</p>
-                        {qrLoading ? (
-                            <div className="qr-loading">Generando QR...</div>
-                        ) : qrImage ? (
-                            <img src={qrImage} alt="QR MercadoPago" className="qr-image" />
-                        ) : null}
-                        <button className="qr-modal-close" onClick={() => { setShowQR(false); setQrImage(null); }}>
-                            Cerrar
+        {/* Modal Medios de Pago */}
+        {showPaymentMethods && (
+            <div className="payment-modal-overlay" onClick={() => setShowPaymentMethods(false)}>
+                <div className="payment-modal-content" onClick={e => e.stopPropagation()}>
+                    <div className="payment-modal-header">
+                        <h3><FiCreditCard size={20} /> Medios de pago</h3>
+                        <button className="payment-modal-close" onClick={() => setShowPaymentMethods(false)}>&times;</button>
+                    </div>
+                    <div className="payment-modal-body">
+                        <button className="payment-option" onClick={() => { setShowPaymentMethods(false); handleMercadoPago(); }}>
+                            <BsCreditCard size={20} />
+                            <div className="payment-option-info">
+                                <strong>Mercado Pago</strong>
+                                <small>Tarjeta de crédito o débito</small>
+                            </div>
+                        </button>
+                        <button className="payment-option" onClick={() => { setShowPaymentMethods(false); handleQR(); }}>
+                            <BsQrCode size={20} />
+                            <div className="payment-option-info">
+                                <strong>QR Mercado Pago</strong>
+                                <small>Escanear con la app</small>
+                            </div>
+                        </button>
+                        <button className="payment-option" onClick={() => { setShowPaymentMethods(false); handleTransferencia(); }}>
+                            <FaCopy size={20} />
+                            <div className="payment-option-info">
+                                <strong>Transferencia bancaria</strong>
+                                <small>CBU o Alias</small>
+                            </div>
                         </button>
                     </div>
                 </div>
-            )}
-        </div>
+            </div>
+        )}
+        </>
     );
 }
 

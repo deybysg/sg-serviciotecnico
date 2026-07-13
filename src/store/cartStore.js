@@ -19,6 +19,7 @@ const useCartStore = create((set, get) => ({
   currentUser: null,
   currentToken: null,
   showMiniCart: false,
+  showCartModal: false,
 
   // Utilidades
   /**
@@ -396,6 +397,7 @@ const useCartStore = create((set, get) => ({
   },
 
   setShowMiniCart: (value) => set({ showMiniCart: value }),
+  setShowCartModal: (value) => set({ showCartModal: value }),
 }));
 
 export default useCartStore;
